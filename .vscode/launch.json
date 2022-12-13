@@ -9,9 +9,7 @@
 			"type": "python",
 			"request": "launch",
 			"program": "${file}",
-			"args": [
-				"--token", "OTkwNDk3NDIxNDg4NDUxNjE1.GkfMc-.kg3_SWnSlpMn75enx_x0Yi8wVM2X4s8MtK98zU",
-			],
+			"args": [],
 			"console": "integratedTerminal",
 			"justMyCode": true
 		}
