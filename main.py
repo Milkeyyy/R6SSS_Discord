@@ -200,7 +200,7 @@ async def getserverstatus():
 	chrome_options.add_argument('--disable-dev-shm-usage')
 
 	# ウィンドウを表示しない
-	#chrome_options.add_argument("--headless")
+	chrome_options.add_argument("--headless")
 
 	driver = webdriver.Chrome(options=chrome_options)
 
@@ -241,7 +241,7 @@ async def getserverstatus():
 	status["xbox"]["store"] = [driver.find_element(By.XPATH, base_path + '[3]/li[4]/h4').text, driver.find_element(By.XPATH, base_path + '[3]/li[4]/p/small').text]
 	status["xbox"]["matchmaking"] = [driver.find_element(By.XPATH, base_path + '[3]/li[5]/h4').text, driver.find_element(By.XPATH, base_path + '[3]/li[5]/p/small').text]
 
-	status["update_date"] = datetime.datetime.now()
+	status["update_date"] = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
 
 	print(status)
 	return status
@@ -256,14 +256,14 @@ async def updateserverstatusembed():
 	# 埋め込みメッセージを作成
 	embed = discord.Embed(color=discord.Colour.dark_grey())
 	embed.set_author(name="Rainbow Six Siege - Server Status", icon_url="https://www.google.com/s2/favicons?sz=64&domain_url=https://www.ubisoft.com/en-us/game/rainbow-six/siege/status")
-	embed.set_footer(text="最終更新: " + status["update_date"].strftime('%Y/%m/%d %H:%M:%S'))
+	embed.set_footer(text="最終更新: " + status["update_date"].strftime('%Y/%m/%d %H:%M:%S') + " (JST)")
 
 	platform_list = ["pc", "psn", "xbox"]
 	for p in platform_list:
 		status_list = []
 
 		# サーバーの状態によってアイコンを変更する
-		if status[p]["status"][1] == "問題なし":
+		if status[p]["status"][1] == "問題なし" or status[p]["status"][1] == "No Issues":
 			status_icon = ":green_circle:"
 		elif status[p]["status"][1] == "想定外の問題":
 			status_icon = ":orange_circle:"
@@ -273,7 +273,7 @@ async def updateserverstatusembed():
 		# ステータステキストを作成
 		for key in status[p].keys():
 			if key != "status":
-				status_list.append(status[p][key][0] + ": " + status[p][key][1])
+				status_list.append("**" + status[p][key][0] + "**" + "\n- **`" + status[p][key][1] + "`**")
 		status_text = "\n".join(status_list)
 
 		# 埋め込みメッセージにプラットフォームのフィールドを追加
@@ -303,6 +303,8 @@ async def create(ctx, channel: Option(
 	logging.info(f"コマンド実行: create / 実行者: {ctx.user}")
 
 	await ctx.defer()
+
+	checkGuildData()
 
 	additional_msg = ""
 	if guilddata[str(ctx.guild_id)]["server_status_message"][1] != 0:
