@@ -1,3 +1,5 @@
+from keep_alive import keep_alive
+
 import argparse
 import datetime
 import json
@@ -8,7 +10,7 @@ from time import sleep
 
 import discord
 from discord.commands import Option
-from discord.ext import commands, tasks
+from discord.ext import tasks
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -48,16 +50,16 @@ parser.add_argument(
 args = parser.parse_args()
 
 # トークンを取得する
-token = ""
+#token = ""
 # トークンが指定されていない場合はエラーを発生させる
-if args.token is None:
-	if os.getenv("TOKEN") is None:
-		logging.error("トークンが指定されていません！")
-		sys.exit(1)
-	else:
-		token = os.getenv("TOKEN")
-else:
-	token = args.token
+#if args.token is None:
+#	if os.getenv("TOKEN") is None:
+#		logging.error("トークンが指定されていません！")
+#		sys.exit(1)
+#	else:
+#		token = os.getenv("TOKEN")
+#else:
+#	token = args.token
 
 # ステータスメッセージの言語が指定されていないまたは正しく指定されていない場合は日本語に設定する
 if args.statuslanguage is None:
@@ -190,22 +192,24 @@ async def after_updateserverstatus():
 	logging.info("サーバーステータスの定期更新終了")
 
 # サーバーステータスを取得する
-async def getserverstatus() -> dict[str, dict]:
+async def getserverstatus():
 	base_path = '/html/body/div[1]/main/div/div/div[1]/div/ul'
 
 	chrome_options = Options()
-	#chrome_options.add_argument('--no-sandbox')
-	#chrome_options.add_argument('--disable-dev-shm-usage')
+	chrome_options.add_argument('--no-sandbox')
+	chrome_options.add_argument('--disable-dev-shm-usage')
 
 	# ウィンドウを表示しない
-	chrome_options.add_argument("--headless")
+	#chrome_options.add_argument("--headless")
 
-	driver = webdriver.Chrome("chromedriver_win32\chromedriver", options=chrome_options)
+	driver = webdriver.Chrome(options=chrome_options)
+
+	#driver = webdriver.Chrome("chromedriver_win32\chromedriver", options=chrome_options)
 
 	driver.get(status_url)
 
 	# ステータスが読み込まれるまで待機する
-	wait = WebDriverWait(driver, 10)
+	wait = WebDriverWait(driver, 20)
 	wait.until(EC.visibility_of_element_located((By.XPATH, '/html/body/div[1]/main/div/div/div[1]/div/ul[1]/li[1]/span/small')))
 
 	# 全プラットフォームのステータスを表示(展開)する
@@ -339,5 +343,11 @@ async def about(ctx):
 
 	await ctx.respond(embed=embed)
 
+
 # ログイン
-client.run(token)
+try:
+	keep_alive()
+	client.run(os.getenv("TOKEN"))
+except Exception as e:
+	logging.error(str(e))
+	os.system("kill 1")
