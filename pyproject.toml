@@ -6,7 +6,6 @@ authors = ["Replit user <<>>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-selenium = "^4.7.2"
 Flask = "^2.2.2"
 py-cord = "^2.3.2"
 

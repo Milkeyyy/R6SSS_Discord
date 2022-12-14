@@ -1,21 +1,19 @@
 from keep_alive import keep_alive
+import localizations
+import statusicon
+
+from replit import db
 
 import argparse
 import datetime
 import json
 import logging
 import os
-import sys
-from time import sleep
+import urllib.request
 
 import discord
 from discord.commands import Option
 from discord.ext import tasks
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 
 logging.basicConfig(level=logging.INFO)
 logging.basicConfig(level=logging.WARNING)
@@ -26,12 +24,11 @@ bot_name = "R6SSS"
 bot_version = "1.0.0"
 
 # サーバーステータス辞書
-server_status = {"pc": {"status": "-----"}, "psn": {"status": "-----"}, "xbox": {"status": "-----"}}
+server_status = {}
 
-server_status_embed = discord.Embed
+default_embed = discord.Embed
 
-guilddata = {}
-default_guilddata_item = {"server_status_message": [0, 0]} # チャンネルID, メッセージID
+default_guilddata_item = {"server_status_message": [0, 0, "en-GB"]} # チャンネルID, メッセージID
 
 # 引数ぱーさー
 parser = argparse.ArgumentParser()
@@ -41,41 +38,18 @@ parser.add_argument(
 	type=str,
 	required=False
 )
-parser.add_argument(
-	"--statuslanguage",
-	help="Server Status Language (ja-jp/en-us)",
-	type=str,
-	required=False
-)
 args = parser.parse_args()
 
-# トークンを取得する
-#token = ""
-# トークンが指定されていない場合はエラーを発生させる
-#if args.token is None:
-#	if os.getenv("TOKEN") is None:
-#		logging.error("トークンが指定されていません！")
-#		sys.exit(1)
-#	else:
-#		token = os.getenv("TOKEN")
-#else:
-#	token = args.token
-
-# ステータスメッセージの言語が指定されていないまたは正しく指定されていない場合は日本語に設定する
-if args.statuslanguage is None:
-	status_language = "ja-jp"
-elif args.statuslanguage != "ja-jp" and args.statuslanguage != "en-us":
-	status_language = "ja-jp"
-else:
-	status_language = args.statuslanguage
-
-# サーバーステータスページのURL
-status_url = f"https://www.ubisoft.com/{status_language}/game/rainbow-six/siege/status"
+# サーバーステータスAPIのURL
+api_url = "https://game-status-api.ubisoft.com/v1/instances?spaceIds=57e580a1-6383-4506-9509-10a390b7e2f1,05bfb3f7-6c21-4c42-be1f-97a33fb5cf66,96c1d424-057e-4ff7-860b-6b9c9222bdbf,98a601e5-ca91-4440-b1c5-753f601a2c90,631d8095-c443-4e21-b301-4af1a0929c27"
+pc_api_url = "https://game-status-api.ubisoft.com/v1/instances?appIds=e3d5ea9e-50bd-43b7-88bf-39794f4e3d40"
 
 # くらいあんと
 intents = discord.Intents.all()
 client = discord.Bot(intents = intents)
 
+# 言語データを読み込む
+localizations.loadLocaleData()
 
 # Bot起動時のイベント
 @client.event
@@ -86,6 +60,11 @@ async def on_ready():
 	print(f" Developed by Milkeyyy")
 	print("---------------------------------------")
 	print("")
+	await client.change_presence(
+		activity=discord.Game(
+			name=f"Type /create | Version {bot_version}"
+		)
+	)
 	logging.info(f"{client.user} へログインしました！ (ID: {client.user.id})")
 
 	# ギルドデータの確認を開始
@@ -96,61 +75,22 @@ async def on_ready():
 
 
 # 関数
-# ギルドデータの保存
-def saveGuildData():
-	# グローバル変数宣言
-	global guilddata
-
-	# 書き込み用にファイルを開く
-	file = open("guild.json", "w", encoding="utf-8")
-	# 辞書をファイルへ保存
-	file.write(json.dumps(guilddata, indent=2, sort_keys=True))
-	file.close()
-	loadGuildData()
-
-
-# ギルドデータの読み込み
-def loadGuildData():
-	# グローバル変数宣言
-	global guilddata
-
-	try:  # ファイルが存在しない場合
-		# ファイルを作成して初期データを書き込む
-		file = open("guild.json", "x", encoding="utf-8")
-		file.write(json.dumps(guilddata, indent=2, sort_keys=True))
-		file.close()
-		# ファイルから読み込む
-		file = open("guild.json", "r", encoding="utf-8")
-		guilddata = json.load(file)
-		file.close()
-
-	except FileExistsError:  # ファイルが存在する場合
-		# ファイルから読み込む
-		file = open("guild.json", "r", encoding="utf-8")
-		guilddata = json.load(file)
-		file.close()
-
 # ギルドデータの確認
 def checkGuildData():
-	global guilddata
 	global default_guilddata_item
-
-	loadGuildData()
 
 	logging.info("ギルドデータの確認開始")
 	for guild in client.guilds:
 		# すべてのギルドのデータが存在するかチェック、存在しないギルドがあればそのギルドのデータを作成する
-		if guilddata.get(str(guild.id)) == None:
-			guilddata[str(guild.id)] = default_guilddata_item
+		if db.get(str(guild.id)) == None:
+			db[str(guild.id)] = default_guilddata_item
 
-	saveGuildData()
 	logging.info("ギルドデータの確認完了")
 
 
 # 1分毎にサーバーステータスを更新する
 @tasks.loop(seconds=60.0)
 async def updateserverstatus():
-	global guilddata
 	global server_status
 	global server_status_embed
 
@@ -163,27 +103,31 @@ async def updateserverstatus():
 	server_status = status
 
 	# 埋め込みメッセージを更新する
-	await updateserverstatusembed()
+	#await updateserverstatusembed()
 
 	# 各ギルドの埋め込みメッセージIDチェック、存在する場合はメッセージを更新する
 	for guild in client.guilds:
+		logging.info(f"ギルド: {guild.name}")
 		try:
-			ch_id = int(guilddata[str(guild.id)]["server_status_message"][0])
-			msg_id = int(guilddata[str(guild.id)]["server_status_message"][1])
-		except KeyError as e:
-			logging.warning(f"ギルド {guild.name} のデータが見つかりませんでした")
+			ch_id = int(db[str(guild.id)]["server_status_message"][0])
+			msg_id = int(db[str(guild.id)]["server_status_message"][1])
+			loc = db[str(guild.id)]["server_status_message"][2]
+		except Exception as e:
+			logging.warning(f"ギルドデータ({guild.name}) の読み込み失敗")
 			logging.warning(e)
-			guilddata[str(guild.id)]["server_status_message"] = [0, 0]
-		if ch_id != 0 and msg_id != 0:
+			db[str(guild.id)]["server_status_message"] = default_guilddata_item
+			ch_id = default_guilddata_item[0]
+			msg_id = default_guilddata_item[1]
+			loc = default_guilddata_item[2]
+
+		if ch_id != 0 and msg_id != 0 and loc != None:
 			ch = client.get_channel(ch_id) # IDからテキストチャンネルを取得する
 			msg = await ch.fetch_message(msg_id) # 取得したテキストチャンネルからメッセージを取得する
 			if msg is None:
 				logging.warning("ギルド " + guild.name + " のメッセージ " + str(msg_id) + " の更新に失敗")
-				guilddata[str(guild.id)]["server_status_message"] = [0, 0]
+				db[str(guild.id)]["server_status_message"] = default_guilddata_item
 			else:
-				await msg.edit(embed=server_status_embed)
-
-	saveGuildData()
+				await msg.edit(embeds=await generateserverstatusembed(loc))
 
 	logging.info("サーバーステータスの更新完了")
 
@@ -193,113 +137,136 @@ async def after_updateserverstatus():
 
 # サーバーステータスを取得する
 async def getserverstatus():
-	base_path = '/html/body/div[1]/main/div/div/div[1]/div/ul'
+	# サーバーステータスを取得する
+	res = urllib.request.urlopen(urllib.request.Request(api_url))
+	#logging.info(str(res.read()))
+	res_pc = urllib.request.urlopen(urllib.request.Request(pc_api_url))
+	#logging.info(str(res_pc.read()))
 
-	chrome_options = Options()
-	chrome_options.add_argument('--no-sandbox')
-	chrome_options.add_argument('--disable-dev-shm-usage')
+	# ステータスコードが200出ない場合はNoneを返す
+	if res.status != 200 or res_pc.status != 200:
+		status = {"Unknown": {"Status": {"Connectivity": "Unknown", "Authentication": "Unknown", "Leaderboard": "Unknown", "Matchmaking": "Unknown", "Purchase": "Unknown"}, "Maintenance": None, "ImpactedFeatures": None}, "_update_date": datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))}
+		return status
 
-	# ウィンドウを表示しない
-	chrome_options.add_argument("--headless")
+	raw_status = json.loads(res_pc.read())
+	raw_status.extend(json.loads(res.read()))
+	#logging.info(str(raw_status))
 
-	driver = webdriver.Chrome(options=chrome_options)
+	# 各プラットフォームのステータスをループ、ステータス辞書に加える
+	status = {}
+	for s in raw_status:
+		p = s["Platform"]
+		status[p] = {"Status": {"Connectivity": None, "Authentication": "Operational", "Leaderboard": "Operational", "Matchmaking": "Operational", "Purchase": "Operational"}, "Maintenance": None, "ImpactedFeatures": None}
+		status[p]["Status"]["Connectivity"] = s["Status"]
+		if status[p]["Status"]["Connectivity"] == "Online": status[p]["Status"]["Connectivity"] = "Operational"
 
-	#driver = webdriver.Chrome("chromedriver_win32\chromedriver", options=chrome_options)
+		# ImpactedFeatures をループ リストに含まれる場合は停止中なので、該当するステータスをOutageにする
+		for f in s["ImpactedFeatures"]:
+			status[p]["Status"][f] = "Outage"
 
-	driver.get(status_url)
+		status[p]["Maintenance"] = s["Maintenance"]
 
-	# ステータスが読み込まれるまで待機する
-	wait = WebDriverWait(driver, 20)
-	wait.until(EC.visibility_of_element_located((By.XPATH, '/html/body/div[1]/main/div/div/div[1]/div/ul[1]/li[1]/span/small')))
+	status["_update_date"] = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
 
-	# 全プラットフォームのステータスを表示(展開)する
-	driver.find_element(By.XPATH, '/html/body/div[1]/main/div/div/div[1]/div/div[1]/button').click()
-	# 全プラットフォームのステータスが展開されるまで待機する
-	wait.until(EC.visibility_of_element_located((By.XPATH, base_path + '[1]/li[2]/p/small')))
+	logging.info(str(status))
 
-	status = {"pc": {}, "psn": {}, "xbox": {}}
-
-	# サーバーステータスを取得
-	# PC
-	status["pc"]["status"] = ["PC", driver.find_element(By.XPATH, base_path + '[1]/li[1]/span/small').text]
-	status["pc"]["connectivity"] = [driver.find_element(By.XPATH, base_path + '[1]/li[2]/h4').text, driver.find_element(By.XPATH, base_path + '[1]/li[2]/p/small').text]
-	status["pc"]["authentication"] = [driver.find_element(By.XPATH, base_path + '[1]/li[3]/h4').text, driver.find_element(By.XPATH, base_path + '[1]/li[3]/p/small').text]
-	status["pc"]["store"] = [driver.find_element(By.XPATH, base_path + '[1]/li[4]/h4').text, driver.find_element(By.XPATH, base_path + '[1]/li[4]/p/small').text]
-	status["pc"]["matchmaking"] = [driver.find_element(By.XPATH, base_path + '[1]/li[5]/h4').text, driver.find_element(By.XPATH, base_path + '[1]/li[5]/p/small').text]
-
-	# PSN
-	status["psn"]["status"] = ["PSN", driver.find_element(By.XPATH, base_path + '[2]/li[1]/span/small').text]
-	status["psn"]["connectivity"] = [driver.find_element(By.XPATH, base_path + '[2]/li[2]/h4').text, driver.find_element(By.XPATH, base_path + '[2]/li[2]/p/small').text]
-	status["psn"]["authentication"] = [driver.find_element(By.XPATH, base_path + '[2]/li[3]/h4').text, driver.find_element(By.XPATH, base_path + '[2]/li[3]/p/small').text]
-	status["psn"]["store"] = [driver.find_element(By.XPATH, base_path + '[2]/li[4]/h4').text, driver.find_element(By.XPATH, base_path + '[2]/li[4]/p/small').text]
-	status["psn"]["matchmaking"] = [driver.find_element(By.XPATH, base_path + '[2]/li[5]/h4').text, driver.find_element(By.XPATH, base_path + '[2]/li[5]/p/small').text]
-
-	# Xbox
-	status["xbox"]["status"] = ["Xbox", driver.find_element(By.XPATH, base_path + '[3]/li[1]/span/small').text]
-	status["xbox"]["connectivity"] = [driver.find_element(By.XPATH, base_path + '[3]/li[2]/h4').text, driver.find_element(By.XPATH, base_path + '[3]/li[2]/p/small').text]
-	status["xbox"]["authentication"] = [driver.find_element(By.XPATH, base_path + '[3]/li[3]/h4').text, driver.find_element(By.XPATH, base_path + '[3]/li[3]/p/small').text]
-	status["xbox"]["store"] = [driver.find_element(By.XPATH, base_path + '[3]/li[4]/h4').text, driver.find_element(By.XPATH, base_path + '[3]/li[4]/p/small').text]
-	status["xbox"]["matchmaking"] = [driver.find_element(By.XPATH, base_path + '[3]/li[5]/h4').text, driver.find_element(By.XPATH, base_path + '[3]/li[5]/p/small').text]
-
-	status["update_date"] = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
-
-	print(status)
 	return status
 
 # サーバーステータス埋め込みメッセージを更新
-async def updateserverstatusembed():
+async def generateserverstatusembed(locale):
 	global server_status_embed
+
+	embeds = []
+	pf_list = {"PC / Stadia": ["PC", "Stadia"], "PlayStation": ["PS4", "PS5"], "Xbox": ["XBOXONE", "XBOX SERIES X"]}
+
+	# 翻訳先言語を設定
+	localizations.locale = locale
+
+	# 各プラットフォームの埋め込みメッセージの色
+	color_list = {"PC / Stadia": discord.Colour.from_rgb(255, 255, 255), "PlayStation": discord.Colour.from_rgb(0, 67, 156), "Xbox": discord.Colour.from_rgb(16, 124, 16)}
 
 	# サーバーステータスを取得
 	status = server_status
 
-	# 埋め込みメッセージを作成
-	embed = discord.Embed(color=discord.Colour.dark_grey())
-	embed.set_author(name="Rainbow Six Siege - Server Status", icon_url="https://www.google.com/s2/favicons?sz=64&domain_url=https://www.ubisoft.com/en-us/game/rainbow-six/siege/status")
-	embed.set_footer(text="最終更新: " + status["update_date"].strftime('%Y/%m/%d %H:%M:%S') + " (JST)")
+	# 各プラットフォームごとの埋め込みメッセージを作成
+	for pf in pf_list:
+		embed = discord.Embed(color=color_list[pf])
+		embed.set_author(name="Server Status - " + pf, icon_url="https://www.google.com/s2/favicons?sz=64&domain_url=https://www.ubisoft.com/en-us/game/rainbow-six/siege/status")
+		embed.set_footer(text=localizations.translate("Last Update") + ": " + status["_update_date"].strftime('%Y/%m/%d %H:%M:%S') + " (JST)")
 
-	platform_list = ["pc", "psn", "xbox"]
-	for p in platform_list:
-		status_list = []
+		for p in pf_list[pf]:
+			if p.startswith("_"): continue
+	
+			# サーバーの状態によってアイコンを変更する
+			# 問題なし
+			if status[p]["Status"]["Connectivity"] == "Operational":
+				status_icon = statusicon.Operational
+			# 計画メンテナンス
+			elif status[p]["Status"]["Connectivity"] == "Maintenance":
+				status_icon = statusicon.Maintenance
+			# 想定外の問題
+			elif status[p]["Status"]["Connectivity"] == "Interrupted":
+				status_icon = statusicon.Interrupted
+			# 想定外の停止
+			elif status[p]["Status"]["Connectivity"] == "Degraded":
+				status_icon = statusicon.Degraded
+			# それ以外
+			else:
+				status_icon = statusicon.Unknown
+	
+			mt_text = ""
+			if status[p]["Maintenance"] == True:
+				mt_text = "- **`" + localizations.translate("Maintenance") + "`**"
+	
+			f_list = []
+			f_text = ""
+			for f, s in status[p]["Status"].items():
+				if f == "Connectivity": continue
+				f_status_icon = statusicon.Operational
+				if s != "Operational": f_status_icon = statusicon.Degraded
+				if s == "Unknown": f_status_icon = statusicon.Unknown
+				f_list.append("┣━ **" + localizations.translate(f) + "**\n┣━ " + f_status_icon + "`" + localizations.translate(s) + "`")
+			f_text = "" + "\n".join(f_list)
+	
+			# 埋め込みメッセージにプラットフォームのフィールドを追加
+			embed.add_field(name=status_icon + "__" + p + "__" + " - `" + localizations.translate(status[p]["Status"]["Connectivity"]) + "`", value=mt_text + f_text)
 
-		# サーバーの状態によってアイコンを変更する
-		if status[p]["status"][1] == "問題なし" or status[p]["status"][1] == "No Issues":
-			status_icon = ":green_circle:"
-		elif status[p]["status"][1] == "想定外の問題":
-			status_icon = ":orange_circle:"
-		else:
-			status_icon = ":yellow_circle:"
+		embeds.append(embed)
 
-		# ステータステキストを作成
-		for key in status[p].keys():
-			if key != "status":
-				status_list.append("**" + status[p][key][0] + "**" + "\n- **`" + status[p][key][1] + "`**")
-		status_text = "\n".join(status_list)
-
-		# 埋め込みメッセージにプラットフォームのフィールドを追加
-		embed.add_field(name=status_icon + " " + status[p]["status"][0] + " - " + status[p]["status"][1], value=status_text)
-
-	server_status_embed = embed
+	return embeds
 
 # コマンド
 @client.slash_command()
-async def status(ctx):
-	global server_status_embed
+async def setlanguage(ctx, locale: Option(
+	str,
+	name="language",
+	choices=localizations.locales
+)):
+	global guilddata
 
+	await ctx.defer()
+
+	if locale in localizations.data["Locales"].values():
+		db[str(ctx.guild.id)]["server_status_message"][2] = [k for k, v in localizations.data["Locales"].items() if v == locale][0]
+	else:
+		db[str(ctx.guild.id)]["server_status_message"][2] = "en-GB"
+
+	await ctx.followup.send(content="サーバーステータスメッセージの言語を `" + locale + "` に設定しました。")
+
+@client.slash_command()
+async def status(ctx):
 	logging.info(f"コマンド実行: status / 実行者: {ctx.user}")
 
 	await ctx.defer()
-	await ctx.followup.send(embed=server_status_embed)
+	await ctx.followup.send(embeds=await generateserverstatusembed(db[str(ctx.guild_id)]["server_status_message"][2]))
 
 @client.slash_command()
 async def create(ctx, channel: Option(
 	discord.TextChannel,
 	required=False,
-	name="テキストチャンネル",
+	name="textchannel",
 	description="サーバーステータスを送信するテキストチャンネルを指定します。指定しない場合は現在のチャンネルになります。")
 ):
-	global server_status_embed
-
 	logging.info(f"コマンド実行: create / 実行者: {ctx.user}")
 
 	await ctx.defer()
@@ -307,7 +274,7 @@ async def create(ctx, channel: Option(
 	checkGuildData()
 
 	additional_msg = ""
-	if guilddata[str(ctx.guild_id)]["server_status_message"][1] != 0:
+	if db[str(ctx.guild_id)]["server_status_message"][1] != 0:
 		additional_msg = "\n(以前送信した古いメッセージは更新されなくなります。)"
 
 	if channel is None:
@@ -317,12 +284,11 @@ async def create(ctx, channel: Option(
 	ch = client.get_channel(ch_id)
 
 	# サーバーステータス埋め込みメッセージを送信
-	msg = await ch.send(embed=server_status_embed)
+	msg = await ch.send(embeds=await generateserverstatusembed(db[str(ctx.guild_id)]["server_status_message"][2]))
 
 	# 送信したチャンネルとメッセージのIDをギルドデータへ保存する
-	guilddata[str(ctx.guild_id)]["server_status_message"][0] = ch_id
-	guilddata[str(ctx.guild_id)]["server_status_message"][1] = msg.id
-	saveGuildData()
+	db[str(ctx.guild_id)]["server_status_message"][0] = ch_id
+	db[str(ctx.guild_id)]["server_status_message"][1] = msg.id
 
 	await ctx.send_followup(content="テキストチャンネル " + ch.mention + " へサーバーステータスメッセージを送信しました。\n以後このメッセージは自動的に更新されます。" + additional_msg)
 

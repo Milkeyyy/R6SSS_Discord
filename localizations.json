@@ -1,0 +1,79 @@
+{
+	"Locales": {
+		"en-GB": "English",
+		"ja-JP": "日本語 / Japanese",
+		"ko-KR": "한국어 / Korean"
+	},
+	"Text": {
+		"No Issues": {
+			"en-GB": "No Issues",
+			"ja-JP": "問題なし",
+			"ko-KR": "이상 없다"
+		},
+		"Maintenance": {
+			"en-GB": "Maintenance",
+			"ja-JP": "計画ﾒﾝﾃﾅﾝｽ",
+			"ko-KR": "정기 점검"
+		},
+		"Unplanned Issues": {
+			"en-GB": "Unplanned Issues",
+			"ja-JP": "想定外の問題",
+			"ko-KR": "불시 발생 문제"
+		},
+		"Unplanned Outage": {
+			"en-GB": "Unplanned Outage",
+			"ja-JP": "想定外の機能停止",
+			"ko-KR": "불시 발생 정전"
+		},
+		"Outage": {
+			"en-GB": "Outage",
+			"ja-JP": "停止",
+			"ko-KR": "정지"
+		},
+		"Connectivity": {
+			"en-GB": "Connectivity",
+			"ja-JP": "接続状況",
+			"ko-KR": "연결"
+		},
+		"Authentication": {
+			"en-GB": "Authentication",
+			"ja-JP": "認証ｼｽﾃﾑ",
+			"ko-KR": "인증"
+		},
+		"Leaderboard": {
+			"en-GB": "Leaderboard",
+			"ja-JP": "ﾗﾝｷﾝｸﾞ",
+			"ko-KR": "순위표"
+		},
+		"Purchase": {
+			"en-GB": "Store",
+			"ja-JP": "ｽﾄｱ",
+			"ko-KR": "상점"
+		},
+		"Matchmaking": {
+			"en-GB": "Matchmaking",
+			"ja-JP": "ﾏｯﾁﾒｲｷﾝｸﾞ",
+			"ko-KR": "매치메이킹"
+		},
+		"Operational": {
+			"en-GB": "Operational",
+			"ja-JP": "通常",
+			"ko-KR": "정상"
+		},
+		"Degraded": {
+			"en-GB": "Degraded",
+			"ja-JP": "停止中",
+			"ko-KR": "저하됨"
+		},
+		"Last Update": {
+			"en-GB": "Last Update",
+			"ja-JP": "最終更新",
+			"ko-KR": "마지막 업데이트"
+		},
+		"Unknown": {
+			"en-GB": "Unknown",
+			"ja-JP": "不明",
+			"ko-KR": "알 수 없음"
+		}
+	}
+}
