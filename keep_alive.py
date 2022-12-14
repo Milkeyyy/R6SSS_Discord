@@ -1,11 +1,13 @@
 from flask import Flask
 from threading import Thread
 
+import serverstatus
+
 app = Flask('')
 
 @app.route('/')
 def home():
-    return "R6SSS Bot is alive!"
+    return serverstatus.data
 
 def run():
   app.run(host='0.0.0.0',port=8080)
