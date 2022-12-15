@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.WARNING)
 # Botの名前
 bot_name = "R6SSS"
 # Botのバージョン
-bot_version = "1.0.0"
+bot_version = "1.0.1"
 
 default_embed = discord.Embed
 
@@ -59,7 +59,7 @@ async def on_ready():
 	logging.info(f"{client.user} へログインしました！ (ID: {client.user.id})")
 
 	# ギルドデータの確認を開始
-	checkGuildData()
+	await checkGuildData()
 
 	logging.info("サーバーステータスの定期更新開始")
 	updateserverstatus.start()
@@ -67,14 +67,25 @@ async def on_ready():
 
 # 関数
 # ギルドデータの確認
-def checkGuildData():
+async def checkGuildData(guild = None):
 	global default_guilddata_item
 
 	logging.info("ギルドデータの確認開始")
-	for guild in client.guilds:
+	guilds = []
+	if guild == None:
+		guilds = client.guilds
+	else:
+		guilds = [guild]
+
+	for guild in guilds:
 		# すべてのギルドのデータが存在するかチェック、存在しないギルドがあればそのギルドのデータを作成する
 		if db.get(str(guild.id)) == None:
 			db[str(guild.id)] = default_guilddata_item
+
+		# 各項目が存在するかチェック 存在しなければ追加する
+		for k, v in default_guilddata_item.items():
+			if db[str(guild.id)].get(k) == None or type(db[str(guild.id)].get(k)) != list:
+				db[str(guild.id)][k] == v
 
 	logging.info("ギルドデータの確認完了")
 
@@ -105,10 +116,10 @@ async def updateserverstatus():
 		except Exception as e:
 			logging.warning(f"ギルドデータ({guild.name}) の読み込み失敗")
 			logging.warning(e)
-			db[str(guild.id)]["server_status_message"] = default_guilddata_item
-			ch_id = default_guilddata_item[0]
-			msg_id = default_guilddata_item[1]
-			loc = default_guilddata_item[2]
+			db[str(guild.id)] = default_guilddata_item
+			ch_id = db[str(guild.id)]["server_status_message"][0]
+			msg_id = db[str(guild.id)]["server_status_message"][1]
+			loc = db[str(guild.id)]["server_status_message"][2]
 
 		if ch_id != 0 and msg_id != 0 and loc != None:
 			# IDからテキストチャンネルを取得する
@@ -125,7 +136,7 @@ async def updateserverstatus():
 			if msg is None:
 				logging.warning("ギルド " + guild.name + " のメッセージ " + str(msg_id) + " の更新に失敗")
 				logging.warning(str(e))
-				db[str(guild.id)]["server_status_message"] = default_guilddata_item
+				db[str(guild.id)] = default_guilddata_item
 			else:
 				await msg.edit(embeds=await generateserverstatusembed(loc))
 
@@ -234,7 +245,7 @@ async def create(ctx, channel: Option(
 
 	await ctx.defer()
 
-	checkGuildData()
+	await checkGuildData(ctx.guild)
 
 	additional_msg = ""
 	if db[str(ctx.guild_id)]["server_status_message"][1] != 0:
