@@ -118,9 +118,9 @@ async def updateserverstatus():
 			try:
 				# 取得したテキストチャンネルからメッセージを取得する
 				msg = await ch.fetch_message(msg_id)
-			except discord.errors.NotFound as e:
+			except discord.errors.NotFound as err:
 				msg = None
-				e = e
+				e = err
 
 			if msg is None:
 				logging.warning("ギルド " + guild.name + " のメッセージ " + str(msg_id) + " の更新に失敗")
