@@ -8,7 +8,7 @@ app = Flask('')
 app.config['JSON_AS_ASCII'] = False
 
 def run():
-  app.run(host='0.0.0.0', port=8080)
+  app.run(host='0.0.0.0', port=80)
 
 def start():
     t = Thread(target=run)
