@@ -72,7 +72,7 @@ async def saveGuildData():
 	file.write(json.dumps(db, indent=2, sort_keys=True))
 	file.close()
 
-	loadGuildData()
+	await loadGuildData()
 
 
 # ギルドデータの読み込み
