@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.WARNING)
 # Botの名前
 bot_name = "R6SSS"
 # Botのバージョン
-bot_version = "1.0.1"
+bot_version = "1.0.2"
 
 default_embed = discord.Embed
 
@@ -214,7 +214,8 @@ async def generateserverstatusembed(locale):
 async def setlanguage(ctx, locale: Option(
 	str,
 	name="language",
-	choices=localizations.locales
+	choices=localizations.locales,
+	permission=discord.Permissions.administrator
 )):
 	global guilddata
 
@@ -239,8 +240,8 @@ async def create(ctx, channel: Option(
 	discord.TextChannel,
 	required=False,
 	name="textchannel",
-	description="サーバーステータスを送信するテキストチャンネルを指定します。指定しない場合は現在のチャンネルになります。")
-):
+	description="サーバーステータスを送信するテキストチャンネルを指定します。指定しない場合は現在のチャンネルになります。"
+)):
 	logging.info(f"コマンド実行: create / 実行者: {ctx.user}")
 
 	await ctx.defer()
