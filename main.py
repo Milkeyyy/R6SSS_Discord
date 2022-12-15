@@ -36,7 +36,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 # くらいあんと
-intents = discord.Intents.all()
+intents = None
 client = discord.Bot(intents = intents)
 
 # 言語データを読み込む
@@ -111,10 +111,20 @@ async def updateserverstatus():
 			loc = default_guilddata_item[2]
 
 		if ch_id != 0 and msg_id != 0 and loc != None:
-			ch = client.get_channel(ch_id) # IDからテキストチャンネルを取得する
-			msg = await ch.fetch_message(msg_id) # 取得したテキストチャンネルからメッセージを取得する
+			# IDからテキストチャンネルを取得する
+			ch = client.get_channel(ch_id)
+
+			e = ""
+			try:
+				# 取得したテキストチャンネルからメッセージを取得する
+				msg = await ch.fetch_message(msg_id)
+			except discord.errors.NotFound as e:
+				msg = None
+				e = e
+
 			if msg is None:
 				logging.warning("ギルド " + guild.name + " のメッセージ " + str(msg_id) + " の更新に失敗")
+				logging.warning(str(e))
 				db[str(guild.id)]["server_status_message"] = default_guilddata_item
 			else:
 				await msg.edit(embeds=await generateserverstatusembed(loc))
