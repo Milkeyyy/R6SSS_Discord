@@ -3,9 +3,8 @@ import localizations
 import statusicon
 import serverstatus
 
-from replit import db
-
 import argparse
+import json
 import logging
 import os
 
@@ -19,11 +18,12 @@ logging.basicConfig(level=logging.WARNING)
 # Botの名前
 bot_name = "R6SSS"
 # Botのバージョン
-bot_version = "1.1.0"
+bot_version = "1.2.0"
 
 default_embed = discord.Embed
 
 default_guilddata_item = {"server_status_message": [0, 0, "en-GB"]} # チャンネルID, メッセージID
+db = {}
 
 # 引数ぱーさー
 parser = argparse.ArgumentParser()
@@ -53,6 +53,7 @@ async def on_ready():
 	logging.info(f"{client.user} へログインしました！ (ID: {client.user.id})")
 
 	# ギルドデータの確認を開始
+	await loadGuildData()
 	await checkGuildData()
 
 	logging.info("サーバーステータスの定期更新開始")
@@ -60,6 +61,41 @@ async def on_ready():
 
 
 # 関数
+# ギルドデータの保存
+async def saveGuildData():
+	# グローバル変数宣言
+	global db
+
+	# 書き込み用にファイルを開く
+	file = open("guild.json", "w", encoding="utf-8")
+	# 辞書をファイルへ保存
+	file.write(json.dumps(db, indent=2, sort_keys=True))
+	file.close()
+
+	loadGuildData()
+
+
+# ギルドデータの読み込み
+async def loadGuildData():
+	# グローバル変数宣言
+	global db
+
+	try:  # ファイルが存在しない場合
+		# ファイルを作成して初期データを書き込む
+		file = open("guild.json", "x", encoding="utf-8")
+		file.write(json.dumps(db, indent=2, sort_keys=True))
+		file.close()
+		# ファイルから読み込む
+		file = open("guild.json", "r", encoding="utf-8")
+		db = json.load(file)
+		file.close()
+
+	except FileExistsError:  # ファイルが存在する場合
+		# ファイルから読み込む
+		file = open("guild.json", "r", encoding="utf-8")
+		db = json.load(file)
+		file.close()
+
 # ギルドデータの確認
 async def checkGuildData(guild = None):
 	global default_guilddata_item
@@ -87,9 +123,9 @@ async def checkGuildData(guild = None):
 # 1分毎にサーバーステータスを更新する
 @tasks.loop(seconds=60.0)
 async def updateserverstatus():
-	global server_status_embed
-
 	logging.info("サーバーステータスの更新開始")
+
+	await saveGuildData()
 
 	# サーバーステータスを取得する
 	status = await serverstatus.get()
@@ -139,8 +175,6 @@ async def after_updateserverstatus():
 
 # サーバーステータス埋め込みメッセージを更新
 async def generateserverstatusembed(locale):
-	global server_status_embed
-
 	embeds = []
 	pf_list = {"PC / Stadia": ["PC", "Stadia"], "PlayStation": ["PS4", "PS5"], "Xbox": ["XBOXONE", "XBOX SERIES X"]}
 
@@ -161,7 +195,7 @@ async def generateserverstatusembed(locale):
 
 		for p in pf_list[pf]:
 			if p.startswith("_"): continue
-	
+
 			# サーバーの状態によってアイコンを変更する
 			# 問題なし
 			if status[p]["Status"]["Connectivity"] == "Operational":
@@ -178,11 +212,11 @@ async def generateserverstatusembed(locale):
 			# それ以外
 			else:
 				status_icon = statusicon.Unknown
-	
+
 			mt_text = ""
 			if status[p]["Maintenance"] == True:
 				mt_text = "- **`" + localizations.translate("Maintenance") + "`**"
-	
+
 			f_list = []
 			f_text = ""
 			for f, s in status[p]["Status"].items():
@@ -192,7 +226,7 @@ async def generateserverstatusembed(locale):
 				if s == "Unknown": f_status_icon = statusicon.Unknown
 				f_list.append("┣━ **" + localizations.translate(f) + "**\n┣━ " + f_status_icon + "`" + localizations.translate(s) + "`")
 			f_text = "" + "\n".join(f_list)
-	
+
 			# 埋め込みメッセージにプラットフォームのフィールドを追加
 			embed.add_field(name=status_icon + "__" + p + "__" + " - `" + localizations.translate(status[p]["Status"]["Connectivity"]) + "`", value=mt_text + f_text)
 
@@ -208,7 +242,7 @@ async def setlanguage(ctx, locale: Option(
 	choices=localizations.locales,
 	permission=discord.Permissions.administrator
 )):
-	global guilddata
+	global db
 
 	await ctx.defer()
 
@@ -280,8 +314,10 @@ async def about(ctx):
 
 # ログイン
 try:
-	web.start()
-	client.run(os.getenv("TOKEN"))
+	#web.start()
+	f = open('token.txt', 'r', encoding='UTF-8')
+	client.run(f.read())
+	f.close()
 except Exception as e:
 	logging.error(str(e))
-	os.system("kill 1")
+	#os.system("kill 1")
