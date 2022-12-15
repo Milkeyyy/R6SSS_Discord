@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.WARNING)
 # Botの名前
 bot_name = "R6SSS"
 # Botのバージョン
-bot_version = "1.2.0"
+bot_version = "1.2.1"
 
 default_embed = discord.Embed
 
@@ -246,6 +246,9 @@ async def setlanguage(ctx, locale: Option(
 
 	await ctx.defer()
 
+	# ギルドデータをチェック
+	await checkGuildData(ctx.guild)
+
 	if locale in localizations.data["Locales"].values():
 		db[str(ctx.guild.id)]["server_status_message"][2] = [k for k, v in localizations.data["Locales"].items() if v == locale][0]
 	else:
@@ -258,7 +261,10 @@ async def status(ctx):
 	logging.info(f"コマンド実行: status / 実行者: {ctx.user}")
 
 	await ctx.defer()
-	await ctx.followup.send(embeds=await generateserverstatusembed(db[str(ctx.guild_id)]["server_status_message"][2]))
+	try:
+		await ctx.followup.send(embeds=await generateserverstatusembed(db[str(ctx.guild_id)]["server_status_message"][2]))
+	except Exception as e:
+		await ctx.followup.send(content="サーバーステータスメッセージの送信時にエラーが発生しました: `" + str(e) + "`")
 
 @client.slash_command()
 async def create(ctx, channel: Option(
@@ -271,6 +277,7 @@ async def create(ctx, channel: Option(
 
 	await ctx.defer()
 
+	# ギルドデータをチェック
 	await checkGuildData(ctx.guild)
 
 	additional_msg = ""
@@ -284,7 +291,14 @@ async def create(ctx, channel: Option(
 	ch = client.get_channel(ch_id)
 
 	# サーバーステータス埋め込みメッセージを送信
-	msg = await ch.send(embeds=await generateserverstatusembed(db[str(ctx.guild_id)]["server_status_message"][2]))
+	try:
+		msg = await ch.send(embeds=await generateserverstatusembed(db[str(ctx.guild_id)]["server_status_message"][2]))
+	except Exception as e:
+		if type(e) == discord.errors.ApplicationCommandInvokeError and str(e).endswith("Missing Permissions"):
+			await ctx.send_followup(content="テキストチャンネル " + ch.mention + " へメッセージを送信する権限がありません！")
+		else:
+			await ctx.send_followup(content="サーバーステータスメッセージの作成時にエラーが発生しました: `" + str(e) + "`")
+		return
 
 	# 送信したチャンネルとメッセージのIDをギルドデータへ保存する
 	db[str(ctx.guild_id)]["server_status_message"][0] = ch_id
