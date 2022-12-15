@@ -10,7 +10,7 @@ def loadLocaleData():
 	global locales
 
 	# ファイルから言語データを読み込む
-	file = open("localizations.json", "r", encoding="utf-8")
+	file = open("src/localizations.json", "r", encoding="utf-8")
 	data = json.load(file)
 	file.close()
 	locales = data["Locales"].values()

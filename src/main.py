@@ -1,4 +1,4 @@
-from keep_alive import keep_alive
+import web
 import localizations
 import statusicon
 import serverstatus
@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.WARNING)
 # Botの名前
 bot_name = "R6SSS"
 # Botのバージョン
-bot_version = "1.0.2"
+bot_version = "1.1.0"
 
 default_embed = discord.Embed
 
@@ -27,12 +27,6 @@ default_guilddata_item = {"server_status_message": [0, 0, "en-GB"]} # チャン�
 
 # 引数ぱーさー
 parser = argparse.ArgumentParser()
-parser.add_argument(
-	"--token",
-	help="Botのトークン (使用法: --token ここにトークンを挿入)",
-	type=str,
-	required=False
-)
 args = parser.parse_args()
 
 # くらいあんと
@@ -103,12 +97,9 @@ async def updateserverstatus():
 	# サーバーステータスを更新する
 	serverstatus.data = status
 
-	# 埋め込みメッセージを更新する
-	#await updateserverstatusembed()
-
 	# 各ギルドの埋め込みメッセージIDチェック、存在する場合はメッセージを更新する
 	for guild in client.guilds:
-		logging.info(f"ギルド: {guild.name}")
+		#logging.info(f"ギルド: {guild.name}")
 		try:
 			ch_id = int(db[str(guild.id)]["server_status_message"][0])
 			msg_id = int(db[str(guild.id)]["server_status_message"][1])
@@ -289,7 +280,7 @@ async def about(ctx):
 
 # ログイン
 try:
-	keep_alive()
+	web.start()
 	client.run(os.getenv("TOKEN"))
 except Exception as e:
 	logging.error(str(e))
