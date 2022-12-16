@@ -1,4 +1,5 @@
 import api
+import heartbeat
 import localizations
 import statusicon
 import serverstatus
@@ -51,6 +52,9 @@ async def on_ready():
 		)
 	)
 	logging.info(f"{client.user} へログインしました！ (ID: {client.user.id})")
+
+	# ハートビートのキーを読み込み
+	heartbeat.loadKeys()
 
 	# ギルドデータの確認を開始
 	await loadGuildData()
@@ -119,10 +123,14 @@ async def checkGuildData(guild = None):
 
 	logging.info("ギルドデータの確認完了")
 
-
 # 1分毎にサーバーステータスを更新する
 @tasks.loop(seconds=60.0)
 async def updateserverstatus():
+	# Heartbeatイベントを送信
+	logging.info("ハートビート")
+
+	heartbeat.monitor.ping()
+
 	logging.info("サーバーステータスの更新開始")
 
 	await saveGuildData()

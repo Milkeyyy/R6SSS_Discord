@@ -1,6 +1,7 @@
 .vscode/launch.json
 guild.json
 token.txt
+cronitor_keys.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
