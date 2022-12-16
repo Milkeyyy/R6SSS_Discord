@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.WARNING)
 # Botの名前
 bot_name = "R6SSS"
 # Botのバージョン
-bot_version = "1.3.3"
+bot_version = "1.3.4"
 
 default_embed = discord.Embed
 
@@ -283,7 +283,8 @@ async def create(ctx, channel: Option(
 	discord.TextChannel,
 	required=False,
 	name="textchannel",
-	description="サーバーステータスを送信するテキストチャンネルを指定します。指定しない場合は現在のチャンネルになります。"
+	description="自動更新されるサーバーステータスを送信するテキストチャンネルを指定します。指定しない場合は現在のチャンネルへ作成されます。",
+	permission=discord.Permissions.administrator
 )):
 	logging.info(f"コマンド実行: create / 実行者: {ctx.user}")
 
