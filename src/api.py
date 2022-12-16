@@ -13,7 +13,7 @@ port = 61000
 
 def run():
 	try:
-		uvicorn.run("api:app", port=port)
+		uvicorn.run("api:app", host="0.0.0.0", port=port)
 	except Exception as e:
 		logging.warning(f"Failed to start API")
 		logging.error(str(e))
