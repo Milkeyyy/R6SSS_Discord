@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.WARNING)
 # Botの名前
 bot_name = "R6SSS"
 # Botのバージョン
-bot_version = "1.2.1"
+bot_version = "1.2.2"
 
 default_embed = discord.Embed
 
@@ -244,7 +244,7 @@ async def setlanguage(ctx, locale: Option(
 )):
 	global db
 
-	await ctx.defer()
+	await ctx.defer(ephemeral=True)
 
 	# ギルドデータをチェック
 	await checkGuildData(ctx.guild)
@@ -254,17 +254,17 @@ async def setlanguage(ctx, locale: Option(
 	else:
 		db[str(ctx.guild.id)]["server_status_message"][2] = "en-GB"
 
-	await ctx.followup.send(content="サーバーステータスメッセージの言語を `" + locale + "` に設定しました。")
+	await ctx.send_followup(content="サーバーステータスメッセージの言語を `" + locale + "` に設定しました。")
 
 @client.slash_command()
 async def status(ctx):
 	logging.info(f"コマンド実行: status / 実行者: {ctx.user}")
 
-	await ctx.defer()
+	await ctx.defer(ephemeral=True)
 	try:
-		await ctx.followup.send(embeds=await generateserverstatusembed(db[str(ctx.guild_id)]["server_status_message"][2]))
+		await ctx.send_followup(embeds=await generateserverstatusembed(db[str(ctx.guild_id)]["server_status_message"][2]))
 	except Exception as e:
-		await ctx.followup.send(content="サーバーステータスメッセージの送信時にエラーが発生しました: `" + str(e) + "`")
+		await ctx.send_followup(content="サーバーステータスメッセージの送信時にエラーが発生しました: `" + str(e) + "`")
 
 @client.slash_command()
 async def create(ctx, channel: Option(
@@ -275,55 +275,64 @@ async def create(ctx, channel: Option(
 )):
 	logging.info(f"コマンド実行: create / 実行者: {ctx.user}")
 
-	await ctx.defer()
+	await ctx.defer(ephemeral=True)
 
-	# ギルドデータをチェック
-	await checkGuildData(ctx.guild)
-
-	additional_msg = ""
-	if db[str(ctx.guild_id)]["server_status_message"][1] != 0:
-		additional_msg = "\n(以前送信した古いメッセージは更新されなくなります。)"
-
-	if channel is None:
-		ch_id = ctx.channel_id
-	else:
-		ch_id = channel.id
-	ch = client.get_channel(ch_id)
-
-	# サーバーステータス埋め込みメッセージを送信
 	try:
-		msg = await ch.send(embeds=await generateserverstatusembed(db[str(ctx.guild_id)]["server_status_message"][2]))
-	except Exception as e:
-		if type(e) == discord.errors.ApplicationCommandInvokeError and str(e).endswith("Missing Permissions"):
-			await ctx.send_followup(content="テキストチャンネル " + ch.mention + " へメッセージを送信する権限がありません！")
+		# ギルドデータをチェック
+		await checkGuildData(ctx.guild)
+
+		additional_msg = ""
+		if db[str(ctx.guild_id)]["server_status_message"][1] != 0:
+			additional_msg = "\n(以前送信した古いメッセージは更新されなくなります。)"
+
+		if channel is None:
+			ch_id = ctx.channel_id
 		else:
-			await ctx.send_followup(content="サーバーステータスメッセージの作成時にエラーが発生しました: `" + str(e) + "`")
-		return
+			ch_id = channel.id
+		ch = client.get_channel(ch_id)
 
-	# 送信したチャンネルとメッセージのIDをギルドデータへ保存する
-	db[str(ctx.guild_id)]["server_status_message"][0] = ch_id
-	db[str(ctx.guild_id)]["server_status_message"][1] = msg.id
+		# サーバーステータス埋め込みメッセージを送信
+		try:
+			msg = await ch.send(embeds=await generateserverstatusembed(db[str(ctx.guild_id)]["server_status_message"][2]))
+		except Exception as e:
+			if type(e) == discord.errors.ApplicationCommandInvokeError and str(e).endswith("Missing Permissions"):
+				await ctx.send_followup(content="テキストチャンネル " + ch.mention + " へメッセージを送信する権限がありません！")
+			else:
+				await ctx.send_followup(content="サーバーステータスメッセージの作成時にエラーが発生しました: `" + str(e) + "`")
+			return
 
-	await ctx.send_followup(content="テキストチャンネル " + ch.mention + " へサーバーステータスメッセージを送信しました。\n以後このメッセージは自動的に更新されます。" + additional_msg)
+		# 送信したチャンネルとメッセージのIDをギルドデータへ保存する
+		db[str(ctx.guild_id)]["server_status_message"][0] = ch_id
+		db[str(ctx.guild_id)]["server_status_message"][1] = msg.id
+
+		await ctx.send_followup(content="テキストチャンネル " + ch.mention + " へサーバーステータスメッセージを送信しました。\n以後このメッセージは自動的に更新されます。" + additional_msg)
+	except Exception as e:
+		await ctx.send_followup(content="サーバーステータスメッセージの送信時にエラーが発生しました: `" + str(e) + "`")
 
 @client.slash_command()
 async def ping(ctx):
 	logging.info(f"コマンド実行: ping / 実行者: {ctx.user}")
-	raw_ping = client.latency
-	ping = round(raw_ping * 1000)
-	ping_embed = discord.Embed(title="Pong!",description=f"Latency: **`{ping}`** ms",color=discord.Colour.from_rgb(79,168,254))
-	await ctx.respond(embed=ping_embed)
+	try:
+		raw_ping = client.latency
+		ping = round(raw_ping * 1000)
+		ping_embed = discord.Embed(title="Pong!",description=f"Latency: **`{ping}`** ms",color=discord.Colour.from_rgb(79,168,254))
+		await ctx.respond(embed=ping_embed)
+	except Exception as e:
+		await ctx.respond(content="コマンドの実行時にエラーが発生しました: `" + str(e) + "`")
 
 @client.slash_command()
 async def about(ctx):
 	logging.info(f"コマンド実行: about / 実行者: {ctx.user}")
-	embed = discord.Embed(color=discord.Colour.blue())
-	embed.set_author(name=bot_name, icon_url=client.user.display_avatar.url)
-	embed.set_footer(text=f"Developed by Milkeyyy#0625")
-	embed.add_field(name="Version", value="`" + bot_version + "`")
-	embed.add_field(name="Library", value=f"Pycord: `{discord.__version__}`")
+	try:
+		embed = discord.Embed(color=discord.Colour.blue())
+		embed.set_author(name=bot_name, icon_url=client.user.display_avatar.url)
+		embed.set_footer(text=f"Developed by Milkeyyy#0625")
+		embed.add_field(name="Version", value="`" + bot_version + "`")
+		embed.add_field(name="Library", value=f"Pycord: `{discord.__version__}`")
 
-	await ctx.respond(embed=embed)
+		await ctx.respond(embed=embed)
+	except Exception as e:
+		await ctx.respond(content="コマンドの実行時にエラーが発生しました: `" + str(e) + "`")
 
 
 # ログイン
