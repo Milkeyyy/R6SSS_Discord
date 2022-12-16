@@ -168,7 +168,7 @@ async def updateserverstatus():
 				else:
 					await msg.edit(embeds=await generateserverstatusembed(loc))
 		except Exception as e:
-			logging.error(content=f"ギルド {guild.name} のサーバーステータスメッセージ({str(msg_id)})の更新に失敗")
+			logging.error(f"ギルド {guild.name} のサーバーステータスメッセージ({str(msg_id)})の更新に失敗")
 			logging.error(str(e))
 
 	logging.info("サーバーステータスの更新完了")
