@@ -1,4 +1,4 @@
-import web
+import api
 import localizations
 import statusicon
 import serverstatus
@@ -341,7 +341,7 @@ async def about(ctx):
 
 # ログイン
 try:
-	#web.start()
+	api.start()
 	f = open('token.txt', 'r', encoding='UTF-8')
 	client.run(f.read())
 	f.close()

@@ -43,6 +43,6 @@ async def get():
 
 	status["_update_date"] = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
 
-	logging.info(str(status))
+	#logging.info(str(status))
 
 	return status
