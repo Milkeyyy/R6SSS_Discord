@@ -3,6 +3,8 @@ Discordのテキストチャンネルにレインボーシックス シージの
 
 [**[Botをサーバーに招待]**](https://discord.com/api/oauth2/authorize?client_id=990497421488451615&permissions=76800&scope=bot%20applications.commands)
 
+[**📶 Bot/API ステータス**](https://milkeyyy-services.cronitorstatus.com)
+
 ## コマンド
 - `create [テキストチャンネル]` - 指定したテキストチャンネルへ**1分ごとに自動更新される**サーバーステータスを作成します。
 	- ##### 送信されたサーバーステータスは、メッセージが削除されるか、`create` コマンドで新しいサーバーステータスが作成されるまで更新され続けます。
