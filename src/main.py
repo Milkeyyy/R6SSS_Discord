@@ -148,24 +148,28 @@ async def updateserverstatus():
 			msg_id = db[str(guild.id)]["server_status_message"][1]
 			loc = db[str(guild.id)]["server_status_message"][2]
 
-		if ch_id != 0 and msg_id != 0 and loc != None:
-			# IDからテキストチャンネルを取得する
-			ch = client.get_channel(ch_id)
+		try:
+			if ch_id != 0 and msg_id != 0 and loc != None:
+				# IDからテキストチャンネルを取得する
+				ch = client.get_channel(ch_id)
 
-			e = ""
-			try:
-				# 取得したテキストチャンネルからメッセージを取得する
-				msg = await ch.fetch_message(msg_id)
-			except discord.errors.NotFound as err:
-				msg = None
-				e = err
+				e = ""
+				try:
+					# 取得したテキストチャンネルからメッセージを取得する
+					msg = await ch.fetch_message(msg_id)
+				except discord.errors.NotFound as err:
+					msg = None
+					e = err
 
-			if msg is None:
-				logging.warning("ギルド " + guild.name + " のメッセージ " + str(msg_id) + " の更新に失敗")
-				logging.warning(str(e))
-				db[str(guild.id)] = default_guilddata_item
-			else:
-				await msg.edit(embeds=await generateserverstatusembed(loc))
+				if msg is None:
+					logging.warning("ギルド " + guild.name + " のメッセージ(" + str(msg_id) + ")の取得に失敗")
+					logging.warning(str(e))
+					db[str(guild.id)] = default_guilddata_item
+				else:
+					await msg.edit(embeds=await generateserverstatusembed(loc))
+		except Exception as e:
+			logging.error(content=f"ギルド {guild.name} のサーバーステータスメッセージ({str(msg_id)})の更新に失敗")
+			logging.error(str(e))
 
 	logging.info("サーバーステータスの更新完了")
 
