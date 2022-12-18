@@ -21,5 +21,6 @@ async def get():
 		return status
 
 	status = json.loads(res.read())
+	status["_update_date"] = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
 
 	return status
