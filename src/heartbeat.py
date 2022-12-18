@@ -3,6 +3,7 @@ import logging
 import sys
 
 def loadKeys():
+	global heartbeat
 	global monitor
 
 	# APIキーを読み込み
@@ -20,9 +21,10 @@ def loadKeys():
 		logging.error("Cronitorのキーが指定されていません")
 		sys.exit(1)
 
-	logging.info(f"Load Cronitor API/Heartbeat Keys: {v[0]}/{v[1]}")
+	logging.info(f"Cronitor API/Heartbeat Keys has been loaded: {v[0]}/{v[1]/v[2]}")
 
 	cronitor.api_key = v[0]
-	monitor = cronitor.Monitor(v[1])
+	heartbeat = cronitor.Monitor(v[1])
+	monitor = cronitor.Monitor(v[2])
 
 	f.close()
