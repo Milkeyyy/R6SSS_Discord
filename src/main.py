@@ -1,4 +1,3 @@
-import api
 import heartbeat
 import localizations
 import statusicon
@@ -126,59 +125,63 @@ async def checkGuildData(guild = None):
 # 1分毎にサーバーステータスを更新する
 @tasks.loop(seconds=60.0)
 async def updateserverstatus():
-	# Heartbeatイベントを送信
-	logging.info("ハートビート")
-
-	heartbeat.monitor.ping()
+	# Heartbeatイベントを送信 (サーバーステータスの更新が開始されたことを報告)
+	heartbeat.monitor.ping(state="run", message="サーバーステータスの更新開始")
 
 	logging.info("サーバーステータスの更新開始")
 
-	await saveGuildData()
+	try:
+		await saveGuildData()
 
-	# サーバーステータスを取得する
-	status = await serverstatus.get()
+		# サーバーステータスを取得する
+		status = await serverstatus.get()
 
-	# サーバーステータスを更新する
-	serverstatus.data = status
+		# サーバーステータスを更新する
+		serverstatus.data = status
 
-	# 各ギルドの埋め込みメッセージIDチェック、存在する場合はメッセージを更新する
-	for guild in client.guilds:
-		#logging.info(f"ギルド: {guild.name}")
-		try:
-			ch_id = int(db[str(guild.id)]["server_status_message"][0])
-			msg_id = int(db[str(guild.id)]["server_status_message"][1])
-			loc = db[str(guild.id)]["server_status_message"][2]
-		except Exception as e:
-			logging.warning(f"ギルドデータ({guild.name}) の読み込み失敗")
-			logging.warning(e)
-			db[str(guild.id)] = default_guilddata_item
-			ch_id = db[str(guild.id)]["server_status_message"][0]
-			msg_id = db[str(guild.id)]["server_status_message"][1]
-			loc = db[str(guild.id)]["server_status_message"][2]
+		# 各ギルドの埋め込みメッセージIDチェック、存在する場合はメッセージを更新する
+		for guild in client.guilds:
+			#logging.info(f"ギルド: {guild.name}")
+			try:
+				ch_id = int(db[str(guild.id)]["server_status_message"][0])
+				msg_id = int(db[str(guild.id)]["server_status_message"][1])
+				loc = db[str(guild.id)]["server_status_message"][2]
+			except Exception as e:
+				logging.warning(f"ギルドデータ({guild.name}) の読み込み失敗")
+				logging.warning(e)
+				db[str(guild.id)] = default_guilddata_item
+				ch_id = db[str(guild.id)]["server_status_message"][0]
+				msg_id = db[str(guild.id)]["server_status_message"][1]
+				loc = db[str(guild.id)]["server_status_message"][2]
 
-		try:
-			if ch_id != 0 and msg_id != 0 and loc != None:
-				# IDからテキストチャンネルを取得する
-				ch = client.get_channel(ch_id)
+			try:
+				if ch_id != 0 and msg_id != 0 and loc != None:
+					# IDからテキストチャンネルを取得する
+					ch = client.get_channel(ch_id)
 
-				e = ""
-				try:
-					# 取得したテキストチャンネルからメッセージを取得する
-					msg = await ch.fetch_message(msg_id)
-				except discord.errors.NotFound as err:
-					msg = None
-					e = err
+					e = ""
+					try:
+						# 取得したテキストチャンネルからメッセージを取得する
+						msg = await ch.fetch_message(msg_id)
+					except discord.errors.NotFound as err:
+						msg = None
+						e = err
 
-				if msg is None:
-					logging.warning("ギルド " + guild.name + " のメッセージ(" + str(msg_id) + ")の取得に失敗")
-					logging.warning(str(e))
-					db[str(guild.id)] = default_guilddata_item
-				else:
-					await msg.edit(embeds=await generateserverstatusembed(loc))
-		except Exception as e:
-			logging.error(f"ギルド {guild.name} のサーバーステータスメッセージ({str(msg_id)})の更新に失敗")
-			logging.error(str(e))
+					if msg is None:
+						logging.warning("ギルド " + guild.name + " のメッセージ(" + str(msg_id) + ")の取得に失敗")
+						logging.warning(str(e))
+						db[str(guild.id)] = default_guilddata_item
+					else:
+						await msg.edit(embeds=await generateserverstatusembed(loc))
+			except Exception as e:
+				logging.error(f"ギルド {guild.name} のサーバーステータスメッセージ({str(msg_id)})の更新に失敗")
+				logging.error(str(e))
+	except Exception as e:
+		logging.error(str(e))
+		heartbeat.monitor.ping(state="fail", message="サーバーステータスの更新エラー: " + str(e))
 
+	# Cronitorのモニターに成功したことを報告
+	heartbeat.monitor.ping(state="complete", message="サーバーステータスの更新完了")
 	logging.info("サーバーステータスの更新完了")
 
 @updateserverstatus.after_loop
@@ -350,7 +353,6 @@ async def about(ctx):
 
 # ログイン
 try:
-	api.start()
 	f = open('token.txt', 'r', encoding='UTF-8')
 	client.run(f.read())
 	f.close()
