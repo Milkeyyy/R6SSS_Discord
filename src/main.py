@@ -125,6 +125,9 @@ async def checkGuildData(guild = None):
 # 1分毎にサーバーステータスを更新する
 @tasks.loop(seconds=60.0)
 async def updateserverstatus():
+	# ハートビートを送信
+	heartbeat.heartbeat.ping(state="ok")
+
 	# Heartbeatイベントを送信 (サーバーステータスの更新が開始されたことを報告)
 	heartbeat.monitor.ping(state="run", message="サーバーステータスの更新開始")
 
