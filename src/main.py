@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.WARNING)
 # Botの名前
 bot_name = "R6SSS"
 # Botのバージョン
-bot_version = "1.3.5"
+bot_version = "1.3.6"
 
 default_embed = discord.Embed
 
