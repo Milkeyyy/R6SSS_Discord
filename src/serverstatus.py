@@ -4,7 +4,7 @@ import logging
 import urllib
 
 # サーバーステータスAPIのURL
-api_url = "https://api-r6sss.deta.dev"
+api_url = "https://api.r6sss.milkeyyy.com"
 
 # サーバーステータス辞書
 data = {}
