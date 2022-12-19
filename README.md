@@ -21,17 +21,17 @@ Discordのテキストチャンネルにレインボーシックス シージの
 - `ping` - このBotのレイテンシーを送信します。
 
 ## API
-URL: https://r6sss.milkeyyy.com/api
+URL: https://api.r6sss.milkeyyy.com
 
-[**ドキュメント** (適当)](https://r6sss.milkeyyy.com/api/docs)
+[**ドキュメント** (適当)](https://api.r6sss.milkeyyy.com/docs)
 
 ### 例
-- `GET` - `https://r6sss.milkeyyy.com/api`
+- `GET` - `https://api.r6sss.milkeyyy.com`
 ```json
 {"PC":{"ImpactedFeatures":null,"Maintenance":null,"Status":{"Authentication":"Operational","Connectivity":"Operational","Leaderboard":"Operational","Matchmaking":"Operational","Purchase":"Operational"}},"PS4":{"ImpactedFeatures":null,"Maintenance":null,"Status":{"Authentication":"Operational","Connectivity":"Operational","Leaderboard":"Operational","Matchmaking":"Operational","Purchase":"Operational"}},"PS5":{"ImpactedFeatures":null,"Maintenance":null,"Status":{"Authentication":"Operational","Connectivity":"Operational","Leaderboard":"Operational","Matchmaking":"Operational","Purchase":"Operational"}},"Stadia":{"ImpactedFeatures":null,"Maintenance":null,"Status":{"Authentication":"Operational","Connectivity":"Operational","Leaderboard":"Operational","Matchmaking":"Operational","Purchase":"Operational"}},"XBOX SERIES X":{"ImpactedFeatures":null,"Maintenance":null,"Status":{"Authentication":"Operational","Connectivity":"Operational","Leaderboard":"Operational","Matchmaking":"Operational","Purchase":"Operational"}},"XBOXONE":{"ImpactedFeatures":null,"Maintenance":null,"Status":{"Authentication":"Operational","Connectivity":"Operational","Leaderboard":"Operational","Matchmaking":"Operational","Purchase":"Operational"}}}
 ```
 
-- `GET` - `https://r6sss.milkeyyy.com/api?platform=PS4&platform=PS5`
+- `GET` - `https://api.r6sss.milkeyyy.com?platform=PS4&platform=PS5`
 ```json
 {"PS4":{"ImpactedFeatures":null,"Maintenance":null,"Status":{"Authentication":"Operational","Connectivity":"Operational","Leaderboard":"Operational","Matchmaking":"Operational","Purchase":"Operational"}},"PS5":{"ImpactedFeatures":null,"Maintenance":null,"Status":{"Authentication":"Operational","Connectivity":"Operational","Leaderboard":"Operational","Matchmaking":"Operational","Purchase":"Operational"}}}
 ```
