@@ -21,26 +21,5 @@ Discordのテキストチャンネルにレインボーシックス シージの
 - `ping` - このBotのレイテンシーを送信します。
 
 ## API
-URL: https://api.r6sss.milkeyyy.com
-
-[**ドキュメント** (適当)](https://api.r6sss.milkeyyy.com/docs)
-
-### 例
-- `GET` - `https://api.r6sss.milkeyyy.com`
-```json
-{"PC":{"ImpactedFeatures":null,"Maintenance":null,"Status":{"Authentication":"Operational","Connectivity":"Operational","Leaderboard":"Operational","Matchmaking":"Operational","Purchase":"Operational"}},"PS4":{"ImpactedFeatures":null,"Maintenance":null,"Status":{"Authentication":"Operational","Connectivity":"Operational","Leaderboard":"Operational","Matchmaking":"Operational","Purchase":"Operational"}},"PS5":{"ImpactedFeatures":null,"Maintenance":null,"Status":{"Authentication":"Operational","Connectivity":"Operational","Leaderboard":"Operational","Matchmaking":"Operational","Purchase":"Operational"}},"Stadia":{"ImpactedFeatures":null,"Maintenance":null,"Status":{"Authentication":"Operational","Connectivity":"Operational","Leaderboard":"Operational","Matchmaking":"Operational","Purchase":"Operational"}},"XBOX SERIES X":{"ImpactedFeatures":null,"Maintenance":null,"Status":{"Authentication":"Operational","Connectivity":"Operational","Leaderboard":"Operational","Matchmaking":"Operational","Purchase":"Operational"}},"XBOXONE":{"ImpactedFeatures":null,"Maintenance":null,"Status":{"Authentication":"Operational","Connectivity":"Operational","Leaderboard":"Operational","Matchmaking":"Operational","Purchase":"Operational"}}}
-```
-
-- `GET` - `https://api.r6sss.milkeyyy.com?platform=PS4&platform=PS5`
-```json
-{"PS4":{"ImpactedFeatures":null,"Maintenance":null,"Status":{"Authentication":"Operational","Connectivity":"Operational","Leaderboard":"Operational","Matchmaking":"Operational","Purchase":"Operational"}},"PS5":{"ImpactedFeatures":null,"Maintenance":null,"Status":{"Authentication":"Operational","Connectivity":"Operational","Leaderboard":"Operational","Matchmaking":"Operational","Purchase":"Operational"}}}
-```
-
-#### パラメーターに指定できるプラットフォーム
-プラットフォームを指定しない場合は、すべてのプラットフォームのサーバーステータスを取得できます。
-- `PC`
-- `Stadia`
-- `PS4`
-- `PS5`
-- `XBOXONE`
-- `XBOX SERIES X`
+- URL: http://api.r6sss.milkeyyy.com/
+- [**詳しくはこちら**](https://github.com/Milkeyyy/R6SServerStatusBot_WebAPI)
