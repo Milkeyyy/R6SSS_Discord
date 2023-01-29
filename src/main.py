@@ -194,7 +194,7 @@ async def after_updateserverstatus():
 # サーバーステータス埋め込みメッセージを更新
 async def generateserverstatusembed(locale):
 	embeds = []
-	pf_list = {"PC / Stadia": ["PC"], "PlayStation": ["PS4"], "Xbox": ["XBOXONE"]}
+	pf_list = {"PC": ["PC"], "PlayStation": ["PS4"], "Xbox": ["XBOXONE"]}
 
 	# 翻訳先言語を設定
 	localizations.locale = locale
