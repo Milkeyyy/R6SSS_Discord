@@ -194,7 +194,7 @@ async def after_updateserverstatus():
 # サーバーステータス埋め込みメッセージを更新
 async def generateserverstatusembed(locale):
 	embeds = []
-	pf_list = {"PC / Stadia": ["PC", "Stadia"], "PlayStation": ["PS4", "PS5"], "Xbox": ["XBOXONE", "XBOX SERIES X"]}
+	pf_list = {"PC / Stadia": ["PC"], "PlayStation": ["PS4"], "Xbox": ["XBOXONE"]}
 
 	# 翻訳先言語を設定
 	localizations.locale = locale
@@ -213,12 +213,6 @@ async def generateserverstatusembed(locale):
 
 		for p in pf_list[pf]:
 			if p.startswith("_"): continue
-
-			# PS5とXbox Series Xは無視する
-			if p == "PS5":
-				continue
-			elif p == "XBOX SERIES X":
-				continue
 
 			# サーバーの状態によってアイコンを変更する
 			# 問題なし
