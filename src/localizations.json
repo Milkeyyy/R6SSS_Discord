@@ -12,7 +12,7 @@
 		},
 		"Maintenance": {
 			"en-GB": "Maintenance",
-			"ja-JP": "計画ﾒﾝﾃﾅﾝｽ",
+			"ja-JP": "計画メンテナンス",
 			"ko-KR": "정기 점검"
 		},
 		"Unplanned Issues": {
@@ -37,22 +37,22 @@
 		},
 		"Authentication": {
 			"en-GB": "Authentication",
-			"ja-JP": "認証ｼｽﾃﾑ",
+			"ja-JP": "認証システム",
 			"ko-KR": "인증"
 		},
 		"Leaderboard": {
 			"en-GB": "Leaderboard",
-			"ja-JP": "ﾗﾝｷﾝｸﾞ",
+			"ja-JP": "ランキング",
 			"ko-KR": "순위표"
 		},
 		"Purchase": {
 			"en-GB": "Store",
-			"ja-JP": "ｽﾄｱ",
+			"ja-JP": "ストア",
 			"ko-KR": "상점"
 		},
 		"Matchmaking": {
 			"en-GB": "Matchmaking",
-			"ja-JP": "ﾏｯﾁﾒｲｷﾝｸﾞ",
+			"ja-JP": "マッチメイキング",
 			"ko-KR": "매치메이킹"
 		},
 		"Operational": {
@@ -62,7 +62,7 @@
 		},
 		"Degraded": {
 			"en-GB": "Degraded",
-			"ja-JP": "停止中",
+			"ja-JP": "想定外の停止",
 			"ko-KR": "저하됨"
 		},
 		"Last Update": {
