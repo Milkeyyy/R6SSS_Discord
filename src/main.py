@@ -200,7 +200,7 @@ async def generateserverstatusembed(locale):
 	localizations.locale = locale
 
 	# 各プラットフォームの埋め込みメッセージの色
-	color_list = {"PC / Stadia": discord.Colour.from_rgb(255, 255, 255), "PlayStation": discord.Colour.from_rgb(0, 67, 156), "Xbox": discord.Colour.from_rgb(16, 124, 16)}
+	color_list = {"PC": discord.Colour.from_rgb(255, 255, 255), "PlayStation": discord.Colour.from_rgb(0, 67, 156), "Xbox": discord.Colour.from_rgb(16, 124, 16)}
 
 	# サーバーステータスを取得
 	status = serverstatus.data
