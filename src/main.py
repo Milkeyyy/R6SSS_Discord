@@ -246,7 +246,7 @@ async def generateserverstatusembed(locale):
 			f_text = "" + "\n".join(f_list)
 
 			# 埋め込みメッセージにプラットフォームのフィールドを追加
-			embed.add_field(name=status_icon + "__" + p + "__" + " - `" + localizations.translate(status[p]["Status"]["Connectivity"]) + "`", value=mt_text + f_text)
+			embed.add_field(name=status_icon + " - `" + localizations.translate(status[p]["Status"]["Connectivity"]) + "`", value=mt_text + f_text)
 
 		embeds.append(embed)
 
