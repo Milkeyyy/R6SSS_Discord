@@ -214,6 +214,12 @@ async def generateserverstatusembed(locale):
 		for p in pf_list[pf]:
 			if p.startswith("_"): continue
 
+			# PS5とXbox Series Xは無視する
+			if p == "PS5":
+				continue
+			elif p == "XBOX SERIES X":
+				continue
+
 			# サーバーの状態によってアイコンを変更する
 			# 問題なし
 			if status[p]["Status"]["Connectivity"] == "Operational":
