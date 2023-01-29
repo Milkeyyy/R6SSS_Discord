@@ -208,7 +208,7 @@ async def generateserverstatusembed(locale):
 	# 各プラットフォームごとの埋め込みメッセージを作成
 	for pf in pf_list:
 		embed = discord.Embed(color=color_list[pf])
-		embed.set_author(name="Server Status - " + pf, icon_url="https://www.google.com/s2/favicons?sz=64&domain_url=https://www.ubisoft.com/en-us/game/rainbow-six/siege/status")
+		embed.set_author(name=pf + " | R6S Server Status", icon_url="https://www.google.com/s2/favicons?sz=64&domain_url=https://www.ubisoft.com/en-us/game/rainbow-six/siege/status")
 		embed.set_footer(text=localizations.translate("Last Update") + ": " + status["_update_date"].strftime('%Y/%m/%d %H:%M:%S') + " (JST)")
 
 		for p in pf_list[pf]:
