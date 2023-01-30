@@ -214,6 +214,8 @@ async def generateserverstatusembed(locale):
 		for p in pf_list[pf]:
 			if p.startswith("_"): continue
 
+			if status[p]["Maintenance"] == None: status[p]["Maintenance"] = []
+
 			# サーバーの状態によってアイコンを変更する
 			# 問題なし
 			if status[p]["Status"]["Connectivity"] == "Operational":
@@ -240,13 +242,17 @@ async def generateserverstatusembed(locale):
 			for f, s in status[p]["Status"].items():
 				if f == "Connectivity": continue
 				f_status_icon = statusicon.Operational
-				if s != "Operational": f_status_icon = statusicon.Degraded
-				if s == "Unknown": f_status_icon = statusicon.Unknown
+				if s != "Operational":
+					f_status_icon = statusicon.Degraded # 停止
+					if f in status[p]["Maintenance"]:
+						f_status_icon = statusicon.Maintenance # メンテナンス
+						s = "Maintenance"
+				if s == "Unknown": f_status_icon = statusicon.Unknown # 不明
 				f_list.append("┣━ **" + localizations.translate(f) + "**\n┣━ " + f_status_icon + "`" + localizations.translate(s) + "`")
 			f_text = "" + "\n".join(f_list)
 
 			# 埋め込みメッセージにプラットフォームのフィールドを追加
-			embed.add_field(name=status_icon + " - `" + localizations.translate(status[p]["Status"]["Connectivity"]) + "`", value=mt_text + f_text)
+			embed.add_field(name=status_icon + " **" + localizations.translate("Connectivity") + "** - `" + localizations.translate(status[p]["Status"]["Connectivity"]) + "`", value=mt_text + f_text)
 
 		embeds.append(embed)
 
