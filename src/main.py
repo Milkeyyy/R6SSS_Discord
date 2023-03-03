@@ -1,16 +1,18 @@
-import heartbeat
-import localizations
-import statusicon
-import serverstatus
-
 import argparse
 import json
 import logging
 import os
+import sys
+import traceback
 
 import discord
 from discord.commands import Option
 from discord.ext import tasks
+
+import heartbeat
+import localizations
+import serverstatus
+import statusicon
 
 logging.basicConfig(level=logging.INFO)
 logging.basicConfig(level=logging.WARNING)
@@ -18,7 +20,7 @@ logging.basicConfig(level=logging.WARNING)
 # Botの名前
 bot_name = "R6SSS"
 # Botのバージョン
-bot_version = "1.3.8"
+bot_version = "1.3.9"
 
 default_embed = discord.Embed
 
@@ -151,7 +153,8 @@ async def updateserverstatus():
 				loc = db[str(guild.id)]["server_status_message"][2]
 			except Exception as e:
 				logging.warning(f"ギルドデータ({guild.name}) の読み込み失敗")
-				logging.warning(e)
+				tb = sys.exc_info()
+				logging.error(str(traceback.format_tb(tb)))
 				db[str(guild.id)] = default_guilddata_item
 				ch_id = db[str(guild.id)]["server_status_message"][0]
 				msg_id = db[str(guild.id)]["server_status_message"][1]
@@ -177,10 +180,12 @@ async def updateserverstatus():
 					else:
 						await msg.edit(embeds=await generateserverstatusembed(loc))
 			except Exception as e:
+				tb = sys.exc_info()
 				logging.error(f"ギルド {guild.name} のサーバーステータスメッセージ({str(msg_id)})の更新に失敗")
-				logging.error(str(e))
+				logging.error(str(traceback.format_tb(tb)))
 	except Exception as e:
-		logging.error(str(e))
+		tb = sys.exc_info()
+		logging.error(str(traceback.format_tb(tb)))
 		heartbeat.monitor.ping(state="fail", message="サーバーステータスの更新エラー: " + str(e))
 
 	# Cronitorのモニターに成功したことを報告
@@ -214,8 +219,6 @@ async def generateserverstatusembed(locale):
 		for p in pf_list[pf]:
 			if p.startswith("_"): continue
 
-			if status[p]["Maintenance"] == None: status[p]["Maintenance"] = []
-
 			# サーバーの状態によってアイコンを変更する
 			# 問題なし
 			if status[p]["Status"]["Connectivity"] == "Operational":
@@ -244,9 +247,6 @@ async def generateserverstatusembed(locale):
 				f_status_icon = statusicon.Operational
 				if s != "Operational":
 					f_status_icon = statusicon.Degraded # 停止
-					if f in status[p]["Maintenance"]:
-						f_status_icon = statusicon.Maintenance # メンテナンス
-						s = "Maintenance"
 				if s == "Unknown": f_status_icon = statusicon.Unknown # 不明
 				f_list.append("┣━ **" + localizations.translate(f) + "**\n┣━ " + f_status_icon + "`" + localizations.translate(s) + "`")
 			f_text = "" + "\n".join(f_list)
@@ -288,6 +288,8 @@ async def status(ctx):
 	try:
 		await ctx.send_followup(embeds=await generateserverstatusembed(db[str(ctx.guild_id)]["server_status_message"][2]))
 	except Exception as e:
+		tb = sys.exc_info()
+		logging.error(str(traceback.format_tb(tb)))
 		await ctx.send_followup(content="サーバーステータスメッセージの送信時にエラーが発生しました: `" + str(e) + "`")
 
 @client.slash_command()
@@ -323,6 +325,8 @@ async def create(ctx, channel: Option(
 			if type(e) == discord.errors.ApplicationCommandInvokeError and str(e).endswith("Missing Permissions"):
 				await ctx.send_followup(content="テキストチャンネル " + ch.mention + " へメッセージを送信する権限がありません！")
 			else:
+				tb = sys.exc_info()
+				logging.error(str(traceback.format_tb(tb)))
 				await ctx.send_followup(content="サーバーステータスメッセージの作成時にエラーが発生しました: `" + str(e) + "`")
 			return
 
@@ -332,6 +336,8 @@ async def create(ctx, channel: Option(
 
 		await ctx.send_followup(content="テキストチャンネル " + ch.mention + " へサーバーステータスメッセージを送信しました。\n以後このメッセージは自動的に更新されます。" + additional_msg)
 	except Exception as e:
+		tb = sys.exc_info()
+		logging.error(str(traceback.format_tb(tb)))
 		await ctx.send_followup(content="サーバーステータスメッセージの送信時にエラーが発生しました: `" + str(e) + "`")
 
 @client.slash_command()
@@ -343,6 +349,8 @@ async def ping(ctx):
 		ping_embed = discord.Embed(title="Pong!",description=f"Latency: **`{ping}`** ms",color=discord.Colour.from_rgb(79,168,254))
 		await ctx.respond(embed=ping_embed)
 	except Exception as e:
+		tb = sys.exc_info()
+		logging.error(str(traceback.format_tb(tb)))
 		await ctx.respond(content="コマンドの実行時にエラーが発生しました: `" + str(e) + "`")
 
 @client.slash_command()
@@ -357,6 +365,8 @@ async def about(ctx):
 
 		await ctx.respond(embed=embed)
 	except Exception as e:
+		tb = sys.exc_info()
+		logging.error(str(traceback.format_tb(tb)))
 		await ctx.respond(content="コマンドの実行時にエラーが発生しました: `" + str(e) + "`")
 
 
@@ -366,5 +376,6 @@ try:
 	client.run(f.read())
 	f.close()
 except Exception as e:
-	logging.error(str(e))
+	tb = sys.exc_info()
+	logging.error(str(traceback.format_tb(tb)))
 	#os.system("kill 1")
