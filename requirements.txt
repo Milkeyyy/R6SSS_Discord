@@ -25,7 +25,7 @@ Jinja2==3.1.2
 MarkupSafe==2.1.1
 multidict==6.0.3
 outcome==1.2.0
-py-cord==2.3.2
+py-cord==2.4.0
 pycparser==2.21
 pydantic==1.10.2
 PySocks==1.7.1
