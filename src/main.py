@@ -1,3 +1,4 @@
+import asyncio
 import argparse
 import json
 import logging
@@ -19,7 +20,7 @@ logging.basicConfig(level=logging.WARNING)
 # Botの名前
 bot_name = "R6SSS"
 # Botのバージョン
-bot_version = "1.3.10"
+bot_version = "1.3.11"
 
 default_embed = discord.Embed
 
@@ -128,10 +129,11 @@ serverstatus_loop_isrunning = False
 
 @tasks.loop(seconds=60.0)
 async def updateserverstatus():
+	global serverstatus_loop_isrunning
 	serverstatus_loop_isrunning = True
 
 	# ハートビートを送信
-	heartbeat.heartbeat.ping(state="ok")
+	heartbeat.heartbeat.ping(state="run")
 
 	# Heartbeatイベントを送信 (サーバーステータスの更新が開始されたことを報告)
 	heartbeat.monitor.ping(state="run", message="サーバーステータスの更新開始")
@@ -191,12 +193,14 @@ async def updateserverstatus():
 		logging.error(str(traceback.format_tb(tb)))
 		heartbeat.monitor.ping(state="fail", message="サーバーステータスの更新エラー: " + str(e))
 
+	logging.info("サーバーステータスの更新完了")
+
 	# Cronitorのモニターに成功したことを報告
 	heartbeat.monitor.ping(state="complete", message="サーバーステータスの更新完了")
-	logging.info("サーバーステータスの更新完了")
 
 @updateserverstatus.after_loop
 async def after_updateserverstatus():
+	global serverstatus_loop_isrunning
 	serverstatus_loop_isrunning = False
 	logging.info("サーバーステータスの定期更新終了")
 	if serverstatus_loop_isrunning == False: updateserverstatus.start()
