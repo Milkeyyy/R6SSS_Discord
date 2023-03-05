@@ -1,7 +1,6 @@
 import argparse
 import json
 import logging
-import os
 import sys
 import traceback
 
@@ -20,7 +19,7 @@ logging.basicConfig(level=logging.WARNING)
 # Botの名前
 bot_name = "R6SSS"
 # Botのバージョン
-bot_version = "1.3.9"
+bot_version = "1.3.10"
 
 default_embed = discord.Embed
 
@@ -125,8 +124,12 @@ async def checkGuildData(guild = None):
 	logging.info("ギルドデータの確認完了")
 
 # 1分毎にサーバーステータスを更新する
+serverstatus_loop_isrunning = False
+
 @tasks.loop(seconds=60.0)
 async def updateserverstatus():
+	serverstatus_loop_isrunning = True
+
 	# ハートビートを送信
 	heartbeat.heartbeat.ping(state="ok")
 
@@ -194,7 +197,9 @@ async def updateserverstatus():
 
 @updateserverstatus.after_loop
 async def after_updateserverstatus():
+	serverstatus_loop_isrunning = False
 	logging.info("サーバーステータスの定期更新終了")
+	if serverstatus_loop_isrunning == False: updateserverstatus.start()
 
 # サーバーステータス埋め込みメッセージを更新
 async def generateserverstatusembed(locale):
@@ -259,13 +264,15 @@ async def generateserverstatusembed(locale):
 	return embeds
 
 # コマンド
-@client.slash_command()
-async def setlanguage(ctx, locale: Option(
-	str,
-	name="language",
-	choices=localizations.locales,
-	permission=discord.Permissions.administrator
-)):
+@client.slash_command(description="サーバーステータスメッセージの言語を設定します。")
+async def setlanguage(ctx,
+	locale: Option(
+		str,
+		name="language",
+		choices=localizations.locales,
+		permission=discord.Permissions.administrator
+	)
+):
 	global db
 
 	await ctx.defer(ephemeral=True)
@@ -280,7 +287,7 @@ async def setlanguage(ctx, locale: Option(
 
 	await ctx.send_followup(content="サーバーステータスメッセージの言語を `" + locale + "` に設定しました。")
 
-@client.slash_command()
+@client.slash_command(description="現在のサーバーステータスを送信します。このコマンドで送信されたサーバーステータスは自動更新されません。")
 async def status(ctx):
 	logging.info(f"コマンド実行: status / 実行者: {ctx.user}")
 
@@ -292,14 +299,16 @@ async def status(ctx):
 		logging.error(str(traceback.format_tb(tb)))
 		await ctx.send_followup(content="サーバーステータスメッセージの送信時にエラーが発生しました: `" + str(e) + "`")
 
-@client.slash_command()
-async def create(ctx, channel: Option(
-	discord.TextChannel,
-	required=False,
-	name="textchannel",
-	description="自動更新されるサーバーステータスを送信するテキストチャンネルを指定します。指定しない場合は現在のチャンネルへ作成されます。",
-	permission=discord.Permissions.administrator
-)):
+@client.slash_command(description="毎分自動更新されるサーバーステータスメッセージを作成します。")
+async def create(ctx,
+	channel: Option(
+		discord.TextChannel,
+		required=False,
+		name="textchannel",
+		description="自動更新されるサーバーステータスを送信するテキストチャンネルを指定します。指定しない場合は現在のチャンネルへ作成されます。",
+		permission=discord.Permissions.administrator
+	)
+):
 	logging.info(f"コマンド実行: create / 実行者: {ctx.user}")
 
 	await ctx.defer(ephemeral=True)
@@ -340,7 +349,7 @@ async def create(ctx, channel: Option(
 		logging.error(str(traceback.format_tb(tb)))
 		await ctx.send_followup(content="サーバーステータスメッセージの送信時にエラーが発生しました: `" + str(e) + "`")
 
-@client.slash_command()
+@client.slash_command(description="ボットのレイテンシーを送信します。")
 async def ping(ctx):
 	logging.info(f"コマンド実行: ping / 実行者: {ctx.user}")
 	try:
@@ -353,7 +362,7 @@ async def ping(ctx):
 		logging.error(str(traceback.format_tb(tb)))
 		await ctx.respond(content="コマンドの実行時にエラーが発生しました: `" + str(e) + "`")
 
-@client.slash_command()
+@client.slash_command(description="このボットについての情報を送信します。")
 async def about(ctx):
 	logging.info(f"コマンド実行: about / 実行者: {ctx.user}")
 	try:
