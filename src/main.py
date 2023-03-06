@@ -20,7 +20,7 @@ logging.basicConfig(level=logging.WARNING)
 # Botの名前
 bot_name = "R6SSS"
 # Botのバージョン
-bot_version = "1.3.11"
+bot_version = "1.3.12"
 
 default_embed = discord.Embed
 
@@ -133,7 +133,7 @@ async def updateserverstatus():
 	serverstatus_loop_isrunning = True
 
 	# ハートビートを送信
-	heartbeat.heartbeat.ping(state="run")
+	heartbeat.heartbeat.ping(state="complete")
 
 	# Heartbeatイベントを送信 (サーバーステータスの更新が開始されたことを報告)
 	heartbeat.monitor.ping(state="run", message="サーバーステータスの更新開始")
