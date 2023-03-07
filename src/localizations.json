@@ -60,6 +60,11 @@
 			"ja-JP": "通常",
 			"ko-KR": "정상"
 		},
+		"Interrupted": {
+			"en-GB": "Interrupted",
+			"ja-JP": "中断",
+			"ko-KR": "중단된"
+		},
 		"Degraded": {
 			"en-GB": "Degraded",
 			"ja-JP": "想定外の停止",
