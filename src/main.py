@@ -133,7 +133,7 @@ async def updateserverstatus():
 	serverstatus_loop_isrunning = True
 
 	# ハートビートを送信
-	heartbeat.heartbeat.ping(state="run")
+	heartbeat.heartbeat.ping(state="complete")
 
 	# Heartbeatイベントを送信 (サーバーステータスの更新が開始されたことを報告)
 	heartbeat.monitor.ping(state="run", message="サーバーステータスの更新開始")
