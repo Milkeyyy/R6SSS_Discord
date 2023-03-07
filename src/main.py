@@ -1,4 +1,3 @@
-import asyncio
 import argparse
 import json
 import logging
@@ -244,23 +243,39 @@ async def generateserverstatusembed(locale):
 			else:
 				status_icon = statusicon.Unknown
 
+			connectivity_text = localizations.translate(status[p]["Status"]["Connectivity"])
+
 			mt_text = ""
 			if status[p]["Maintenance"] == True:
-				mt_text = "- **`" + localizations.translate("Maintenance") + "`**"
+				status_icon = statusicon.Maintenance
+				connectivity_text = localizations.translate(status[p]["Status"]["Connectivity"]) + "  (" + localizations.translate("Maintenance") + ")"
 
 			f_list = []
 			f_text = ""
+			f_status_text = ""
 			for f, s in status[p]["Status"].items():
 				if f == "Connectivity": continue
+				# 通常
 				f_status_icon = statusicon.Operational
+				f_status_text = localizations.translate(s)
+				# 停止
 				if s != "Operational":
-					f_status_icon = statusicon.Degraded # 停止
-				if s == "Unknown": f_status_icon = statusicon.Unknown # 不明
-				f_list.append("┣━ **" + localizations.translate(f) + "**\n┣━ " + f_status_icon + "`" + localizations.translate(s) + "`")
+					f_status_icon = statusicon.Degraded
+				# メンテナンス
+				if status[p]["Maintenance"] == True:
+					f_status_icon = statusicon.Maintenance
+					f_status_text = localizations.translate("Maintenance")
+				# 不明
+				if s == "Unknown":
+					f_status_icon = statusicon.Unknown
+					f_status_text = localizations.translate("Unknown")
+
+				f_list.append("┣━ **" + localizations.translate(f) + "**\n┣━ " + f_status_icon + "`" + f_status_text + "`")
+
 			f_text = "" + "\n".join(f_list)
 
 			# 埋め込みメッセージにプラットフォームのフィールドを追加
-			embed.add_field(name=status_icon + " **" + localizations.translate("Connectivity") + "** - `" + localizations.translate(status[p]["Status"]["Connectivity"]) + "`", value=mt_text + f_text)
+			embed.add_field(name=status_icon + " **" + localizations.translate("Connectivity") + "** - `" + connectivity_text + "`", value=mt_text + f_text)
 
 		embeds.append(embed)
 
