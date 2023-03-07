@@ -20,7 +20,7 @@ logging.basicConfig(level=logging.WARNING)
 # Botの名前
 bot_name = "R6SSS"
 # Botのバージョン
-bot_version = "1.3.11"
+bot_version = "1.3.12"
 
 default_embed = discord.Embed
 
@@ -189,8 +189,7 @@ async def updateserverstatus():
 				logging.error(f"ギルド {guild.name} のサーバーステータスメッセージ({str(msg_id)})の更新に失敗")
 				logging.error(str(traceback.format_tb(tb)))
 	except Exception as e:
-		tb = sys.exc_info()
-		logging.error(str(traceback.format_tb(tb)))
+		logging.error(traceback.format_exc())
 		heartbeat.monitor.ping(state="fail", message="サーバーステータスの更新エラー: " + str(e))
 
 	logging.info("サーバーステータスの更新完了")
@@ -299,8 +298,7 @@ async def status(ctx):
 	try:
 		await ctx.send_followup(embeds=await generateserverstatusembed(db[str(ctx.guild_id)]["server_status_message"][2]))
 	except Exception as e:
-		tb = sys.exc_info()
-		logging.error(str(traceback.format_tb(tb)))
+		logging.error(traceback.format_exc())
 		await ctx.send_followup(content="サーバーステータスメッセージの送信時にエラーが発生しました: `" + str(e) + "`")
 
 @client.slash_command(description="毎分自動更新されるサーバーステータスメッセージを作成します。")
@@ -338,8 +336,7 @@ async def create(ctx,
 			if type(e) == discord.errors.ApplicationCommandInvokeError and str(e).endswith("Missing Permissions"):
 				await ctx.send_followup(content="テキストチャンネル " + ch.mention + " へメッセージを送信する権限がありません！")
 			else:
-				tb = sys.exc_info()
-				logging.error(str(traceback.format_tb(tb)))
+				logging.error(traceback.format_exc())
 				await ctx.send_followup(content="サーバーステータスメッセージの作成時にエラーが発生しました: `" + str(e) + "`")
 			return
 
@@ -349,8 +346,7 @@ async def create(ctx,
 
 		await ctx.send_followup(content="テキストチャンネル " + ch.mention + " へサーバーステータスメッセージを送信しました。\n以後このメッセージは自動的に更新されます。" + additional_msg)
 	except Exception as e:
-		tb = sys.exc_info()
-		logging.error(str(traceback.format_tb(tb)))
+		logging.error(traceback.format_exc())
 		await ctx.send_followup(content="サーバーステータスメッセージの送信時にエラーが発生しました: `" + str(e) + "`")
 
 @client.slash_command(description="ボットのレイテンシーを送信します。")
@@ -362,8 +358,7 @@ async def ping(ctx):
 		ping_embed = discord.Embed(title="Pong!",description=f"Latency: **`{ping}`** ms",color=discord.Colour.from_rgb(79,168,254))
 		await ctx.respond(embed=ping_embed)
 	except Exception as e:
-		tb = sys.exc_info()
-		logging.error(str(traceback.format_tb(tb)))
+		logging.error(traceback.format_exc())
 		await ctx.respond(content="コマンドの実行時にエラーが発生しました: `" + str(e) + "`")
 
 @client.slash_command(description="このボットについての情報を送信します。")
@@ -378,8 +373,7 @@ async def about(ctx):
 
 		await ctx.respond(embed=embed)
 	except Exception as e:
-		tb = sys.exc_info()
-		logging.error(str(traceback.format_tb(tb)))
+		logging.error(traceback.format_exc())
 		await ctx.respond(content="コマンドの実行時にエラーが発生しました: `" + str(e) + "`")
 
 
@@ -389,6 +383,5 @@ try:
 	client.run(f.read())
 	f.close()
 except Exception as e:
-	tb = sys.exc_info()
-	logging.error(str(traceback.format_tb(tb)))
+	logging.error(traceback.format_exc())
 	#os.system("kill 1")
