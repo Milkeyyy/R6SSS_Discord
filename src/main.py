@@ -1,6 +1,7 @@
 import argparse
 import json
 import logging
+import os
 import sys
 import traceback
 
@@ -12,6 +13,7 @@ import heartbeat
 import localizations
 import serverstatus
 import statusicon
+import statusindicator
 
 logging.basicConfig(level=logging.INFO)
 logging.basicConfig(level=logging.WARNING)
@@ -19,11 +21,21 @@ logging.basicConfig(level=logging.WARNING)
 # Botの名前
 bot_name = "R6SSS"
 # Botのバージョン
-bot_version = "1.3.13"
+bot_version = "1.4.0"
 
 default_embed = discord.Embed
 
-default_guilddata_item = {"server_status_message": [0, 0, "en-GB"]} # チャンネルID, メッセージID
+default_guilddata_item = {"server_status_message": [0, 0, "en-GB"]} # チャンネルID, メッセージID]
+
+default_guilddata_item = {
+	"server_status_message": {
+		"channel_id": 0,
+		"message_id": 0,
+		"language": "en-GB",
+		"status_indicator": True
+	}
+}
+
 db = {}
 
 # 引数ぱーさー
@@ -56,6 +68,9 @@ async def on_ready():
 	# ハートビートのキーを読み込み
 	heartbeat.loadKeys()
 
+	# 旧ギルドデータの変換処理を試行
+	await convertGuildData()
+
 	# ギルドデータの確認を開始
 	await loadGuildData()
 	await checkGuildData()
@@ -71,7 +86,7 @@ async def saveGuildData():
 	global db
 
 	# 書き込み用にファイルを開く
-	file = open("guild.json", "w", encoding="utf-8")
+	file = open("guilds.json", "w", encoding="utf-8")
 	# 辞書をファイルへ保存
 	file.write(json.dumps(db, indent=2, sort_keys=True))
 	file.close()
@@ -86,17 +101,17 @@ async def loadGuildData():
 
 	try:  # ファイルが存在しない場合
 		# ファイルを作成して初期データを書き込む
-		file = open("guild.json", "x", encoding="utf-8")
+		file = open("guilds.json", "x", encoding="utf-8")
 		file.write(json.dumps(db, indent=2, sort_keys=True))
 		file.close()
 		# ファイルから読み込む
-		file = open("guild.json", "r", encoding="utf-8")
+		file = open("guilds.json", "r", encoding="utf-8")
 		db = json.load(file)
 		file.close()
 
 	except FileExistsError:  # ファイルが存在する場合
 		# ファイルから読み込む
-		file = open("guild.json", "r", encoding="utf-8")
+		file = open("guilds.json", "r", encoding="utf-8")
 		db = json.load(file)
 		file.close()
 
@@ -122,6 +137,37 @@ async def checkGuildData(guild = None):
 				db[str(guild.id)][k] == v
 
 	logging.info("ギルドデータの確認完了")
+
+# 旧ギルドデータの変換
+async def convertGuildData():
+	global default_guilddata_item
+
+	try:
+		# 旧ギルドデータが存在する場合は変換処理を実行する
+		if os.path.exists("guild.json"):
+			# ファイルの読み込み
+			file = open("guild.json", "r", encoding="utf-8")
+			old_gd = json.load(file)
+			new_gd = {}
+			file.close()
+
+			for guild_id in old_gd.keys():
+				new_gd[guild_id] = {"server_status_message": {}}
+				new_gd[guild_id]["server_status_message"]["channel_id"] = old_gd[guild_id]["server_status_message"][0]
+				new_gd[guild_id]["server_status_message"]["message_id"] = old_gd[guild_id]["server_status_message"][1]
+				new_gd[guild_id]["server_status_message"]["language"] = old_gd[guild_id]["server_status_message"][2]
+				new_gd[guild_id]["server_status_message"]["status_indicator"] = True
+
+   			# 書き込み用にファイルを開く
+			file = open("guilds.json", "w", encoding="utf-8")
+			# 辞書をファイルへ保存
+			file.write(json.dumps(new_gd, indent=2, sort_keys=True))
+			file.close()
+			await loadGuildData()
+
+	except Exception as e:
+		logging.warning("ギルドデータの変換処理に失敗しました: " + str(e))
+
 
 # 1分毎にサーバーステータスを更新する
 serverstatus_loop_isrunning = False
@@ -152,22 +198,23 @@ async def updateserverstatus():
 		for guild in client.guilds:
 			#logging.info(f"ギルド: {guild.name}")
 			try:
-				ch_id = int(db[str(guild.id)]["server_status_message"][0])
-				msg_id = int(db[str(guild.id)]["server_status_message"][1])
-				loc = db[str(guild.id)]["server_status_message"][2]
+				ch_id = int(db[str(guild.id)]["server_status_message"]["channel_id"])
+				msg_id = int(db[str(guild.id)]["server_status_message"]["message_id"])
+				loc = db[str(guild.id)]["server_status_message"]["language"]
 			except Exception as e:
 				logging.warning(f"ギルドデータ({guild.name}) の読み込み失敗")
 				tb = sys.exc_info()
 				logging.error(str(traceback.format_tb(tb)))
 				db[str(guild.id)] = default_guilddata_item
-				ch_id = db[str(guild.id)]["server_status_message"][0]
-				msg_id = db[str(guild.id)]["server_status_message"][1]
-				loc = db[str(guild.id)]["server_status_message"][2]
+				ch_id = db[str(guild.id)]["server_status_message"]["channel_id"]
+				msg_id = db[str(guild.id)]["server_status_message"]["message_id"]
+				loc = db[str(guild.id)]["server_status_message"]["language"]
 
 			try:
 				if ch_id != 0 and msg_id != 0 and loc != None:
 					# IDからテキストチャンネルを取得する
 					ch = client.get_channel(ch_id)
+					ch_name = ch.name
 
 					e = ""
 					try:
@@ -182,11 +229,15 @@ async def updateserverstatus():
 						logging.warning(str(e))
 						db[str(guild.id)] = default_guilddata_item
 					else:
+						# テキストチャンネルの名前にステータスインジケーターを設定
+						if ch_name[0] in statusindicator.List: ch_name = ch_name[1:]
+						if db[str(guild.id)]["server_status_message"]["status_indicator"] == True: await msg.channel.edit(name=serverstatus.indicator + ch_name)
+
 						await msg.edit(embeds=await generateserverstatusembed(loc))
 			except Exception as e:
 				tb = sys.exc_info()
 				logging.error(f"ギルド {guild.name} のサーバーステータスメッセージ({str(msg_id)})の更新に失敗")
-				logging.error(str(traceback.format_tb(tb)))
+				logging.error(traceback.format_exc())
 	except Exception as e:
 		logging.error(traceback.format_exc())
 		heartbeat.monitor.ping(state="fail", message="サーバーステータスの更新エラー: " + str(e))
@@ -293,17 +344,46 @@ async def setlanguage(ctx,
 ):
 	global db
 
+	logging.info(f"コマンド実行: setlanguage / 実行者: {ctx.user}")
+
 	await ctx.defer(ephemeral=True)
 
 	# ギルドデータをチェック
 	await checkGuildData(ctx.guild)
 
 	if locale in localizations.data["Locales"].values():
-		db[str(ctx.guild.id)]["server_status_message"][2] = [k for k, v in localizations.data["Locales"].items() if v == locale][0]
+		db[str(ctx.guild.id)]["server_status_message"]["language"] = [k for k, v in localizations.data["Locales"].items() if v == locale][0]
 	else:
-		db[str(ctx.guild.id)]["server_status_message"][2] = "en-GB"
+		db[str(ctx.guild.id)]["server_status_message"]["language"] = "en-GB"
+
+	# ギルドデータを保存
+	await saveGuildData()
 
 	await ctx.send_followup(content="サーバーステータスメッセージの言語を `" + locale + "` に設定しました。")
+
+@client.slash_command(description="サーバーステータスインジケーターの表示を設定します。")
+async def setindicator(ctx,
+	enable: Option(
+		bool,
+		name="enable",
+		permission=discord.Permissions.administrator
+	)
+):
+	global db
+
+	logging.info(f"コマンド実行: setindicator / 実行者: {ctx.user}")
+
+	await ctx.defer(ephemeral=True)
+
+	# ギルドデータをチェック
+	await checkGuildData(ctx.guild)
+
+	db[str(ctx.guild.id)]["server_status_message"]["status_indicator"] = enable
+
+	# ギルドデータを保存
+	await saveGuildData()
+
+	await ctx.send_followup(content="サーバーステータスインジケーターの表示を `" + str(enable) + "` に設定しました。")
 
 @client.slash_command(description="現在のサーバーステータスを送信します。このコマンドで送信されたサーバーステータスは自動更新されません。")
 async def status(ctx):
@@ -311,7 +391,7 @@ async def status(ctx):
 
 	await ctx.defer(ephemeral=True)
 	try:
-		await ctx.send_followup(embeds=await generateserverstatusembed(db[str(ctx.guild_id)]["server_status_message"][2]))
+		await ctx.send_followup(embeds=await generateserverstatusembed(db[str(ctx.guild_id)]["server_status_message"]["language"]))
 	except Exception as e:
 		logging.error(traceback.format_exc())
 		await ctx.send_followup(content="サーバーステータスメッセージの送信時にエラーが発生しました: `" + str(e) + "`")
@@ -335,7 +415,7 @@ async def create(ctx,
 		await checkGuildData(ctx.guild)
 
 		additional_msg = ""
-		if db[str(ctx.guild_id)]["server_status_message"][1] != 0:
+		if db[str(ctx.guild_id)]["server_status_message"]["message_id"] != 0:
 			additional_msg = "\n(以前送信した古いメッセージは更新されなくなります。)"
 
 		if channel is None:
@@ -346,7 +426,7 @@ async def create(ctx,
 
 		# サーバーステータス埋め込みメッセージを送信
 		try:
-			msg = await ch.send(embeds=await generateserverstatusembed(db[str(ctx.guild_id)]["server_status_message"][2]))
+			msg = await ch.send(embeds=await generateserverstatusembed(db[str(ctx.guild_id)]["server_status_message"]["language"]))
 		except Exception as e:
 			if type(e) == discord.errors.ApplicationCommandInvokeError and str(e).endswith("Missing Permissions"):
 				await ctx.send_followup(content="テキストチャンネル " + ch.mention + " へメッセージを送信する権限がありません！")
@@ -356,8 +436,11 @@ async def create(ctx,
 			return
 
 		# 送信したチャンネルとメッセージのIDをギルドデータへ保存する
-		db[str(ctx.guild_id)]["server_status_message"][0] = ch_id
-		db[str(ctx.guild_id)]["server_status_message"][1] = msg.id
+		db[str(ctx.guild_id)]["server_status_message"]["channel_id"] = ch_id
+		db[str(ctx.guild_id)]["server_status_message"]["message_id"] = msg.id
+
+		# ギルドデータを保存
+		await saveGuildData()
 
 		await ctx.send_followup(content="テキストチャンネル " + ch.mention + " へサーバーステータスメッセージを送信しました。\n以後このメッセージは自動的に更新されます。" + additional_msg)
 	except Exception as e:
