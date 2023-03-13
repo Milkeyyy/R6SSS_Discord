@@ -230,8 +230,11 @@ async def updateserverstatus():
 						db[str(guild.id)] = default_guilddata_item
 					else:
 						# テキストチャンネルの名前にステータスインジケーターを設定
-						if ch_name[0] in statusindicator.List: ch_name = ch_name[1:]
-						if db[str(guild.id)]["server_status_message"]["status_indicator"] == True: await msg.channel.edit(name=serverstatus.indicator + ch_name)
+						try:
+							if ch_name[0] in statusindicator.List: ch_name = ch_name[1:]
+							if db[str(guild.id)]["server_status_message"]["status_indicator"] == True: await msg.channel.edit(name=serverstatus.indicator + ch_name)
+						except Exception as e:
+							logging.error(f"ギルド {guild.name} のステータスインジケーターの更新に失敗: {e}")
 
 						await msg.edit(embeds=await generateserverstatusembed(loc))
 			except Exception as e:
