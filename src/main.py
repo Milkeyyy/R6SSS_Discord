@@ -318,7 +318,6 @@ async def generateserverstatusembed(locale):
 				# メンテナンス
 				if status[p]["Maintenance"] == True:
 					f_status_icon = statusicon.Maintenance
-					f_status_text = localizations.translate("Maintenance")
 				# 不明
 				if s == "Unknown":
 					f_status_icon = statusicon.Unknown
