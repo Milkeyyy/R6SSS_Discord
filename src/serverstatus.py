@@ -24,24 +24,28 @@ async def get():
 
 	# ステータスコードが200以外の場合はUnknownなデータを返す
 	if res.status != 200:
-		status = {"Unknown": {"Status": {"Connectivity": "Unknown", "Authentication": "Unknown", "Leaderboard": "Unknown", "Matchmaking": "Unknown", "Purchase": "Unknown"}, "Maintenance": None, "ImpactedFeatures": None}, "_update_date": datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))}
+		status = {"Unknown": {"Status": {"Connectivity": "Unknown", "Authentication": "Unknown", "Leaderboard": "Unknown", "Matchmaking": "Unknown", "Purchase": "Unknown"}, "Maintenance": None, "ImpactedFeatures": None}, "_update_date": datetime.datetime.utcnow().timestamp()}
 		indicator = statusindicator.Unknown
 		return status
 
 	status = json.loads(res.read())
 	status["_update_date"] = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
 
+	status_list = []
 	# ステータスインジケーターを設定
 	for k, v in status.items():
 		if k == "_update_date": continue
+
 		st = v["Status"]["Connectivity"]
-		if st == "Operational" and indicator != statusindicator.Interrupted and indicator != statusindicator.Degraded and indicator != statusindicator.Maintenance:
+		status_list.append(st)
+
+		if st == "Operational" and "Interrupted" not in status_list and "Degraded" not in status_list and "Maintenance" not in status_list:
 			indicator = statusindicator.Operational
 		if st == "Interrupted":
 			indicator = statusindicator.Interrupted
 		if st == "Degraded":
 			indicator = statusindicator.Degraded
-		if st == "Maintenance":
+		if v["Maintenance"] == True:
 			indicator = statusindicator.Maintenance
 
 	return status
