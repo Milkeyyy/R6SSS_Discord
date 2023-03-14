@@ -302,7 +302,7 @@ async def generateserverstatusembed(locale):
 			mt_text = ""
 			if status[p]["Maintenance"] == True:
 				status_icon = statusicon.Maintenance
-				connectivity_text = localizations.translate(status[p]["Status"]["Connectivity"]) + "  (" + localizations.translate("Maintenance") + ")"
+				connectivity_text = localizations.translate(localizations.translate("Maintenance"))
 
 			f_list = []
 			f_text = ""
