@@ -3,11 +3,13 @@ import json
 import logging
 import os
 import sys
+import time
 import traceback
 
 import discord
 from discord.commands import Option
 from discord.ext import tasks
+import schedule
 
 import heartbeat
 import localizations
@@ -21,7 +23,7 @@ logging.basicConfig(level=logging.WARNING)
 # Botの名前
 bot_name = "R6SSS"
 # Botのバージョン
-bot_version = "1.4.1"
+bot_version = "1.5.0"
 
 default_embed = discord.Embed
 
@@ -158,7 +160,7 @@ async def convertGuildData():
 				new_gd[guild_id]["server_status_message"]["language"] = old_gd[guild_id]["server_status_message"][2]
 				new_gd[guild_id]["server_status_message"]["status_indicator"] = True
 
-   			# 書き込み用にファイルを開く
+			# 書き込み用にファイルを開く
 			file = open("guilds.json", "w", encoding="utf-8")
 			# 辞書をファイルへ保存
 			file.write(json.dumps(new_gd, indent=2, sort_keys=True))
@@ -172,7 +174,7 @@ async def convertGuildData():
 # 1分毎にサーバーステータスを更新する
 serverstatus_loop_isrunning = False
 
-@tasks.loop(seconds=60.0)
+@tasks.loop(seconds=300.0)
 async def updateserverstatus():
 	global serverstatus_loop_isrunning
 	serverstatus_loop_isrunning = True
@@ -214,6 +216,14 @@ async def updateserverstatus():
 				if ch_id != 0 and msg_id != 0 and loc != None:
 					# IDからテキストチャンネルを取得する
 					ch = client.get_channel(ch_id)
+					# チャンネルが存在しない場合はギルドデータからチャンネルIDとメッセージIDを削除する
+					if ch == None:
+						db[str(guild.id)]["server_status_message"]["channel_id"] = 0
+						db[str(guild.id)]["server_status_message"]["message_id"] = 0
+						# ギルドデータを保存
+						await saveGuildData()
+						continue # ループを続ける
+
 					ch_name = ch.name
 
 					e = ""
