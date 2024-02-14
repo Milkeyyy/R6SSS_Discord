@@ -3,13 +3,11 @@ import json
 import logging
 import os
 import sys
-import time
 import traceback
 
 import discord
 from discord.commands import Option
 from discord.ext import tasks
-import schedule
 
 import heartbeat
 import localizations

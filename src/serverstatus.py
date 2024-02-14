@@ -1,7 +1,4 @@
 import datetime
-import json
-import logging
-import urllib
 
 import serverstatus_api
 import statusindicator

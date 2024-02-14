@@ -1,5 +1,5 @@
 import json
-import logging
+
 
 locale = "ja-JP"
 data = {}

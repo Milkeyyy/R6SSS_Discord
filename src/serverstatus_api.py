@@ -1,7 +1,6 @@
 import datetime
 import json
 import logging
-import threading
 from urllib import request
 
 
