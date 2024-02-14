@@ -15,7 +15,6 @@ import serverstatus
 import statusicon
 import statusindicator
 
-logging.basicConfig(level=logging.INFO)
 logging.basicConfig(level=logging.WARNING)
 
 # Botの名前
