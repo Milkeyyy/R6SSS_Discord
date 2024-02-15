@@ -68,6 +68,8 @@ def update_serverstatus():
 async def get_serverstatus(platform: list = None):
 	status = {}
 
+	update_serverstatus()
+
 	# パラメーターが指定されていない場合は全てのプラットフォームのステータスを返す
 	if platform == None:
 		status = serverstatus.data
