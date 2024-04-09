@@ -391,7 +391,7 @@ async def setlanguage(ctx,
 	# ギルドデータを保存
 	await save_guilddata()
 
-	await ctx.send_followup(content="サーバーステータスメッセージの言語を `" + db[str(ctx.guild.id)]["server_status_message"]["language"] + "` に設定しました。")
+	await ctx.send_followup(content="サーバーステータスメッセージの言語を `" + localizations.data["Locales"][db[str(ctx.guild.id)]["server_status_message"]["language"]] + "` に設定しました。")
 
 @client.slash_command(description="サーバーステータスインジケーターの表示を設定します。")
 async def setindicator(ctx,
