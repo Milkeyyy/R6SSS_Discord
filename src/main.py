@@ -1,6 +1,5 @@
 import argparse
 import json
-import logging
 import os
 import sys
 import traceback
@@ -11,11 +10,11 @@ from discord.ext import tasks
 
 import heartbeat
 import localizations
+from logger import logger
 import serverstatus
 import statusicon
 import statusindicator
 
-logging.basicConfig(level=logging.WARNING)
 
 # Botの名前
 bot_name = "R6SSS"
@@ -62,7 +61,7 @@ async def on_ready():
 			name=f"Type /create | Version {bot_version}"
 		)
 	)
-	logging.info(f"{client.user} へログインしました！ (ID: {client.user.id})")
+	logger.info(f"{client.user} へログインしました！ (ID: {client.user.id})")
 
 	# ハートビートのキーを読み込み
 	heartbeat.loadKeys()
@@ -74,8 +73,8 @@ async def on_ready():
 	await loadGuildData()
 	await checkGuildData()
 
-	logging.info("サーバーステータスの定期更新開始")
 	updateserverstatus.start()
+	logger.info("サーバーステータスの定期更新開始")
 
 
 # 関数
@@ -118,7 +117,7 @@ async def loadGuildData():
 async def checkGuildData(guild = None):
 	global default_guilddata_item
 
-	logging.info("ギルドデータの確認開始")
+	logger.info("ギルドデータの確認開始")
 	guilds = []
 	if guild == None:
 		guilds = client.guilds
@@ -135,7 +134,7 @@ async def checkGuildData(guild = None):
 			if db[str(guild.id)].get(k) == None or type(db[str(guild.id)].get(k)) != list:
 				db[str(guild.id)][k] == v
 
-	logging.info("ギルドデータの確認完了")
+	logger.info("ギルドデータの確認完了")
 
 # 旧ギルドデータの変換
 async def convertGuildData():
@@ -165,7 +164,7 @@ async def convertGuildData():
 			await loadGuildData()
 
 	except Exception as e:
-		logging.warning("ギルドデータの変換処理に失敗しました: " + str(e))
+		logger.warning("ギルドデータの変換処理に失敗しました: " + str(e))
 
 
 # 1分毎にサーバーステータスを更新する
@@ -182,7 +181,7 @@ async def updateserverstatus():
 	# Heartbeatイベントを送信 (サーバーステータスの更新が開始されたことを報告)
 	heartbeat.monitor.ping(state="run", message="サーバーステータスの更新開始")
 
-	logging.info("サーバーステータスの更新開始")
+	logger.info("サーバーステータスの更新開始")
 
 	try:
 		await saveGuildData()
@@ -195,15 +194,15 @@ async def updateserverstatus():
 
 		# 各ギルドの埋め込みメッセージIDチェック、存在する場合はメッセージを更新する
 		for guild in client.guilds:
-			#logging.info(f"ギルド: {guild.name}")
+			#logger.info(f"ギルド: {guild.name}")
 			try:
 				ch_id = int(db[str(guild.id)]["server_status_message"]["channel_id"])
 				msg_id = int(db[str(guild.id)]["server_status_message"]["message_id"])
 				loc = db[str(guild.id)]["server_status_message"]["language"]
 			except Exception as e:
-				logging.warning(f"ギルドデータ({guild.name}) の読み込み失敗")
+				logger.warning(f"ギルドデータ({guild.name}) の読み込み失敗")
 				tb = sys.exc_info()
-				logging.error(str(traceback.format_tb(tb)))
+				logger.error(str(traceback.format_tb(tb)))
 				db[str(guild.id)] = default_guilddata_item
 				ch_id = db[str(guild.id)]["server_status_message"]["channel_id"]
 				msg_id = db[str(guild.id)]["server_status_message"]["message_id"]
@@ -232,8 +231,8 @@ async def updateserverstatus():
 						e = err
 
 					if msg is None:
-						logging.warning("ギルド " + guild.name + " のメッセージ(" + str(msg_id) + ")の取得に失敗")
-						logging.warning(str(e))
+						logger.warning("ギルド " + guild.name + " のメッセージ(" + str(msg_id) + ")の取得に失敗")
+						logger.warning(str(e))
 						db[str(guild.id)] = default_guilddata_item
 					else:
 						# テキストチャンネルの名前にステータスインジケーターを設定
@@ -241,18 +240,18 @@ async def updateserverstatus():
 							if ch_name[0] in statusindicator.List: ch_name = ch_name[1:]
 							if db[str(guild.id)]["server_status_message"]["status_indicator"] == True: await msg.channel.edit(name=serverstatus.indicator + ch_name)
 						except Exception as e:
-							logging.error(f"ギルド {guild.name} のステータスインジケーターの更新に失敗: {e}")
+							logger.error(f"ギルド {guild.name} のステータスインジケーターの更新に失敗: {e}")
 
 						await msg.edit(embeds=await generateserverstatusembed(loc))
 			except Exception as e:
 				tb = sys.exc_info()
-				logging.error(f"ギルド {guild.name} のサーバーステータスメッセージ({str(msg_id)})の更新に失敗")
-				logging.error(traceback.format_exc())
+				logger.error(f"ギルド {guild.name} のサーバーステータスメッセージ({str(msg_id)})の更新に失敗")
+				logger.error(traceback.format_exc())
 	except Exception as e:
-		logging.error(traceback.format_exc())
+		logger.error(traceback.format_exc())
 		heartbeat.monitor.ping(state="fail", message="サーバーステータスの更新エラー: " + str(e))
 
-	logging.info("サーバーステータスの更新完了")
+	logger.info("サーバーステータスの更新完了")
 
 	# Cronitorのモニターに成功したことを報告
 	heartbeat.monitor.ping(state="complete", message="サーバーステータスの更新完了")
@@ -261,8 +260,8 @@ async def updateserverstatus():
 async def after_updateserverstatus():
 	global serverstatus_loop_isrunning
 	serverstatus_loop_isrunning = False
-	logging.info("サーバーステータスの定期更新終了")
 	if serverstatus_loop_isrunning == False: updateserverstatus.start()
+	logger.info("サーバーステータスの定期更新終了")
 
 # サーバーステータス埋め込みメッセージを更新
 async def generateserverstatusembed(locale):
@@ -353,7 +352,7 @@ async def setlanguage(ctx,
 ):
 	global db
 
-	logging.info(f"コマンド実行: setlanguage / 実行者: {ctx.user}")
+	logger.info(f"コマンド実行: setlanguage / 実行者: {ctx.user}")
 
 	await ctx.defer(ephemeral=True)
 
@@ -380,7 +379,7 @@ async def setindicator(ctx,
 ):
 	global db
 
-	logging.info(f"コマンド実行: setindicator / 実行者: {ctx.user}")
+	logger.info(f"コマンド実行: setindicator / 実行者: {ctx.user}")
 
 	await ctx.defer(ephemeral=True)
 
@@ -396,13 +395,13 @@ async def setindicator(ctx,
 
 @client.slash_command(description="現在のサーバーステータスを送信します。このコマンドで送信されたサーバーステータスは自動更新されません。")
 async def status(ctx):
-	logging.info(f"コマンド実行: status / 実行者: {ctx.user}")
+	logger.info(f"コマンド実行: status / 実行者: {ctx.user}")
 
 	await ctx.defer(ephemeral=True)
 	try:
 		await ctx.send_followup(embeds=await generateserverstatusembed(db[str(ctx.guild_id)]["server_status_message"]["language"]))
 	except Exception as e:
-		logging.error(traceback.format_exc())
+		logger.error(traceback.format_exc())
 		await ctx.send_followup(content="サーバーステータスメッセージの送信時にエラーが発生しました: `" + str(e) + "`")
 
 @client.slash_command(description="毎分自動更新されるサーバーステータスメッセージを作成します。")
@@ -415,7 +414,7 @@ async def create(ctx,
 		permission=discord.Permissions.administrator
 	)
 ):
-	logging.info(f"コマンド実行: create / 実行者: {ctx.user}")
+	logger.info(f"コマンド実行: create / 実行者: {ctx.user}")
 
 	await ctx.defer(ephemeral=True)
 
@@ -440,7 +439,7 @@ async def create(ctx,
 			if type(e) == discord.errors.ApplicationCommandInvokeError and str(e).endswith("Missing Permissions"):
 				await ctx.send_followup(content="テキストチャンネル " + ch.mention + " へメッセージを送信する権限がありません！")
 			else:
-				logging.error(traceback.format_exc())
+				logger.error(traceback.format_exc())
 				await ctx.send_followup(content="サーバーステータスメッセージの作成時にエラーが発生しました: `" + str(e) + "`")
 			return
 
@@ -453,24 +452,24 @@ async def create(ctx,
 
 		await ctx.send_followup(content="テキストチャンネル " + ch.mention + " へサーバーステータスメッセージを送信しました。\n以後このメッセージは自動的に更新されます。" + additional_msg)
 	except Exception as e:
-		logging.error(traceback.format_exc())
+		logger.error(traceback.format_exc())
 		await ctx.send_followup(content="サーバーステータスメッセージの送信時にエラーが発生しました: `" + str(e) + "`")
 
 @client.slash_command(description="ボットのレイテンシーを送信します。")
 async def ping(ctx):
-	logging.info(f"コマンド実行: ping / 実行者: {ctx.user}")
+	logger.info(f"コマンド実行: ping / 実行者: {ctx.user}")
 	try:
 		raw_ping = client.latency
 		ping = round(raw_ping * 1000)
 		ping_embed = discord.Embed(title="Pong!",description=f"Latency: **`{ping}`** ms",color=discord.Colour.from_rgb(79,168,254))
 		await ctx.respond(embed=ping_embed)
 	except Exception as e:
-		logging.error(traceback.format_exc())
+		logger.error(traceback.format_exc())
 		await ctx.respond(content="コマンドの実行時にエラーが発生しました: `" + str(e) + "`")
 
 @client.slash_command(description="このボットについての情報を送信します。")
 async def about(ctx):
-	logging.info(f"コマンド実行: about / 実行者: {ctx.user}")
+	logger.info(f"コマンド実行: about / 実行者: {ctx.user}")
 	try:
 		embed = discord.Embed(color=discord.Colour.blue())
 		embed.set_author(name=bot_name, icon_url=client.user.display_avatar.url)
@@ -480,7 +479,7 @@ async def about(ctx):
 
 		await ctx.respond(embed=embed)
 	except Exception as e:
-		logging.error(traceback.format_exc())
+		logger.error(traceback.format_exc())
 		await ctx.respond(content="コマンドの実行時にエラーが発生しました: `" + str(e) + "`")
 
 
@@ -490,5 +489,5 @@ try:
 	client.run(f.read())
 	f.close()
 except Exception as e:
-	logging.error(traceback.format_exc())
+	logger.error(traceback.format_exc())
 	#os.system("kill 1")
