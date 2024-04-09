@@ -169,7 +169,7 @@ async def convert_guilddata():
 # 1分毎にサーバーステータスを更新する
 serverstatus_loop_isrunning = False
 
-@tasks.loop(seconds=300.0)
+@tasks.loop(seconds=180.0)
 async def update_serverstatus():
 	global serverstatus_loop_isrunning
 	serverstatus_loop_isrunning = True
