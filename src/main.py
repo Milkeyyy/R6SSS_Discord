@@ -266,8 +266,8 @@ async def after_updateserverstatus():
 async def generate_serverstatus_embed(locale):
 	pf_list = {
 		"PC": ["PC", "PC", 2],
-		"PS4": ["PS4", "PS4", 0],
-		"PS5": ["PS5", "PS5", 1],
+		"PS4": ["PS4", "PlayStation 4", 0],
+		"PS5": ["PS5", "PlayStation 5", 1],
 		"XB1": ["XBOXONE", "Xbox One", 0],
 		"XBSX": ["XBOX SERIES X", "Xbox Series X/S", 1]
 	}
