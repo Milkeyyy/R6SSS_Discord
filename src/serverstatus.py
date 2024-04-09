@@ -1,14 +1,14 @@
 import datetime
 
 import serverstatus_api
-import statusindicator
+import status_indicator
 
 
 # サーバーステータス辞書
 data = {}
 
 # テキストチャンネルの名前に表示するステータスインジケーター(絵文字)
-indicator = statusindicator.Unknown
+indicator = status_indicator.Unknown
 
 # サーバーステータスを取得して整えて返す
 async def get():
@@ -27,12 +27,12 @@ async def get():
 		status_list.append(st)
 
 		if st == "Operational" and "Interrupted" not in status_list and "Degraded" not in status_list and "Maintenance" not in status_list:
-			indicator = statusindicator.Operational
+			indicator = status_indicator.Operational
 		if st == "Interrupted":
-			indicator = statusindicator.Interrupted
+			indicator = status_indicator.Interrupted
 		if st == "Degraded":
-			indicator = statusindicator.Degraded
+			indicator = status_indicator.Degraded
 		if v["Maintenance"] == True:
-			indicator = statusindicator.Maintenance
+			indicator = status_indicator.Maintenance
 
 	return status

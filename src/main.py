@@ -11,15 +11,16 @@ from discord.ext import tasks
 import heartbeat
 import localizations
 from logger import logger
+import platform_icon
 import serverstatus
-import statusicon
-import statusindicator
+import status_icon as status_icon_set
+import status_indicator
 
 
 # Botの名前
 bot_name = "R6SSS"
 # Botのバージョン
-bot_version = "1.5.1"
+bot_version = "1.6.0"
 
 default_embed = discord.Embed
 
@@ -44,8 +45,6 @@ args = parser.parse_args()
 intents = None
 client = discord.Bot(intents = intents)
 
-# 言語データを読み込む
-localizations.loadLocaleData()
 
 # Bot起動時のイベント
 @client.event
@@ -67,19 +66,19 @@ async def on_ready():
 	heartbeat.loadKeys()
 
 	# 旧ギルドデータの変換処理を試行
-	await convertGuildData()
+	await convert_guilddata()
 
 	# ギルドデータの確認を開始
-	await loadGuildData()
-	await checkGuildData()
+	await load_guilddata()
+	await check_guilddata()
 
-	updateserverstatus.start()
 	logger.info("サーバーステータスの定期更新開始")
+	update_serverstatus.start()
 
 
 # 関数
 # ギルドデータの保存
-async def saveGuildData():
+async def save_guilddata():
 	# グローバル変数宣言
 	global db
 
@@ -89,11 +88,11 @@ async def saveGuildData():
 	file.write(json.dumps(db, indent=2, sort_keys=True))
 	file.close()
 
-	await loadGuildData()
+	await load_guilddata()
 
 
 # ギルドデータの読み込み
-async def loadGuildData():
+async def load_guilddata():
 	# グローバル変数宣言
 	global db
 
@@ -114,7 +113,7 @@ async def loadGuildData():
 		file.close()
 
 # ギルドデータの確認
-async def checkGuildData(guild = None):
+async def check_guilddata(guild = None):
 	global default_guilddata_item
 
 	logger.info("ギルドデータの確認開始")
@@ -137,7 +136,7 @@ async def checkGuildData(guild = None):
 	logger.info("ギルドデータの確認完了")
 
 # 旧ギルドデータの変換
-async def convertGuildData():
+async def convert_guilddata():
 	global default_guilddata_item
 
 	try:
@@ -161,7 +160,7 @@ async def convertGuildData():
 			# 辞書をファイルへ保存
 			file.write(json.dumps(new_gd, indent=2, sort_keys=True))
 			file.close()
-			await loadGuildData()
+			await load_guilddata()
 
 	except Exception as e:
 		logger.warning("ギルドデータの変換処理に失敗しました: " + str(e))
@@ -171,7 +170,7 @@ async def convertGuildData():
 serverstatus_loop_isrunning = False
 
 @tasks.loop(seconds=300.0)
-async def updateserverstatus():
+async def update_serverstatus():
 	global serverstatus_loop_isrunning
 	serverstatus_loop_isrunning = True
 
@@ -184,7 +183,7 @@ async def updateserverstatus():
 	logger.info("サーバーステータスの更新開始")
 
 	try:
-		await saveGuildData()
+		await save_guilddata()
 
 		# サーバーステータスを取得する
 		status = await serverstatus.get()
@@ -217,7 +216,7 @@ async def updateserverstatus():
 						db[str(guild.id)]["server_status_message"]["channel_id"] = 0
 						db[str(guild.id)]["server_status_message"]["message_id"] = 0
 						# ギルドデータを保存
-						await saveGuildData()
+						await save_guilddata()
 						continue # ループを続ける
 
 					ch_name = ch.name
@@ -237,12 +236,12 @@ async def updateserverstatus():
 					else:
 						# テキストチャンネルの名前にステータスインジケーターを設定
 						try:
-							if ch_name[0] in statusindicator.List: ch_name = ch_name[1:]
+							if ch_name[0] in status_indicator.List: ch_name = ch_name[1:]
 							if db[str(guild.id)]["server_status_message"]["status_indicator"] == True: await msg.channel.edit(name=serverstatus.indicator + ch_name)
 						except Exception as e:
 							logger.error(f"ギルド {guild.name} のステータスインジケーターの更新に失敗: {e}")
 
-						await msg.edit(embeds=await generateserverstatusembed(loc))
+						await msg.edit(embeds=await generate_serverstatus_embed(loc))
 			except Exception as e:
 				tb = sys.exc_info()
 				logger.error(f"ギルド {guild.name} のサーバーステータスメッセージ({str(msg_id)})の更新に失敗")
@@ -256,87 +255,112 @@ async def updateserverstatus():
 	# Cronitorのモニターに成功したことを報告
 	heartbeat.monitor.ping(state="complete", message="サーバーステータスの更新完了")
 
-@updateserverstatus.after_loop
+@update_serverstatus.after_loop
 async def after_updateserverstatus():
 	global serverstatus_loop_isrunning
 	serverstatus_loop_isrunning = False
-	if serverstatus_loop_isrunning == False: updateserverstatus.start()
 	logger.info("サーバーステータスの定期更新終了")
+	if serverstatus_loop_isrunning == False: update_serverstatus.start()
 
 # サーバーステータス埋め込みメッセージを更新
-async def generateserverstatusembed(locale):
+async def generate_serverstatus_embed(locale):
+	pf_list = {
+		"PC": ["PC", "PC", 2],
+		"PS4": ["PS4", "PS4", 0],
+		"PS5": ["PS5", "PS5", 1],
+		"XB1": ["XBOXONE", "Xbox One", 0],
+		"XBSX": ["XBOX SERIES X", "Xbox Series X/S", 1]
+	}
+
+	# 各プラットフォームの埋め込みメッセージの色
+	color_list = {
+		"PC": discord.Colour.from_rgb(255, 255, 255),
+		"PS4": discord.Colour.from_rgb(0, 67, 156),
+		"PS5": discord.Colour.from_rgb(0, 67, 156),
+		"XB1": discord.Colour.from_rgb(16, 124, 16),
+		"XBSX": discord.Colour.from_rgb(16, 124, 16)
+	}
+
 	embeds = []
-	pf_list = {"PC": ["PC"], "PlayStation": ["PS4"], "Xbox": ["XBOXONE"]}
 
 	# 翻訳先言語を設定
 	localizations.locale = locale
-
-	# 各プラットフォームの埋め込みメッセージの色
-	color_list = {"PC": discord.Colour.from_rgb(255, 255, 255), "PlayStation": discord.Colour.from_rgb(0, 67, 156), "Xbox": discord.Colour.from_rgb(16, 124, 16)}
 
 	# サーバーステータスを取得
 	status = serverstatus.data
 
 	# 各プラットフォームごとの埋め込みメッセージを作成
-	for pf in pf_list:
-		embed = discord.Embed(color=color_list[pf])
-		embed.set_author(name=pf + " | R6S Server Status", icon_url="https://www.google.com/s2/favicons?sz=64&domain_url=https://www.ubisoft.com/en-us/game/rainbow-six/siege/status")
-		embed.set_footer(text=localizations.translate("Last Update") + ": " + status["_update_date"].strftime('%Y/%m/%d %H:%M:%S') + " (JST)")
+	embed = discord.Embed(color=color_list["PC"])
+	embed.set_author(name="R6S Server Status", icon_url="https://www.google.com/s2/favicons?sz=64&domain_url=https://www.ubisoft.com/en-us/game/rainbow-six/siege/status")
+	embed.set_footer(text=localizations.translate("Last Update") + ": " + status["_update_date"].strftime('%Y/%m/%d %H:%M:%S') + " (JST)")
 
-		for p in pf_list[pf]:
-			if p.startswith("_"): continue
+	for k, v in pf_list.items():
+		status_list = []
 
-			# サーバーの状態によってアイコンを変更する
-			# 問題なし
-			if status[p]["Status"]["Connectivity"] == "Operational":
-				status_icon = statusicon.Operational
-			# 計画メンテナンス
-			elif status[p]["Status"]["Connectivity"] == "Maintenance":
-				status_icon = statusicon.Maintenance
-			# 想定外の問題
-			elif status[p]["Status"]["Connectivity"] == "Interrupted":
-				status_icon = statusicon.Interrupted
-			# 想定外の停止
-			elif status[p]["Status"]["Connectivity"] == "Degraded":
-				status_icon = statusicon.Degraded
-			# それ以外
-			else:
-				status_icon = statusicon.Unknown
+		pf_id = v[0] # PC, PS4, XB1...
+		pf_display_name = v[1] # プラットフォームの表示名
 
-			connectivity_text = localizations.translate(status[p]["Status"]["Connectivity"])
+		if pf_id.startswith("_"): continue
+		# サーバーの状態によってアイコンを変更する
+		# 問題なし
+		if status[pf_id]["Status"]["Connectivity"] == "Operational":
+			status_icon = status_icon_set.OPERATIONAL
+		# 計画メンテナンス
+		elif status[pf_id]["Status"]["Connectivity"] == "Maintenance":
+			status_icon = status_icon_set.MAINTENANCE
+		# 想定外の問題
+		elif status[pf_id]["Status"]["Connectivity"] == "Interrupted":
+			status_icon = status_icon_set.INTERRUPTED
+		# 想定外の停止
+		elif status[pf_id]["Status"]["Connectivity"] == "Degraded":
+			status_icon = status_icon_set.DEGRADED
+		# それ以外
+		else:
+			status_icon = status_icon_set.UNKNOWN
 
-			mt_text = ""
-			if status[p]["Maintenance"] == True:
-				status_icon = statusicon.Maintenance
-				connectivity_text = localizations.translate(localizations.translate("Maintenance"))
+		connectivity_text = localizations.translate(status[pf_id]["Status"]["Connectivity"])
 
-			f_list = []
-			f_text = ""
-			f_status_text = ""
-			for f, s in status[p]["Status"].items():
-				if f == "Connectivity": continue
-				# 通常
-				f_status_icon = statusicon.Operational
-				f_status_text = localizations.translate(s)
-				# 停止
-				if s != "Operational":
-					f_status_icon = statusicon.Degraded
-				# メンテナンス
-				if status[p]["Maintenance"] == True:
-					f_status_icon = statusicon.Maintenance
-				# 不明
-				if s == "Unknown":
-					f_status_icon = statusicon.Unknown
-					f_status_text = localizations.translate("Unknown")
+		mt_text = ""
+		if status[pf_id]["Maintenance"] == True:
+			status_icon = status_icon_set.MAINTENANCE
+			connectivity_text = localizations.translate(localizations.translate("Maintenance"))
 
-				f_list.append("┣━ **" + localizations.translate(f) + "**\n┣━ " + f_status_icon + "`" + f_status_text + "`")
+		f_list = []
+		f_text = ""
+		f_status_text = ""
+		for f, s in status[pf_id]["Status"].items():
+			if f == "Connectivity": continue
+			# 通常
+			f_status_icon = status_icon_set.OPERATIONAL
+			f_status_text = localizations.translate(s)
+			# 停止
+			if s != "Operational":
+				f_status_icon = status_icon_set.DEGRADED
+			# メンテナンス
+			if status[pf_id]["Maintenance"] == True:
+				f_status_icon = status_icon_set.MAINTENANCE
+			# 不明
+			if s == "Unknown":
+				f_status_icon = status_icon_set.UNKNOWN
+				f_status_text = localizations.translate("Unknown")
 
-			f_text = "" + "\n".join(f_list)
+			f_list.append("┣ " + localizations.translate(f) + "\n┣ " + f_status_icon + "`" + f_status_text + "`")
 
-			# 埋め込みメッセージにプラットフォームのフィールドを追加
-			embed.add_field(name=status_icon + " **" + localizations.translate("Connectivity") + "** - `" + connectivity_text + "`", value=mt_text + f_text)
+		f_text = "" + "\n".join(f_list)
 
-		embeds.append(embed)
+		# 埋め込みメッセージにプラットフォームのフィールドを追加
+		status_list.append(mt_text + f_text)
+
+		# プラットフォームのステータスのフィールドを追加
+		embed.add_field(
+			name=platform_icon.LIST[v[0]] + " " + pf_display_name + " - " + status_icon + "`" + connectivity_text + "`",
+			value="\n".join(status_list)
+		)
+		# 各プラットフォームごとに別の行にするために、リストで指定された数の空のフィールドを挿入する
+		for i in range(v[2]):
+			embed.add_field(name="", value="")
+
+	embeds.append(embed)
 
 	return embeds
 
@@ -350,14 +374,14 @@ async def setlanguage(ctx,
 		permission=discord.Permissions.administrator
 	)
 ):
-	global db
+	global d
 
 	logger.info(f"コマンド実行: setlanguage / 実行者: {ctx.user}")
 
 	await ctx.defer(ephemeral=True)
 
 	# ギルドデータをチェック
-	await checkGuildData(ctx.guild)
+	await check_guilddata(ctx.guild)
 
 	if locale in localizations.data["Locales"].values():
 		db[str(ctx.guild.id)]["server_status_message"]["language"] = [k for k, v in localizations.data["Locales"].items() if v == locale][0]
@@ -365,7 +389,7 @@ async def setlanguage(ctx,
 		db[str(ctx.guild.id)]["server_status_message"]["language"] = "en-GB"
 
 	# ギルドデータを保存
-	await saveGuildData()
+	await save_guilddata()
 
 	await ctx.send_followup(content="サーバーステータスメッセージの言語を `" + locale + "` に設定しました。")
 
@@ -384,12 +408,12 @@ async def setindicator(ctx,
 	await ctx.defer(ephemeral=True)
 
 	# ギルドデータをチェック
-	await checkGuildData(ctx.guild)
+	await check_guilddata(ctx.guild)
 
 	db[str(ctx.guild.id)]["server_status_message"]["status_indicator"] = enable
 
 	# ギルドデータを保存
-	await saveGuildData()
+	await save_guilddata()
 
 	await ctx.send_followup(content="サーバーステータスインジケーターの表示を `" + str(enable) + "` に設定しました。")
 
@@ -397,9 +421,9 @@ async def setindicator(ctx,
 async def status(ctx):
 	logger.info(f"コマンド実行: status / 実行者: {ctx.user}")
 
-	await ctx.defer(ephemeral=True)
+	await ctx.defer(ephemeral=False)
 	try:
-		await ctx.send_followup(embeds=await generateserverstatusembed(db[str(ctx.guild_id)]["server_status_message"]["language"]))
+		await ctx.send_followup(embeds=await generate_serverstatus_embed(db[str(ctx.guild_id)]["server_status_message"]["language"]))
 	except Exception as e:
 		logger.error(traceback.format_exc())
 		await ctx.send_followup(content="サーバーステータスメッセージの送信時にエラーが発生しました: `" + str(e) + "`")
@@ -420,7 +444,7 @@ async def create(ctx,
 
 	try:
 		# ギルドデータをチェック
-		await checkGuildData(ctx.guild)
+		await check_guilddata(ctx.guild)
 
 		additional_msg = ""
 		if db[str(ctx.guild_id)]["server_status_message"]["message_id"] != 0:
@@ -434,7 +458,7 @@ async def create(ctx,
 
 		# サーバーステータス埋め込みメッセージを送信
 		try:
-			msg = await ch.send(embeds=await generateserverstatusembed(db[str(ctx.guild_id)]["server_status_message"]["language"]))
+			msg = await ch.send(embeds=await generate_serverstatus_embed(db[str(ctx.guild_id)]["server_status_message"]["language"]))
 		except Exception as e:
 			if type(e) == discord.errors.ApplicationCommandInvokeError and str(e).endswith("Missing Permissions"):
 				await ctx.send_followup(content="テキストチャンネル " + ch.mention + " へメッセージを送信する権限がありません！")
@@ -448,7 +472,7 @@ async def create(ctx,
 		db[str(ctx.guild_id)]["server_status_message"]["message_id"] = msg.id
 
 		# ギルドデータを保存
-		await saveGuildData()
+		await save_guilddata()
 
 		await ctx.send_followup(content="テキストチャンネル " + ch.mention + " へサーバーステータスメッセージを送信しました。\n以後このメッセージは自動的に更新されます。" + additional_msg)
 	except Exception as e:
@@ -473,7 +497,7 @@ async def about(ctx):
 	try:
 		embed = discord.Embed(color=discord.Colour.blue())
 		embed.set_author(name=bot_name, icon_url=client.user.display_avatar.url)
-		embed.set_footer(text=f"Developed by Milkeyyy#0625")
+		embed.set_footer(text=f"Developed by Milkeyyy")
 		embed.add_field(name="Version", value="`" + bot_version + "`")
 		embed.add_field(name="Library", value=f"Pycord: `{discord.__version__}`")
 
@@ -485,6 +509,9 @@ async def about(ctx):
 
 # ログイン
 try:
+	# 言語データを読み込む
+	localizations.loadLocaleData()
+	# ログイン
 	f = open('token.txt', 'r', encoding='UTF-8')
 	client.run(f.read())
 	f.close()
