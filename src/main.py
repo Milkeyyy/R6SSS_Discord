@@ -344,7 +344,7 @@ async def generate_serverstatus_embed(locale):
 				f_status_icon = status_icon_set.UNKNOWN
 				f_status_text = localizations.translate("Unknown")
 
-			f_list.append("┣ " + localizations.translate(f) + "\n┣ " + f_status_icon + "`" + f_status_text + "`")
+			f_list.append("┣ **" + localizations.translate(f) + "**\n┣ " + f_status_icon + "`" + f_status_text + "`")
 
 		f_text = "" + "\n".join(f_list)
 
@@ -391,7 +391,7 @@ async def setlanguage(ctx,
 	# ギルドデータを保存
 	await save_guilddata()
 
-	await ctx.send_followup(content="サーバーステータスメッセージの言語を `" + locale + "` に設定しました。")
+	await ctx.send_followup(content="サーバーステータスメッセージの言語を `" + db[str(ctx.guild.id)]["server_status_message"]["language"] + "` に設定しました。")
 
 @client.slash_command(description="サーバーステータスインジケーターの表示を設定します。")
 async def setindicator(ctx,
