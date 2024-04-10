@@ -9,7 +9,7 @@ frozenlist==1.4.1
 humanize==4.9.0
 idna==3.6
 multidict==6.0.5
-py-cord==2.4.1
+py-cord==2.5.0
 PyYAML==6.0.1
 requests==2.31.0
 urllib3==2.2.0
