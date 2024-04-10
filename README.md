@@ -9,7 +9,7 @@ Discordのテキストチャンネルにレインボーシックス シージの
 ### 稼働状況
 ![R6SSS Discord Bot](https://cronitor.io/badges/Za7Cbb/production/uXc8wYxprFTpoguQbbHGQ95r5u4.svg)
 
-[**[Botをサーバーに招待]**](https://discord.com/api/oauth2/authorize?client_id=990497421488451615&permissions=76800&scope=bot%20applications.commands)
+[**[Botをサーバーに招待]**](https://discord.com/oauth2/authorize?client_id=1218238800061534340)
 
 ## コマンド
 - `create [テキストチャンネル]` - 指定したテキストチャンネルへ**5分ごとに自動更新される**サーバーステータスを作成します。
