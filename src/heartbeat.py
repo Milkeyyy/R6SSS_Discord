@@ -3,7 +3,7 @@ import logging
 import sys
 
 
-def loadKeys():
+def load_keys():
 	global heartbeat
 	global monitor
 

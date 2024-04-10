@@ -57,13 +57,13 @@ async def on_ready():
 	print("")
 	await client.change_presence(
 		activity=discord.Game(
-			name=f"Type /create | Version {bot_version}"
+			name=f"Type /create | v{bot_version}"
 		)
 	)
 	logger.info(f"{client.user} へログインしました！ (ID: {client.user.id})")
 
 	# ハートビートのキーを読み込み
-	heartbeat.loadKeys()
+	heartbeat.load_keys()
 
 	# 旧ギルドデータの変換処理を試行
 	await convert_guilddata()
@@ -510,7 +510,7 @@ async def about(ctx):
 # ログイン
 try:
 	# 言語データを読み込む
-	localizations.loadLocaleData()
+	localizations.load_localedata()
 	# ログイン
 	f = open('token.txt', 'r', encoding='UTF-8')
 	client.run(f.read())

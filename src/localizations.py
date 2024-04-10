@@ -5,7 +5,7 @@ locale = "ja-JP"
 data = {}
 locales = []
 
-def loadLocaleData():
+def load_localedata():
 	global data
 	global locales
 
