@@ -1,0 +1,74 @@
+{
+	"strings": {
+		"No Issues": "No Issues",
+		"Maintenance": "Maintenance",
+		"Unplanned Issues": "Unplanned Issues",
+		"Unplanned Outage": "Unplanned Outage",
+		"Outage": "Outage",
+		"Connectivity": "Connectivity",
+		"Authentication": "Authentication",
+		"Leaderboard": "Leaderboard",
+		"Purchase": "Purchase",
+		"Matchmaking": "Matchmaking",
+		"Operational": "Operational",
+		"Interrupted": "Interrupted",
+		"Degraded": "Degraded",
+		"Last Update": "Last Update",
+		"Unknown": "Unknown",
+		"Cmd_General_DontHavePermission": "You don't have permission to execute this command!",
+		"An error occurred when running the command": "An error occurred when running the command",
+		"DontHavePermission_SendMessage": "You do not have permission to send messages to text channel {0}!",
+		"Cmd_setlanguage_Success": "Server status message language set to `{0}`.",
+		"Cmd_setindicator_Success": "Server status indicator display set to `{0}`.",
+		"Cmd_create_Success": "Sent server status message to text channel {0}. \nThis message will be updated automatically from now on.",
+		"Cmd_create_Old messages you previously sent will no longer be updated.": "Old messages you previously sent will no longer be updated."
+	},
+	"commands": {
+		"synccommands": {
+			"name": "synccommands",
+			"description": "Owner Only"
+		},
+		"about": {
+			"name": "about",
+			"description": "Display information about this bot."
+		},
+		"ping": {
+			"name": "ping",
+			"description": "Displays the latency of this bot."
+		},
+		"setlanguage": {
+			"name": "setlanguage",
+			"description": "Set the display language for server status.",
+			"options": {
+				"locale": {
+					"name": "language",
+					"description" :"Language to set"
+				}
+			}
+		},
+		"setindicator": {
+			"name": "setindicator",
+			"description": "Sets the display of the indicator that appears in the name of the text channel.",
+			"options": {
+				"enable": {
+					"name": "enable",
+					"description": "True: Enable / False: Disable"
+				}
+			}
+		},
+		"status": {
+			"name": "status",
+			"description": "Send current server status. Server status sent with this command is not automatically updated."
+		},
+		"create": {
+			"name": "create",
+			"description": "Create server status messages that are automatically updated.",
+			"options": {
+				"channel": {
+					"name": "channel",
+					"description": "Text channel to send server status. If not specified, it will be created in the current channel."
+				}
+			}
+		}
+	}
+}

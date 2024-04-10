@@ -7,14 +7,28 @@ import traceback
 import discord
 from discord.commands import Option
 from discord.ext import tasks
+from pycord.i18n import _
 
-import heartbeat
-import localizations
+# ロガー
 from logger import logger
-import platform_icon
+
+# Discordのクライアント
+from client import client
+
+# Cronitor
+import heartbeat
+
+# サーバーステータス
 import serverstatus
+
+# アイコン
+import platform_icon
 import status_icon as status_icon_set
 import status_indicator
+
+# ローカライズ
+import localizations
+from localizations import i18n, LOCALES
 
 
 # Botの名前
@@ -41,10 +55,6 @@ db = {}
 parser = argparse.ArgumentParser()
 args = parser.parse_args()
 
-# くらいあんと
-intents = None
-client = discord.Bot(intents = intents)
-
 
 # Bot起動時のイベント
 @client.event
@@ -61,6 +71,10 @@ async def on_ready():
 		)
 	)
 	logger.info(f"{client.user} へログインしました！ (ID: {client.user.id})")
+
+	# コマンドのローカライズ
+	#i18n.localize_commands()
+	#await client.sync_commands()
 
 	# ハートビートのキーを読み込み
 	heartbeat.load_keys()
@@ -132,6 +146,12 @@ async def check_guilddata(guild = None):
 		for k, v in default_guilddata_item.items():
 			if db[str(guild.id)].get(k) == None or type(db[str(guild.id)].get(k)) != list:
 				db[str(guild.id)][k] == v
+			if k == "server_status_message": # 言語設定を変換
+				if db[str(guild.id)][k]["language"] == "en-GB": db[str(guild.id)][k]["language"] = "en_GB"
+				elif db[str(guild.id)][k]["language"] == "ja-JP": db[str(guild.id)][k]["language"] = "ja"
+				elif db[str(guild.id)][k]["language"] == "ko-KR": db[str(guild.id)][k]["language"] = "ko"
+
+	await save_guilddata()
 
 	logger.info("ギルドデータの確認完了")
 
@@ -193,7 +213,7 @@ async def update_serverstatus():
 
 		# 各ギルドの埋め込みメッセージIDチェック、存在する場合はメッセージを更新する
 		for guild in client.guilds:
-			#logger.info(f"ギルド: {guild.name}")
+			logger.info(f"ギルド: {guild.name}")
 			try:
 				ch_id = int(db[str(guild.id)]["server_status_message"]["channel_id"])
 				msg_id = int(db[str(guild.id)]["server_status_message"]["message_id"])
@@ -283,16 +303,13 @@ async def generate_serverstatus_embed(locale):
 
 	embeds = []
 
-	# 翻訳先言語を設定
-	localizations.locale = locale
-
 	# サーバーステータスを取得
 	status = serverstatus.data
 
 	# 各プラットフォームごとの埋め込みメッセージを作成
 	embed = discord.Embed(color=color_list["PC"])
 	embed.set_author(name="R6S Server Status", icon_url="https://www.google.com/s2/favicons?sz=64&domain_url=https://www.ubisoft.com/en-us/game/rainbow-six/siege/status")
-	embed.set_footer(text=localizations.translate("Last Update") + ": " + status["_update_date"].strftime('%Y/%m/%d %H:%M:%S') + " (JST)")
+	embed.set_footer(text=_("Last Update") + ": " + status["_update_date"].strftime('%Y/%m/%d %H:%M:%S') + " (JST)")
 
 	for k, v in pf_list.items():
 		status_list = []
@@ -318,12 +335,12 @@ async def generate_serverstatus_embed(locale):
 		else:
 			status_icon = status_icon_set.UNKNOWN
 
-		connectivity_text = localizations.translate(status[pf_id]["Status"]["Connectivity"])
+		connectivity_text = _(status[pf_id]["Status"]["Connectivity"])
 
 		mt_text = ""
 		if status[pf_id]["Maintenance"] == True:
 			status_icon = status_icon_set.MAINTENANCE
-			connectivity_text = localizations.translate(localizations.translate("Maintenance"))
+			connectivity_text = _("Maintenance")
 
 		f_list = []
 		f_text = ""
@@ -332,7 +349,7 @@ async def generate_serverstatus_embed(locale):
 			if f == "Connectivity": continue
 			# 通常
 			f_status_icon = status_icon_set.OPERATIONAL
-			f_status_text = localizations.translate(s)
+			f_status_text = _(s)
 			# 停止
 			if s != "Operational":
 				f_status_icon = status_icon_set.DEGRADED
@@ -342,9 +359,9 @@ async def generate_serverstatus_embed(locale):
 			# 不明
 			if s == "Unknown":
 				f_status_icon = status_icon_set.UNKNOWN
-				f_status_text = localizations.translate("Unknown")
+				f_status_text = _("Unknown")
 
-			f_list.append("┣ **" + localizations.translate(f) + "**\n┣ " + f_status_icon + "`" + f_status_text + "`")
+			f_list.append("┣ **" + _(f) + "**\n┣ " + f_status_icon + "`" + f_status_text + "`")
 
 		f_text = "" + "\n".join(f_list)
 
@@ -365,12 +382,11 @@ async def generate_serverstatus_embed(locale):
 	return embeds
 
 # コマンド
-@client.slash_command(description="サーバーステータスメッセージの言語を設定します。")
+@client.slash_command()
 async def setlanguage(ctx,
 	locale: Option(
 		str,
-		name="language",
-		choices=localizations.locales,
+		choices=LOCALES,
 		permission=discord.Permissions.administrator
 	)
 ):
@@ -380,24 +396,27 @@ async def setlanguage(ctx,
 
 	await ctx.defer(ephemeral=True)
 
-	# ギルドデータをチェック
-	await check_guilddata(ctx.guild)
+	try:
+		# ギルドデータをチェック
+		await check_guilddata(ctx.guild)
 
-	if locale in localizations.data["Locales"].values():
-		db[str(ctx.guild.id)]["server_status_message"]["language"] = [k for k, v in localizations.data["Locales"].items() if v == locale][0]
-	else:
-		db[str(ctx.guild.id)]["server_status_message"]["language"] = "en-GB"
+		if locale in localizations.data["Locales"].values():
+			db[str(ctx.guild.id)]["server_status_message"]["language"] = [k for k, v in localizations.data["Locales"].items() if v == locale][0]
+		else:
+			db[str(ctx.guild.id)]["server_status_message"]["language"] = "en_GB"
 
-	# ギルドデータを保存
-	await save_guilddata()
+		# ギルドデータを保存
+		await save_guilddata()
 
-	await ctx.send_followup(content="サーバーステータスメッセージの言語を `" + localizations.data["Locales"][db[str(ctx.guild.id)]["server_status_message"]["language"]] + "` に設定しました。")
+		await ctx.send_followup(content=_("Cmd_setlanguage_Succcess", localizations.data["Locales"][db[str(ctx.guild.id)]["server_status_message"]["language"]]))
+	except Exception as e:
+		logger.error(traceback.format_exc())
+		await ctx.send_followup(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
 
-@client.slash_command(description="サーバーステータスインジケーターの表示を設定します。")
+@client.slash_command()
 async def setindicator(ctx,
 	enable: Option(
 		bool,
-		name="enable",
 		permission=discord.Permissions.administrator
 	)
 ):
@@ -407,17 +426,21 @@ async def setindicator(ctx,
 
 	await ctx.defer(ephemeral=True)
 
-	# ギルドデータをチェック
-	await check_guilddata(ctx.guild)
+	try:
+		# ギルドデータをチェック
+		await check_guilddata(ctx.guild)
 
-	db[str(ctx.guild.id)]["server_status_message"]["status_indicator"] = enable
+		db[str(ctx.guild.id)]["server_status_message"]["status_indicator"] = enable
 
-	# ギルドデータを保存
-	await save_guilddata()
+		# ギルドデータを保存
+		await save_guilddata()
 
-	await ctx.send_followup(content="サーバーステータスインジケーターの表示を `" + str(enable) + "` に設定しました。")
+		await ctx.send_followup(content=_("Cmd_setindicator_Success", str(enable)))
+	except Exception as e:
+		logger.error(traceback.format_exc())
+		await ctx.send_followup(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
 
-@client.slash_command(description="現在のサーバーステータスを送信します。このコマンドで送信されたサーバーステータスは自動更新されません。")
+@client.slash_command()
 async def status(ctx):
 	logger.info(f"コマンド実行: status / 実行者: {ctx.user}")
 
@@ -426,15 +449,13 @@ async def status(ctx):
 		await ctx.send_followup(embeds=await generate_serverstatus_embed(db[str(ctx.guild_id)]["server_status_message"]["language"]))
 	except Exception as e:
 		logger.error(traceback.format_exc())
-		await ctx.send_followup(content="サーバーステータスメッセージの送信時にエラーが発生しました: `" + str(e) + "`")
+		await ctx.send_followup(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
 
-@client.slash_command(description="毎分自動更新されるサーバーステータスメッセージを作成します。")
+@client.slash_command()
 async def create(ctx,
 	channel: Option(
 		discord.TextChannel,
 		required=False,
-		name="textchannel",
-		description="自動更新されるサーバーステータスを送信するテキストチャンネルを指定します。指定しない場合は現在のチャンネルへ作成されます。",
 		permission=discord.Permissions.administrator
 	)
 ):
@@ -448,7 +469,7 @@ async def create(ctx,
 
 		additional_msg = ""
 		if db[str(ctx.guild_id)]["server_status_message"]["message_id"] != 0:
-			additional_msg = "\n(以前送信した古いメッセージは更新されなくなります。)"
+			additional_msg = f"\n({_('Cmd_create_Old messages you previously sent will no longer be updated.')})"
 
 		if channel is None:
 			ch_id = ctx.channel_id
@@ -461,10 +482,10 @@ async def create(ctx,
 			msg = await ch.send(embeds=await generate_serverstatus_embed(db[str(ctx.guild_id)]["server_status_message"]["language"]))
 		except Exception as e:
 			if type(e) == discord.errors.ApplicationCommandInvokeError and str(e).endswith("Missing Permissions"):
-				await ctx.send_followup(content="テキストチャンネル " + ch.mention + " へメッセージを送信する権限がありません！")
+				await ctx.send_followup(content=_("DontHavePermission_SendMessage", ch.mention))
 			else:
 				logger.error(traceback.format_exc())
-				await ctx.send_followup(content="サーバーステータスメッセージの作成時にエラーが発生しました: `" + str(e) + "`")
+				await ctx.send_followup(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
 			return
 
 		# 送信したチャンネルとメッセージのIDをギルドデータへ保存する
@@ -474,12 +495,12 @@ async def create(ctx,
 		# ギルドデータを保存
 		await save_guilddata()
 
-		await ctx.send_followup(content="テキストチャンネル " + ch.mention + " へサーバーステータスメッセージを送信しました。\n以後このメッセージは自動的に更新されます。" + additional_msg)
+		await ctx.send_followup(content=_("Cmd_create_Success", ch.mention) + additional_msg)
 	except Exception as e:
 		logger.error(traceback.format_exc())
-		await ctx.send_followup(content="サーバーステータスメッセージの送信時にエラーが発生しました: `" + str(e) + "`")
+		await ctx.send_followup(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
 
-@client.slash_command(description="ボットのレイテンシーを送信します。")
+@client.slash_command()
 async def ping(ctx):
 	logger.info(f"コマンド実行: ping / 実行者: {ctx.user}")
 	try:
@@ -489,9 +510,9 @@ async def ping(ctx):
 		await ctx.respond(embed=ping_embed)
 	except Exception as e:
 		logger.error(traceback.format_exc())
-		await ctx.respond(content="コマンドの実行時にエラーが発生しました: `" + str(e) + "`")
+		await ctx.respond(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
 
-@client.slash_command(description="このボットについての情報を送信します。")
+@client.slash_command()
 async def about(ctx):
 	logger.info(f"コマンド実行: about / 実行者: {ctx.user}")
 	try:
@@ -504,13 +525,27 @@ async def about(ctx):
 		await ctx.respond(embed=embed)
 	except Exception as e:
 		logger.error(traceback.format_exc())
-		await ctx.respond(content="コマンドの実行時にエラーが発生しました: `" + str(e) + "`")
+		await ctx.respond(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
+
+@client.slash_command()
+async def synccommands(ctx):
+	try:
+		if await client.is_owner(ctx.user):
+			await ctx.defer(ephemeral=True)
+			i18n.localize_commands()
+			await client.sync_commands()
+			await ctx.send_followup(content="コマンドを同期しました。")
+		else:
+			await ctx.respond(content=_("Cmd_General_DontHavePermission"), ephemeral=True)
+	except Exception as e:
+		logger.error(traceback.format_exc())
+		await ctx.respond(content=_("An error occurred when running the command") + ": `" + str(e) + "`", ephemeral=True)
 
 
 # ログイン
 try:
 	# 言語データを読み込む
-	localizations.load_localedata()
+	#localizations.load_localedata()
 	# ログイン
 	f = open('token.txt', 'r', encoding='UTF-8')
 	client.run(f.read())

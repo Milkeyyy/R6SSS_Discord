@@ -10,6 +10,7 @@ humanize==4.9.0
 idna==3.6
 multidict==6.0.5
 py-cord==2.5.0
+pycord-i18n==1.2.1
 PyYAML==6.0.1
 requests==2.31.0
 urllib3==2.2.0

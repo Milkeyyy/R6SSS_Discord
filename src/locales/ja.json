@@ -1,0 +1,74 @@
+{
+	"strings": {
+		"No Issues": "問題なし",
+		"Maintenance": "メンテナンス",
+		"Unplanned Issues": "想定外の問題",
+		"Unplanned Outage": "想定外の機能停止",
+		"Outage": "停止",
+		"Connectivity": "接続状況",
+		"Authentication": "認証システム",
+		"Leaderboard": "ランキング",
+		"Purchase": "ストア",
+		"Matchmaking": "マッチメイキング",
+		"Operational": "通常",
+		"Interrupted": "中断",
+		"Degraded": "想定外の停止",
+		"Last Update": "最終更新",
+		"Unknown": "不明",
+		"Cmd_General_DontHavePermission": "あなたにはこのコマンドを実行する権限がありません！",
+		"An error occurred when running the command": "コマンドの実行時にエラーが発生しました",
+		"DontHavePermission_SendMessage": "テキストチャンネル {0} へメッセージを送信する権限がありません！",
+		"Cmd_setlanguage_Success": "サーバーステータスメッセージの言語を `{0}` に設定しました。",
+		"Cmd_setindicator_Success": "サーバーステータスインジケーターの表示を `{0}` に設定しました。",
+		"Cmd_create_Success": "テキストチャンネル {0} へサーバーステータスメッセージを送信しました。\n以後このメッセージは自動的に更新されます。",
+		"Cmd_create_Old messages you previously sent will no longer be updated.": "以前送信した古いメッセージは更新されなくなります。"
+	},
+	"commands": {
+		"synccommands": {
+			"name": "synccommands",
+			"description": "Owner Only"
+		},
+		"about": {
+			"name": "about",
+			"description": "このBotについての情報を表示します。"
+		},
+		"ping": {
+			"name": "ping",
+			"description": "このBotのレイテンシーを表示します。"
+		},
+		"setlanguage": {
+			"name": "setlanguage",
+			"description": "サーバーステータスメッセージの表示言語を設定します。",
+			"options": {
+				"locale": {
+					"name": "言語",
+					"description" :"設定する言語"
+				}
+			}
+		},
+		"setindicator": {
+			"name": "setindicator",
+			"description": "テキストチャンネルの名前に表示されるインジケーターの表示を設定します。",
+			"options": {
+				"enable": {
+					"name": "有効",
+					"description": "True: 有効 / False: 無効"
+				}
+			}
+		},
+		"status": {
+			"name": "status",
+			"description": "現在のサーバーステータスを送信します。このコマンドで送信されたサーバーステータスは自動更新されません。"
+		},
+		"create": {
+			"name": "create",
+			"description": "自動更新されるサーバーステータスメッセージを作成します。",
+			"options": {
+				"channel": {
+					"name": "テキストチャンネル",
+					"description": "サーバーステータスを送信するテキストチャンネル。指定しない場合は現在のチャンネルへ作成されます。"
+				}
+			}
+		}
+	}
+}
