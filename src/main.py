@@ -217,18 +217,14 @@ async def update_serverstatus():
 			try:
 				ch_id = int(db[str(guild.id)]["server_status_message"]["channel_id"])
 				msg_id = int(db[str(guild.id)]["server_status_message"]["message_id"])
-				loc = db[str(guild.id)]["server_status_message"]["language"]
+				lang = db[str(guild.id)]["server_status_message"]["language"]
 			except Exception as e:
 				logger.warning(f"ギルドデータ({guild.name}) の読み込み失敗")
 				tb = sys.exc_info()
 				logger.error(str(traceback.format_tb(tb)))
-				db[str(guild.id)] = default_guilddata_item
-				ch_id = db[str(guild.id)]["server_status_message"]["channel_id"]
-				msg_id = db[str(guild.id)]["server_status_message"]["message_id"]
-				loc = db[str(guild.id)]["server_status_message"]["language"]
 
 			try:
-				if ch_id != 0 and msg_id != 0 and loc != None:
+				if ch_id != 0 and msg_id != 0 and lang != None:
 					# IDからテキストチャンネルを取得する
 					ch = client.get_channel(ch_id)
 					# チャンネルが存在しない場合はギルドデータからチャンネルIDとメッセージIDを削除する
@@ -261,7 +257,7 @@ async def update_serverstatus():
 						except Exception as e:
 							logger.error(f"ギルド {guild.name} のステータスインジケーターの更新に失敗: {e}")
 
-						await msg.edit(embeds=await generate_serverstatus_embed(loc))
+						await msg.edit(embeds=await generate_serverstatus_embed(lang))
 			except Exception as e:
 				tb = sys.exc_info()
 				logger.error(f"ギルド {guild.name} のサーバーステータスメッセージ({str(msg_id)})の更新に失敗")
