@@ -28,7 +28,7 @@ import status_indicator
 
 # ローカライズ
 import localizations
-from localizations import i18n, LOCALES
+from localizations import i18n, LOCALE_DATA
 
 
 # Botの名前
@@ -317,7 +317,7 @@ async def generate_serverstatus_embed(locale):
 	# 各プラットフォームごとの埋め込みメッセージを作成
 	embed = discord.Embed(color=color_list["PC"])
 	embed.set_author(name="R6S Server Status", icon_url="https://www.google.com/s2/favicons?sz=64&domain_url=https://www.ubisoft.com/en-us/game/rainbow-six/siege/status")
-	embed.set_footer(text=_("Last Update") + ": " + status["_update_date"].strftime('%Y/%m/%d %H:%M:%S') + " (JST)")
+	embed.set_footer(text=localizations.translate("Last Update", locale) + ": " + status["_update_date"].strftime('%Y/%m/%d %H:%M:%S') + " (JST)")
 
 	for k, v in pf_list.items():
 		status_list = []
@@ -343,12 +343,12 @@ async def generate_serverstatus_embed(locale):
 		else:
 			status_icon = status_icon_set.UNKNOWN
 
-		connectivity_text = _(status[pf_id]["Status"]["Connectivity"])
+		connectivity_text = localizations.translate(status[pf_id]["Status"]["Connectivity"], locale)
 
 		mt_text = ""
 		if status[pf_id]["Maintenance"] == True:
 			status_icon = status_icon_set.MAINTENANCE
-			connectivity_text = _("Maintenance")
+			connectivity_text = localizations.translate("Maintenance", locale)
 
 		f_list = []
 		f_text = ""
@@ -357,7 +357,7 @@ async def generate_serverstatus_embed(locale):
 			if f == "Connectivity": continue
 			# 通常
 			f_status_icon = status_icon_set.OPERATIONAL
-			f_status_text = _(s)
+			f_status_text = localizations.translate(s, locale)
 			# 停止
 			if s != "Operational":
 				f_status_icon = status_icon_set.DEGRADED
@@ -367,9 +367,9 @@ async def generate_serverstatus_embed(locale):
 			# 不明
 			if s == "Unknown":
 				f_status_icon = status_icon_set.UNKNOWN
-				f_status_text = _("Unknown")
+				f_status_text = localizations.translate("Unknown", locale)
 
-			f_list.append("┣ **" + _(f) + "**\n┣ " + f_status_icon + "`" + f_status_text + "`")
+			f_list.append("┣ **" + localizations.translate(f, locale) + "**\n┣ " + f_status_icon + "`" + f_status_text + "`")
 
 		f_text = "" + "\n".join(f_list)
 
@@ -394,7 +394,7 @@ async def generate_serverstatus_embed(locale):
 async def setlanguage(ctx,
 	locale: Option(
 		str,
-		choices=LOCALES,
+		choices=LOCALE_DATA.keys(),
 		permission=discord.Permissions.administrator
 	)
 ):
@@ -408,15 +408,16 @@ async def setlanguage(ctx,
 		# ギルドデータをチェック
 		await check_guilddata(ctx.guild)
 
-		if locale in localizations.data["Locales"].values():
-			db[str(ctx.guild.id)]["server_status_message"]["language"] = [k for k, v in localizations.data["Locales"].items() if v == locale][0]
+		if locale in localizations.LOCALE_DATA.keys():
+			#db[str(ctx.guild.id)]["server_status_message"]["language"] = [k for k, v in localizations.LOCALE_DATA.keys() if v == locale][0]
+			db[str(ctx.guild.id)]["server_status_message"]["language"] = locale
 		else:
 			db[str(ctx.guild.id)]["server_status_message"]["language"] = "en_GB"
 
 		# ギルドデータを保存
 		await save_guilddata()
 
-		await ctx.send_followup(content=_("Cmd_setlanguage_Succcess", localizations.data["Locales"][db[str(ctx.guild.id)]["server_status_message"]["language"]]))
+		await ctx.send_followup(content=_("Cmd_setlanguage_Success", db[str(ctx.guild.id)]["server_status_message"]["language"]))
 	except Exception as e:
 		logger.error(traceback.format_exc())
 		await ctx.send_followup(content=_("An error occurred when running the command") + ": `" + str(e) + "`")

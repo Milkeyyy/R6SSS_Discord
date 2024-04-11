@@ -9,37 +9,41 @@ from logger import logger
 
 
 locale = "ja-JP"
-data = {}
 #LOCALES: list
 
 
 def load_localedata():
-	global data
 	global i18n
-	global LOCALES
+	global LOCALE_DATA
 
 	# 言語一覧
-	LOCALES = []
-	locale_data = dict()
+	LOCALE_DATA = dict()
 
 	# 言語ファイルを読み込む
 	logger.info("言語ファイルを読み込み")
 	for f in glob("src/locales/*.json"):
 		lang = path.splitext(path.basename(f))[0]
 		logger.info("- " + lang)
-		# 言語一覧に追加
-		LOCALES.append(lang)
 		# 翻訳データを読み込み
 		with open(f, mode="r", encoding="utf-8") as f:
-			locale_data[lang] = json.loads(f.read())
+			LOCALE_DATA[lang] = json.loads(f.read())
 			#i18n.translations[lang] = f.read()
 			#i18n.localizations[lang] = f.read()
 
 	i18n = I18n(
 		client,
 		consider_user_locale=True,
-		**locale_data
+		**LOCALE_DATA
 	)
 	#print(i18n.current_locale)
+
+def translate(text: str, lang: str="en_GB"):
+	global LOCALE_DATA
+
+	try:
+		return LOCALE_DATA[lang]["strings"][text]
+	except KeyError as e:
+		#logging.error(str(e))
+		return text
 
 load_localedata()
