@@ -149,7 +149,7 @@ async def check_guilddata(guild = None):
 			if k == "server_status_message": # 言語設定を変換
 				if db[str(guild.id)][k]["language"] == "en-GB": db[str(guild.id)][k]["language"] = "en_GB"
 				elif db[str(guild.id)][k]["language"] == "ja-JP": db[str(guild.id)][k]["language"] = "ja"
-				elif db[str(guild.id)][k]["language"] == "ko-KR": db[str(guild.id)][k]["language"] = "ko"
+				elif db[str(guild.id)][k]["language"] == "ko-KR": db[str(guild.id)][k]["language"] = "en_GB" # 一時的に英語にする
 
 	await save_guilddata()
 
