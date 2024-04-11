@@ -255,9 +255,21 @@ async def update_serverstatus():
 							if ch_name[0] in status_indicator.List: ch_name = ch_name[1:]
 							if db[str(guild.id)]["server_status_message"]["status_indicator"] == True: await msg.channel.edit(name=serverstatus.indicator + ch_name)
 						except Exception as e:
+							logger.error(traceback.format_exc())
 							logger.error(f"ギルド {guild.name} のステータスインジケーターの更新に失敗: {e}")
 
-						await msg.edit(embeds=await generate_serverstatus_embed(lang))
+						try:
+							embeds = await generate_serverstatus_embed(lang)
+						except Exception as e:
+							embeds = None
+							logger.error(traceback.format_exc())
+							logger.error("サーバーステータスメッセージの生成に失敗: " + str(e))
+
+						try:
+							if embeds != None: await msg.edit(embeds=embeds)
+						except Exception as e:
+							logger.error(traceback.format_exc())
+							logger.error("サーバーステータスメッセージの編集に失敗: " + str(e))
 			except Exception as e:
 				tb = sys.exc_info()
 				logger.error(f"ギルド {guild.name} のサーバーステータスメッセージ({str(msg_id)})の更新に失敗")
