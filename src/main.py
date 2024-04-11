@@ -227,7 +227,7 @@ async def update_serverstatus():
 				if ch_id != 0 and msg_id != 0 and lang != None:
 					# IDからテキストチャンネルを取得する
 					ch = client.get_channel(ch_id)
-					# チャンネルが存在しない場合はギルドデータからチャンネルIDとメッセージIDを削除する
+					# チャンネルが存在しない場合はギルドデータのチャンネルIDとメッセージIDをリセットする
 					if ch == None:
 						db[str(guild.id)]["server_status_message"]["channel_id"] = 0
 						db[str(guild.id)]["server_status_message"]["message_id"] = 0
@@ -248,7 +248,11 @@ async def update_serverstatus():
 					if msg is None:
 						logger.warning("ギルド " + guild.name + " のメッセージ(" + str(msg_id) + ")の取得に失敗")
 						logger.warning(str(e))
-						db[str(guild.id)] = default_guilddata_item
+						# メッセージが存在しない(削除されている)場合はギルドデータのチャンネルIDとメッセージIDをリセットする
+						db[str(guild.id)]["server_status_message"]["channel_id"] = 0
+						db[str(guild.id)]["server_status_message"]["message_id"] = 0
+						# ギルドデータを保存
+						await save_guilddata()
 					else:
 						# テキストチャンネルの名前にステータスインジケーターを設定
 						try:
