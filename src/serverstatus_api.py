@@ -56,7 +56,7 @@ class serverstatus:
 			else:
 				status[p]["Maintenance"] = s["Maintenance"]
 
-			status[p]["_Update_At"] = datetime.datetime.utcnow().timestamp()
+			status[p]["_Update_At"] = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
 
 		#logging.info(str(status))
 

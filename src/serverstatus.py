@@ -16,12 +16,12 @@ async def get():
 
 	# サーバーステータスを取得
 	status = await serverstatus_api.get_serverstatus()
-	status["_update_date"] = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
+	status["_Update_At"] = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
 
 	status_list = []
 	# ステータスインジケーターを設定
 	for k, v in status.items():
-		if k == "_update_date": continue
+		if k.startswith("_") : continue
 
 		st = v["Status"]["Connectivity"]
 		status_list.append(st)

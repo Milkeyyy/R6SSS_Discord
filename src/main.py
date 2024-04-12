@@ -13,6 +13,7 @@ from pycord.i18n import _
 from logger import logger
 
 # Discordのクライアント
+import client as app
 from client import client
 
 # Cronitor
@@ -30,11 +31,6 @@ import status_indicator
 import localizations
 from localizations import i18n, LOCALE_DATA
 
-
-# Botの名前
-bot_name = "R6SSS"
-# Botのバージョン
-bot_version = "1.6.0"
 
 default_embed = discord.Embed
 
@@ -60,14 +56,14 @@ args = parser.parse_args()
 @client.event
 async def on_ready():
 	print("---------------------------------------")
-	print(f" {bot_name} - Version {bot_version}")
+	print(f" {app.NAME} - Version {app.VERSION}")
 	print(f" using Pycord {discord.__version__}")
 	print(f" Developed by Milkeyyy")
 	print("---------------------------------------")
 	print("")
 	await client.change_presence(
 		activity=discord.Game(
-			name=f"Type /create | v{bot_version}"
+			name=f"Type /create | v{app.VERSION}"
 		)
 	)
 	logger.info(f"{client.user} へログインしました！ (ID: {client.user.id})")
@@ -298,10 +294,10 @@ async def after_updateserverstatus():
 async def generate_serverstatus_embed(locale):
 	pf_list = {
 		"PC": ["PC", "PC", 2],
-		"PS4": ["PS4", "PlayStation 4", 0],
-		"PS5": ["PS5", "PlayStation 5", 1],
-		"XB1": ["XBOXONE", "Xbox One", 0],
-		"XBSX": ["XBOX SERIES X", "Xbox Series X/S", 1]
+		"PS4": ["PS4", "PS4", 0],
+		"PS5": ["PS5", "PS5", 1],
+		"XB1": ["XBOXONE", "XB1", 0],
+		"XBSX": ["XBOX SERIES X", "XBSX/S", 1]
 	}
 
 	# 各プラットフォームの埋め込みメッセージの色
@@ -320,8 +316,9 @@ async def generate_serverstatus_embed(locale):
 
 	# 各プラットフォームごとの埋め込みメッセージを作成
 	embed = discord.Embed(color=color_list["PC"])
-	embed.set_author(name="R6S Server Status", icon_url="https://www.google.com/s2/favicons?sz=64&domain_url=https://www.ubisoft.com/en-us/game/rainbow-six/siege/status")
-	embed.set_footer(text=localizations.translate("Last Update", locale) + ": " + status["_update_date"].strftime('%Y/%m/%d %H:%M:%S') + " (JST)")
+	embed.title = "📶 R6S Server Status"
+	embed.description = "🕒 " + localizations.translate("Last Update", locale) + ": " + f"<t:{status['_Update_At']}:f> (<t:{status['_Update_At']}:R>)"
+	#embed.set_footer(text=localizations.translate("Last Update", locale) + ": " + f"<t:{status['_Update_At']}:f> (<t:{status['_Update_At']}:R>)")
 
 	for k, v in pf_list.items():
 		status_list = []
@@ -373,7 +370,7 @@ async def generate_serverstatus_embed(locale):
 				f_status_icon = status_icon_set.UNKNOWN
 				f_status_text = localizations.translate("Unknown", locale)
 
-			f_list.append("┣ **" + localizations.translate(f, locale) + "**\n┣ " + f_status_icon + "`" + f_status_text + "`")
+			f_list.append("" + localizations.translate(f, locale) + "\n┗ " + f_status_icon + "`" + f_status_text + "`")
 
 		f_text = "" + "\n".join(f_list)
 
@@ -382,7 +379,7 @@ async def generate_serverstatus_embed(locale):
 
 		# プラットフォームのステータスのフィールドを追加
 		embed.add_field(
-			name=platform_icon.LIST[v[0]] + " " + pf_display_name + " - " + status_icon + "`" + connectivity_text + "`",
+			name=platform_icon.LIST[v[0]] + " " + pf_display_name + " - " + status_icon + "**`" + connectivity_text + "`**",
 			value="\n".join(status_list)
 		)
 		# 各プラットフォームごとに別の行にするために、リストで指定された数の空のフィールドを挿入する
@@ -530,9 +527,9 @@ async def about(ctx):
 	logger.info(f"コマンド実行: about / 実行者: {ctx.user}")
 	try:
 		embed = discord.Embed(color=discord.Colour.blue())
-		embed.set_author(name=bot_name, icon_url=client.user.display_avatar.url)
+		embed.set_author(name=app.NAME, icon_url=client.user.display_avatar.url)
 		embed.set_footer(text=f"Developed by Milkeyyy")
-		embed.add_field(name="Version", value="`" + bot_version + "`")
+		embed.add_field(name="Version", value="`" + app.VERSION + "`")
 		embed.add_field(name="Library", value=f"Pycord: `{discord.__version__}`")
 
 		await ctx.respond(embed=embed)
