@@ -388,11 +388,11 @@ async def generate_serverstatus_embed(locale):
 
 # コマンド
 @client.slash_command()
+@discord.default_permissions(administrator=True)
 async def setlanguage(ctx,
 	locale: Option(
 		str,
-		choices=LOCALE_DATA.keys(),
-		permission=discord.Permissions.administrator
+		choices=LOCALE_DATA.keys()
 	)
 ):
 	global d
@@ -420,10 +420,10 @@ async def setlanguage(ctx,
 		await ctx.send_followup(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
 
 @client.slash_command()
+@discord.default_permissions(administrator=True)
 async def setindicator(ctx,
 	enable: Option(
-		bool,
-		permission=discord.Permissions.administrator
+		bool
 	)
 ):
 	global db
@@ -447,6 +447,7 @@ async def setindicator(ctx,
 		await ctx.send_followup(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
 
 @client.slash_command()
+@discord.default_permissions(send_messages=True)
 async def status(ctx):
 	logger.info(f"コマンド実行: status / 実行者: {ctx.user}")
 
@@ -458,11 +459,11 @@ async def status(ctx):
 		await ctx.send_followup(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
 
 @client.slash_command()
+@discord.default_permissions(administrator=True)
 async def create(ctx,
 	channel: Option(
 		discord.TextChannel,
-		required=False,
-		permission=discord.Permissions.administrator
+		required=False
 	)
 ):
 	logger.info(f"コマンド実行: create / 実行者: {ctx.user}")
@@ -507,6 +508,7 @@ async def create(ctx,
 		await ctx.send_followup(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
 
 @client.slash_command()
+@discord.default_permissions(send_messages=True)
 async def ping(ctx):
 	logger.info(f"コマンド実行: ping / 実行者: {ctx.user}")
 	try:
@@ -519,6 +521,7 @@ async def ping(ctx):
 		await ctx.respond(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
 
 @client.slash_command()
+@discord.default_permissions(send_messages=True)
 async def about(ctx):
 	logger.info(f"コマンド実行: about / 実行者: {ctx.user}")
 	try:
