@@ -32,10 +32,6 @@ import localizations
 from localizations import i18n, LOCALE_DATA
 
 
-default_embed = discord.Embed
-
-default_guilddata_item = {"server_status_message": [0, 0, "en-GB"]} # チャンネルID, メッセージID]
-
 default_guilddata_item = {
 	"server_status_message": {
 		"channel_id": 0,
