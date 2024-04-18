@@ -1,7 +1,3 @@
-import argparse
-import json
-import os
-import sys
 import traceback
 
 import discord

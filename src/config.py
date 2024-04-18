@@ -1,5 +1,4 @@
 import datetime
-import json
 from os import path
 
 from box import Box
