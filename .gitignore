@@ -1,7 +1,7 @@
 .vscode/launch.json
 guild.json
-guilds.json
-token.txt
+guilds*.json
+token*.txt
 cronitor_keys.txt
 
 # Byte-compiled / optimized / DLL files
