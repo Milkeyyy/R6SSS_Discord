@@ -16,6 +16,9 @@ from logger import logger
 import client as app
 from client import client
 
+# コンフィグ
+from config import GuildConfig
+
 # Cronitor
 import heartbeat
 
@@ -71,111 +74,12 @@ async def on_ready():
 	# ハートビートのキーを読み込み
 	heartbeat.load_keys()
 
-	# 旧ギルドデータの変換処理を試行
-	await convert_guilddata()
-
 	# ギルドデータの確認を開始
-	await load_guilddata()
-	await check_guilddata()
+	await GuildConfig.load()
+	await GuildConfig.check()
 
 	logger.info("サーバーステータスの定期更新開始")
 	update_serverstatus.start()
-
-
-# 関数
-# ギルドデータの保存
-async def save_guilddata():
-	# グローバル変数宣言
-	global db
-
-	# 書き込み用にファイルを開く
-	file = open("guilds.json", "w", encoding="utf-8")
-	# 辞書をファイルへ保存
-	file.write(json.dumps(db, indent=2, sort_keys=True))
-	file.close()
-
-	await load_guilddata()
-
-
-# ギルドデータの読み込み
-async def load_guilddata():
-	# グローバル変数宣言
-	global db
-
-	try:  # ファイルが存在しない場合
-		# ファイルを作成して初期データを書き込む
-		file = open("guilds.json", "x", encoding="utf-8")
-		file.write(json.dumps(db, indent=2, sort_keys=True))
-		file.close()
-		# ファイルから読み込む
-		file = open("guilds.json", "r", encoding="utf-8")
-		db = json.load(file)
-		file.close()
-
-	except FileExistsError:  # ファイルが存在する場合
-		# ファイルから読み込む
-		file = open("guilds.json", "r", encoding="utf-8")
-		db = json.load(file)
-		file.close()
-
-# ギルドデータの確認
-async def check_guilddata(guild = None):
-	global default_guilddata_item
-
-	logger.info("ギルドデータの確認開始")
-	guilds = []
-	if guild == None:
-		guilds = client.guilds
-	else:
-		guilds = [guild]
-
-	for guild in guilds:
-		# すべてのギルドのデータが存在するかチェック、存在しないギルドがあればそのギルドのデータを作成する
-		if db.get(str(guild.id)) == None:
-			db[str(guild.id)] = default_guilddata_item
-
-		# 各項目が存在するかチェック 存在しなければ追加する
-		for k, v in default_guilddata_item.items():
-			if db[str(guild.id)].get(k) == None or type(db[str(guild.id)].get(k)) != list:
-				db[str(guild.id)][k] == v
-			if k == "server_status_message": # 言語設定を変換
-				if db[str(guild.id)][k]["language"] == "en-GB": db[str(guild.id)][k]["language"] = "en_GB"
-				elif db[str(guild.id)][k]["language"] == "ja-JP": db[str(guild.id)][k]["language"] = "ja"
-				elif db[str(guild.id)][k]["language"] == "ko-KR": db[str(guild.id)][k]["language"] = "en_GB" # 一時的に英語にする
-
-	await save_guilddata()
-
-	logger.info("ギルドデータの確認完了")
-
-# 旧ギルドデータの変換
-async def convert_guilddata():
-	global default_guilddata_item
-
-	try:
-		# 旧ギルドデータが存在する場合は変換処理を実行する
-		if os.path.exists("guild.json"):
-			# ファイルの読み込み
-			file = open("guild.json", "r", encoding="utf-8")
-			old_gd = json.load(file)
-			new_gd = {}
-			file.close()
-
-			for guild_id in old_gd.keys():
-				new_gd[guild_id] = {"server_status_message": {}}
-				new_gd[guild_id]["server_status_message"]["channel_id"] = old_gd[guild_id]["server_status_message"][0]
-				new_gd[guild_id]["server_status_message"]["message_id"] = old_gd[guild_id]["server_status_message"][1]
-				new_gd[guild_id]["server_status_message"]["language"] = old_gd[guild_id]["server_status_message"][2]
-				new_gd[guild_id]["server_status_message"]["status_indicator"] = True
-
-			# 書き込み用にファイルを開く
-			file = open("guilds.json", "w", encoding="utf-8")
-			# 辞書をファイルへ保存
-			file.write(json.dumps(new_gd, indent=2, sort_keys=True))
-			file.close()
-			await load_guilddata()
-
-	except Exception as e:
-		logger.warning("ギルドデータの変換処理に失敗しました: " + str(e))
 
 
 # 1分毎にサーバーステータスを更新する
@@ -195,7 +99,7 @@ async def update_serverstatus():
 	logger.info("サーバーステータスの更新開始")
 
 	try:
-		await save_guilddata()
+		await GuildConfig.save()
 
 		# サーバーステータスを取得する
 		status = await serverstatus.get()
@@ -207,24 +111,26 @@ async def update_serverstatus():
 		for guild in client.guilds:
 			logger.info(f"ギルド: {guild.name}")
 			try:
-				ch_id = int(db[str(guild.id)]["server_status_message"]["channel_id"])
-				msg_id = int(db[str(guild.id)]["server_status_message"]["message_id"])
-				lang = db[str(guild.id)]["server_status_message"]["language"]
+				ch_id = int(GuildConfig.data.config[str(guild.id)]["server_status_message"]["channel_id"])
+				msg_id = int(GuildConfig.data.config[str(guild.id)]["server_status_message"]["message_id"])
+				notif_ch_id = int(GuildConfig.data.config[str(guild.id)]["server_status_notification"]["channel_id"])
+				notif_role_id = int(GuildConfig.data.config[str(guild.id)]["server_status_notification"]["role_id"])
+				lang = GuildConfig.data.config[str(guild.id)]["server_status_message"]["language"]
 			except Exception as e:
-				logger.warning(f"ギルドデータ({guild.name}) の読み込み失敗")
-				tb = sys.exc_info()
-				logger.error(str(traceback.format_tb(tb)))
+				logger.warning(f"ギルドデータ ({guild.name}) の読み込み失敗")
+				logger.error(traceback.format_exc())
+				continue # 更新をスキップ
 
 			try:
 				if ch_id != 0 and msg_id != 0 and lang != None:
 					# IDからテキストチャンネルを取得する
-					ch = client.get_channel(ch_id)
+					ch = guild.get_channel(ch_id)
 					# チャンネルが存在しない場合はギルドデータのチャンネルIDとメッセージIDをリセットする
 					if ch == None:
-						db[str(guild.id)]["server_status_message"]["channel_id"] = 0
-						db[str(guild.id)]["server_status_message"]["message_id"] = 0
+						GuildConfig.data.config[str(guild.id)]["server_status_message"]["channel_id"] = 0
+						GuildConfig.data.config[str(guild.id)]["server_status_message"]["message_id"] = 0
 						# ギルドデータを保存
-						await save_guilddata()
+						await GuildConfig.save()
 						continue # ループを続ける
 
 					ch_name = ch.name
@@ -241,20 +147,21 @@ async def update_serverstatus():
 						logger.warning("ギルド " + guild.name + " のメッセージ(" + str(msg_id) + ")の取得に失敗")
 						logger.warning(str(e))
 						# メッセージが存在しない(削除されている)場合はギルドデータのチャンネルIDとメッセージIDをリセットする
-						db[str(guild.id)]["server_status_message"]["channel_id"] = 0
-						db[str(guild.id)]["server_status_message"]["message_id"] = 0
+						GuildConfig.data.config[str(guild.id)]["server_status_message"]["channel_id"] = 0
+						GuildConfig.data.config[str(guild.id)]["server_status_message"]["message_id"] = 0
 						# ギルドデータを保存
-						await save_guilddata()
+						await GuildConfig.save()
 					else:
 						# テキストチャンネルの名前にステータスインジケーターを設定
 						try:
 							if ch_name[0] in status_indicator.List: ch_name = ch_name[1:]
-							if db[str(guild.id)]["server_status_message"]["status_indicator"] == True: await msg.channel.edit(name=serverstatus.indicator + ch_name)
+							if GuildConfig.data.config[str(guild.id)]["server_status_message"]["status_indicator"] == True: await msg.channel.edit(name=serverstatus.indicator + ch_name)
 						except Exception as e:
 							logger.error(traceback.format_exc())
 							logger.error(f"ギルド {guild.name} のステータスインジケーターの更新に失敗: {e}")
 
 						try:
+							# 埋め込みメッセージを生成
 							embeds = await generate_serverstatus_embed(lang)
 						except Exception as e:
 							embeds = None
@@ -262,12 +169,33 @@ async def update_serverstatus():
 							logger.error("サーバーステータスメッセージの生成に失敗: " + str(e))
 
 						try:
+							# サーバーステータスメッセージを編集
 							if embeds != None: await msg.edit(embeds=embeds)
 						except Exception as e:
 							logger.error(traceback.format_exc())
 							logger.error("サーバーステータスメッセージの編集に失敗: " + str(e))
+
+						try:
+							# TD:ここにサーバーステータスが変更されたかチェックするコードを書く
+
+							# 通知メッセージを送信
+							notif_ch = guild.get_channel(notif_ch_id)
+							notif_role = guild.get_role(notif_role_id)
+
+							if notif_role != None and notif_role.mentionable: notif_role_mention = notif_role.mention
+							else: notif_role_mention = ""
+
+							if notif_ch != None:
+								embed = embeds[0]
+								embed.description = embed.description + "\n[**🌐 " + localizations.translate("Notification_Show_Server_Status", lang) + "**]" + "(" + msg.jump_url + ")"
+								await notif_ch.send(
+									content=localizations.translate("Notification_Server_Status_Updated", lang) + "\n" + notif_role_mention,
+									embed=embed
+								)
+						except Exception as e:
+							logger.error(traceback.format_exc())
+							logger.error("サーバーステータス通知メッセージの送信に失敗: " + str(e))
 			except Exception as e:
-				tb = sys.exc_info()
 				logger.error(f"ギルド {guild.name} のサーバーステータスメッセージ({str(msg_id)})の更新に失敗")
 				logger.error(traceback.format_exc())
 	except Exception as e:
@@ -314,7 +242,7 @@ async def generate_serverstatus_embed(locale):
 	embed = discord.Embed(color=color_list["PC"])
 	embed.title = "📶 R6S Server Status"
 	embed.description = "🕒 " + localizations.translate("Last Update", locale) + ": " + f"<t:{status['_Update_At']}:f> (<t:{status['_Update_At']}:R>)"
-	#embed.set_footer(text=localizations.translate("Last Update", locale) + ": " + f"<t:{status['_Update_At']}:f> (<t:{status['_Update_At']}:R>)")
+	embed.set_footer(text=localizations.translate("Last Update", locale) + ": " + f"<t:{status['_Update_At']}:f> (<t:{status['_Update_At']}:R>)")
 
 	for k, v in pf_list.items():
 		status_list = []
@@ -395,26 +323,24 @@ async def setlanguage(ctx,
 		choices=LOCALE_DATA.keys()
 	)
 ):
-	global d
-
 	logger.info(f"コマンド実行: setlanguage / 実行者: {ctx.user}")
 
 	await ctx.defer(ephemeral=True)
 
 	try:
 		# ギルドデータをチェック
-		await check_guilddata(ctx.guild)
+		await GuildConfig.check_guild(ctx.guild.id)
 
 		if locale in localizations.LOCALE_DATA.keys():
-			#db[str(ctx.guild.id)]["server_status_message"]["language"] = [k for k, v in localizations.LOCALE_DATA.keys() if v == locale][0]
-			db[str(ctx.guild.id)]["server_status_message"]["language"] = locale
+			#GuildConfig.data.config[str(ctx.guild.id)]["server_status_message"]["language"] = [k for k, v in localizations.LOCALE_DATA.keys() if v == locale][0]
+			GuildConfig.data.config[str(ctx.guild.id)]["server_status_message"]["language"] = locale
 		else:
-			db[str(ctx.guild.id)]["server_status_message"]["language"] = "en_GB"
+			GuildConfig.data.config[str(ctx.guild.id)]["server_status_message"]["language"] = "en_GB"
 
 		# ギルドデータを保存
-		await save_guilddata()
+		await GuildConfig.save()
 
-		await ctx.send_followup(content=_("Cmd_setlanguage_Success", db[str(ctx.guild.id)]["server_status_message"]["language"]))
+		await ctx.send_followup(content=_("Cmd_setlanguage_Success", GuildConfig.data.config[str(ctx.guild.id)]["server_status_message"]["language"]))
 	except Exception as e:
 		logger.error(traceback.format_exc())
 		await ctx.send_followup(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
@@ -426,20 +352,18 @@ async def setindicator(ctx,
 		bool
 	)
 ):
-	global db
-
 	logger.info(f"コマンド実行: setindicator / 実行者: {ctx.user}")
 
 	await ctx.defer(ephemeral=True)
 
 	try:
 		# ギルドデータをチェック
-		await check_guilddata(ctx.guild)
+		await GuildConfig.check_guild(ctx.guild.id)
 
-		db[str(ctx.guild.id)]["server_status_message"]["status_indicator"] = enable
+		GuildConfig.data.config[str(ctx.guild.id)]["server_status_message"]["status_indicator"] = enable
 
 		# ギルドデータを保存
-		await save_guilddata()
+		await GuildConfig.save()
 
 		await ctx.send_followup(content=_("Cmd_setindicator_Success", str(enable)))
 	except Exception as e:
@@ -453,7 +377,7 @@ async def status(ctx):
 
 	await ctx.defer(ephemeral=False)
 	try:
-		await ctx.send_followup(embeds=await generate_serverstatus_embed(db[str(ctx.guild_id)]["server_status_message"]["language"]))
+		await ctx.send_followup(embeds=await generate_serverstatus_embed(GuildConfig.data.config[str(ctx.guild_id)]["server_status_message"]["language"]))
 	except Exception as e:
 		logger.error(traceback.format_exc())
 		await ctx.send_followup(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
@@ -472,10 +396,10 @@ async def create(ctx,
 
 	try:
 		# ギルドデータをチェック
-		await check_guilddata(ctx.guild)
+		await GuildConfig.check_guild(ctx.guild.id)
 
 		additional_msg = ""
-		if db[str(ctx.guild_id)]["server_status_message"]["message_id"] != 0:
+		if GuildConfig.data.config[str(ctx.guild_id)]["server_status_message"]["message_id"] != 0:
 			additional_msg = f"\n({_('Cmd_create_Old messages you previously sent will no longer be updated.')})"
 
 		if channel is None:
@@ -486,7 +410,7 @@ async def create(ctx,
 
 		# サーバーステータス埋め込みメッセージを送信
 		try:
-			msg = await ch.send(embeds=await generate_serverstatus_embed(db[str(ctx.guild_id)]["server_status_message"]["language"]))
+			msg = await ch.send(embeds=await generate_serverstatus_embed(GuildConfig.data.config[str(ctx.guild_id)]["server_status_message"]["language"]))
 		except Exception as e:
 			if type(e) == discord.errors.ApplicationCommandInvokeError and str(e).endswith("Missing Permissions"):
 				await ctx.send_followup(content=_("DontHavePermission_SendMessage", ch.mention))
@@ -496,11 +420,11 @@ async def create(ctx,
 			return
 
 		# 送信したチャンネルとメッセージのIDをギルドデータへ保存する
-		db[str(ctx.guild_id)]["server_status_message"]["channel_id"] = ch_id
-		db[str(ctx.guild_id)]["server_status_message"]["message_id"] = msg.id
+		GuildConfig.data.config[str(ctx.guild_id)]["server_status_message"]["channel_id"] = ch_id
+		GuildConfig.data.config[str(ctx.guild_id)]["server_status_message"]["message_id"] = msg.id
 
 		# ギルドデータを保存
-		await save_guilddata()
+		await GuildConfig.save()
 
 		await ctx.send_followup(content=_("Cmd_create_Success", ch.mention) + additional_msg)
 	except Exception as e:
