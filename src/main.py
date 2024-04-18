@@ -35,22 +35,6 @@ import localizations
 from localizations import i18n, LOCALE_DATA
 
 
-default_guilddata_item = {
-	"server_status_message": {
-		"channel_id": 0,
-		"message_id": 0,
-		"language": "en-GB",
-		"status_indicator": True
-	}
-}
-
-db = {}
-
-# 引数ぱーさー
-parser = argparse.ArgumentParser()
-args = parser.parse_args()
-
-
 # Bot起動時のイベント
 @client.event
 async def on_ready():
