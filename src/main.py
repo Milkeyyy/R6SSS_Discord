@@ -222,7 +222,7 @@ async def generate_serverstatus_embed(locale):
 	embed = discord.Embed(color=color_list["PC"])
 	embed.title = "📶 R6S Server Status"
 	embed.description = "🕒 " + localizations.translate("Last Update", locale) + ": " + f"<t:{status['_Update_At']}:f> (<t:{status['_Update_At']}:R>)"
-	embed.set_footer(text=localizations.translate("Last Update", locale) + ": " + f"<t:{status['_Update_At']}:f> (<t:{status['_Update_At']}:R>)")
+	embed.set_footer(text="⚠️\n" + localizations.translate("NotAffiliatedWithOrRndorsedBy", locale))
 
 	for k, v in pf_list.items():
 		status_list = []

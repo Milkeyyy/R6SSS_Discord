@@ -18,6 +18,7 @@
 		"Degraded": "Degraded",
 		"Last Update": "Last Update",
 		"Unknown": "Unknown",
+		"NotAffiliatedWithOrRndorsedBy": "This bot is not affiliated with or endorsed by Ubisoft.\nThe accuracy of server status is not guaranteed.",
 		"Cmd_General_DontHavePermission": "You don't have permission to execute this command!",
 		"An error occurred when running the command": "An error occurred when running the command",
 		"DontHavePermission_SendMessage": "You do not have permission to send messages to text channel {0}!",
