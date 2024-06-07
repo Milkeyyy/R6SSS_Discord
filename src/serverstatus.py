@@ -10,8 +10,9 @@ data = {}
 # テキストチャンネルの名前に表示するステータスインジケーター(絵文字)
 indicator = status_indicator.Unknown
 
-# サーバーステータスを取得して整えて返す
-async def get():
+async def get() -> dict[str, dict]:
+	"""サーバーステータスを取得して整えて返す"""
+
 	global indicator
 
 	# サーバーステータスを取得

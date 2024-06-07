@@ -12,7 +12,7 @@ locale = "ja-JP"
 #LOCALES: list
 
 
-def load_localedata():
+def load_localedata() -> None:
 	global i18n
 	global LOCALE_DATA
 
@@ -37,7 +37,7 @@ def load_localedata():
 	)
 	#print(i18n.current_locale)
 
-def translate(text: str, lang: str="en_GB"):
+def translate(text: str, lang: str="en_GB") -> str:
 	global LOCALE_DATA
 
 	try:

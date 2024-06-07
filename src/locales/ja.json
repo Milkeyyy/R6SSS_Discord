@@ -19,6 +19,8 @@
 		"Last Update": "最終更新",
 		"Unknown": "不明",
 		"NotAffiliatedWithOrRndorsedBy": "この Bot は Ubisoft と提携または承認されていません。\nサーバーステータスの正確性は保証されません。",
+		"Notification_Server_Status_Updated": "サーバーステータスが更新されました。",
+		"Notification_Show_Server_Status": "サーバーステータスを表示",
 		"Cmd_General_DontHavePermission": "あなたにはこのコマンドを実行する権限がありません！",
 		"An error occurred when running the command": "コマンドの実行時にエラーが発生しました",
 		"DontHavePermission_SendMessage": "テキストチャンネル {0} へメッセージを送信する権限がありません！",

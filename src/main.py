@@ -33,11 +33,11 @@ from localizations import i18n, LOCALE_DATA
 
 # Bot起動時のイベント
 @client.event
-async def on_ready():
+async def on_ready() -> None:
 	print("---------------------------------------")
 	print(f" {app.NAME} - Version {app.VERSION}")
 	print(f" using Pycord {discord.__version__}")
-	print(f" Developed by Milkeyyy")
+	print(" Developed by Milkeyyy")
 	print("---------------------------------------")
 	print("")
 	await client.change_presence(
@@ -45,7 +45,7 @@ async def on_ready():
 			name=f"Type /create | v{app.VERSION}"
 		)
 	)
-	logger.info(f"{client.user} へログインしました！ (ID: {client.user.id})")
+	logger.info("%s へログインしました！ (ID: %s)", client.user.display_name, str(client.user.id))
 
 	# コマンドのローカライズ
 	#i18n.localize_commands()
@@ -61,12 +61,30 @@ async def on_ready():
 	logger.info("サーバーステータスの定期更新開始")
 	update_serverstatus.start()
 
+# アプリケーションコマンド実行時のイベント
+@client.event
+async def on_application_command_completion(ctx: discord.ApplicationContext) -> None:
+	full_command_name = ctx.command.qualified_name
+	if ctx.guild is not None:
+		logger.info(
+			f"アプリケーションコマンド {full_command_name} が {ctx.guild.name} (ID: {ctx.guild.id}) にて {ctx.user} (ID: {ctx.user.id}) によって実行"
+		)
+	else:
+		logger.info(
+			f"アプリケーションコマンド {full_command_name} が {ctx.user} (ID: {ctx.user.id}) によって DM にて実行"
+		)
+
+# アプリケーションコマンドエラー時のイベント
+@client.event
+async def on_application_command_error(ctx: discord.ApplicationContext) -> None:
+	pass
+
 
 # 1分毎にサーバーステータスを更新する
 serverstatus_loop_isrunning = False
 
 @tasks.loop(seconds=180.0)
-async def update_serverstatus():
+async def update_serverstatus() -> None:
 	global serverstatus_loop_isrunning
 	serverstatus_loop_isrunning = True
 
@@ -89,24 +107,24 @@ async def update_serverstatus():
 
 		# 各ギルドの埋め込みメッセージIDチェック、存在する場合はメッセージを更新する
 		for guild in client.guilds:
-			logger.info(f"ギルド: {guild.name}")
+			logger.info("ギルド: %s", guild.name)
 			try:
 				ch_id = int(GuildConfig.data.config[str(guild.id)]["server_status_message"]["channel_id"])
 				msg_id = int(GuildConfig.data.config[str(guild.id)]["server_status_message"]["message_id"])
 				notif_ch_id = int(GuildConfig.data.config[str(guild.id)]["server_status_notification"]["channel_id"])
 				notif_role_id = int(GuildConfig.data.config[str(guild.id)]["server_status_notification"]["role_id"])
 				lang = GuildConfig.data.config[str(guild.id)]["server_status_message"]["language"]
-			except Exception as e:
-				logger.warning(f"ギルドデータ ({guild.name}) の読み込み失敗")
+			except Exception:
+				logger.warning("ギルドデータ (%s) の読み込み失敗", guild.name)
 				logger.error(traceback.format_exc())
 				continue # 更新をスキップ
 
 			try:
-				if ch_id != 0 and msg_id != 0 and lang != None:
+				if ch_id != 0 and msg_id != 0 and lang is not None:
 					# IDからテキストチャンネルを取得する
 					ch = guild.get_channel(ch_id)
 					# チャンネルが存在しない場合はギルドデータのチャンネルIDとメッセージIDをリセットする
-					if ch == None:
+					if ch is None:
 						GuildConfig.data.config[str(guild.id)]["server_status_message"]["channel_id"] = 0
 						GuildConfig.data.config[str(guild.id)]["server_status_message"]["message_id"] = 0
 						# ギルドデータを保存
@@ -124,7 +142,7 @@ async def update_serverstatus():
 						e = err
 
 					if msg is None:
-						logger.warning("ギルド " + guild.name + " のメッセージ(" + str(msg_id) + ")の取得に失敗")
+						logger.warning("ギルド %s のメッセージ(%s)の取得に失敗", guild.name, str(msg_id))
 						logger.warning(str(e))
 						# メッセージが存在しない(削除されている)場合はギルドデータのチャンネルIDとメッセージIDをリセットする
 						GuildConfig.data.config[str(guild.id)]["server_status_message"]["channel_id"] = 0
@@ -134,11 +152,13 @@ async def update_serverstatus():
 					else:
 						# テキストチャンネルの名前にステータスインジケーターを設定
 						try:
-							if ch_name[0] in status_indicator.List: ch_name = ch_name[1:]
-							if GuildConfig.data.config[str(guild.id)]["server_status_message"]["status_indicator"] == True: await msg.channel.edit(name=serverstatus.indicator + ch_name)
+							if ch_name[0] in status_indicator.List:
+								ch_name = ch_name[1:]
+							if GuildConfig.data.config[str(guild.id)]["server_status_message"]["status_indicator"]:
+								await msg.channel.edit(name=serverstatus.indicator + ch_name)
 						except Exception as e:
 							logger.error(traceback.format_exc())
-							logger.error(f"ギルド {guild.name} のステータスインジケーターの更新に失敗: {e}")
+							logger.error("ギルド %s のステータスインジケーターの更新に失敗: %s", guild.name, str(e))
 
 						try:
 							# 埋め込みメッセージを生成
@@ -146,38 +166,44 @@ async def update_serverstatus():
 						except Exception as e:
 							embeds = None
 							logger.error(traceback.format_exc())
-							logger.error("サーバーステータスメッセージの生成に失敗: " + str(e))
+							logger.error("サーバーステータスメッセージの生成に失敗: %s", str(e))
 
 						try:
 							# サーバーステータスメッセージを編集
-							if embeds != None: await msg.edit(embeds=embeds)
+							if embeds is not None:
+								await msg.edit(embeds=embeds)
 						except Exception as e:
 							logger.error(traceback.format_exc())
-							logger.error("サーバーステータスメッセージの編集に失敗: " + str(e))
+							logger.error("サーバーステータスメッセージの生成に失敗: %s", str(e))
 
 						try:
-							# TD:ここにサーバーステータスが変更されたかチェックするコードを書く
+							# TODO: ここにサーバーステータスが変更されたかチェックするコードを書く
 
 							# 通知メッセージを送信
 							notif_ch = guild.get_channel(notif_ch_id)
 							notif_role = guild.get_role(notif_role_id)
 
-							if notif_role != None and notif_role.mentionable: notif_role_mention = notif_role.mention
-							else: notif_role_mention = ""
+							if notif_role is not None and notif_role.mentionable:
+								notif_role_mention = notif_role.mention
+							else:
+								notif_role_mention = ""
 
-							if notif_ch != None:
+							if notif_ch is not None:
 								embed = embeds[0]
 								embed.description = embed.description + "\n[**🌐 " + localizations.translate("Notification_Show_Server_Status", lang) + "**]" + "(" + msg.jump_url + ")"
 								await notif_ch.send(
 									content=localizations.translate("Notification_Server_Status_Updated", lang) + "\n" + notif_role_mention,
 									embed=embed
 								)
+
 						except Exception as e:
 							logger.error(traceback.format_exc())
-							logger.error("サーバーステータス通知メッセージの送信に失敗: " + str(e))
+							logger.error("サーバーステータス通知メッセージの送信に失敗: %s", str(e))
+
 			except Exception as e:
-				logger.error(f"ギルド {guild.name} のサーバーステータスメッセージ({str(msg_id)})の更新に失敗")
+				logger.error("ギルド %s のサーバーステータスメッセージ(%s)の更新に失敗", guild.name, str(msg_id))
 				logger.error(traceback.format_exc())
+
 	except Exception as e:
 		logger.error(traceback.format_exc())
 		heartbeat.monitor.ping(state="fail", message="サーバーステータスの更新エラー: " + str(e))
@@ -188,14 +214,16 @@ async def update_serverstatus():
 	heartbeat.monitor.ping(state="complete", message="サーバーステータスの更新完了")
 
 @update_serverstatus.after_loop
-async def after_updateserverstatus():
+async def after_updateserverstatus() -> None:
 	global serverstatus_loop_isrunning
+
 	serverstatus_loop_isrunning = False
 	logger.info("サーバーステータスの定期更新終了")
-	if serverstatus_loop_isrunning == False: update_serverstatus.start()
+	if not serverstatus_loop_isrunning:
+		update_serverstatus.start()
 
 # サーバーステータス埋め込みメッセージを更新
-async def generate_serverstatus_embed(locale):
+async def generate_serverstatus_embed(locale) -> None:
 	pf_list = {
 		"PC": ["PC", "PC", 2],
 		"PS4": ["PS4", "PS4", 0],
@@ -224,13 +252,15 @@ async def generate_serverstatus_embed(locale):
 	embed.description = "🕒 " + localizations.translate("Last Update", locale) + ": " + f"<t:{status['_Update_At']}:f> (<t:{status['_Update_At']}:R>)"
 	embed.set_footer(text="⚠️\n" + localizations.translate("NotAffiliatedWithOrRndorsedBy", locale))
 
-	for k, v in pf_list.items():
+	for _, v in pf_list.items():
 		status_list = []
 
 		pf_id = v[0] # PC, PS4, XB1...
 		pf_display_name = v[1] # プラットフォームの表示名
 
-		if pf_id.startswith("_"): continue
+		if pf_id.startswith("_"):
+			continue
+
 		# サーバーの状態によってアイコンを変更する
 		# 問題なし
 		if status[pf_id]["Status"]["Connectivity"] == "Operational":
@@ -251,7 +281,7 @@ async def generate_serverstatus_embed(locale):
 		connectivity_text = localizations.translate(status[pf_id]["Status"]["Connectivity"], locale)
 
 		mt_text = ""
-		if status[pf_id]["Maintenance"] == True:
+		if status[pf_id]["Maintenance"]:
 			status_icon = status_icon_set.MAINTENANCE
 			connectivity_text = localizations.translate("Maintenance", locale)
 
@@ -259,7 +289,8 @@ async def generate_serverstatus_embed(locale):
 		f_text = ""
 		f_status_text = ""
 		for f, s in status[pf_id]["Status"].items():
-			if f == "Connectivity": continue
+			if f == "Connectivity":
+				continue
 			# 通常
 			f_status_icon = status_icon_set.OPERATIONAL
 			f_status_text = localizations.translate(s, locale)
@@ -267,7 +298,7 @@ async def generate_serverstatus_embed(locale):
 			if s != "Operational":
 				f_status_icon = status_icon_set.DEGRADED
 			# メンテナンス
-			if status[pf_id]["Maintenance"] == True:
+			if status[pf_id]["Maintenance"]:
 				f_status_icon = status_icon_set.MAINTENANCE
 			# 不明
 			if s == "Unknown":
@@ -296,15 +327,14 @@ async def generate_serverstatus_embed(locale):
 
 # コマンド
 @client.slash_command()
+@discord.guild_only()
 @discord.default_permissions(administrator=True)
 async def setlanguage(ctx,
 	locale: Option(
 		str,
 		choices=LOCALE_DATA.keys()
 	)
-):
-	logger.info(f"コマンド実行: setlanguage / 実行者: {ctx.user}")
-
+) -> None:
 	await ctx.defer(ephemeral=True)
 
 	try:
@@ -326,14 +356,13 @@ async def setlanguage(ctx,
 		await ctx.send_followup(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
 
 @client.slash_command()
+@discord.guild_only()
 @discord.default_permissions(administrator=True)
 async def setindicator(ctx,
 	enable: Option(
 		bool
 	)
-):
-	logger.info(f"コマンド実行: setindicator / 実行者: {ctx.user}")
-
+) -> None:
 	await ctx.defer(ephemeral=True)
 
 	try:
@@ -351,10 +380,9 @@ async def setindicator(ctx,
 		await ctx.send_followup(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
 
 @client.slash_command()
+@discord.guild_only()
 @discord.default_permissions(send_messages=True)
-async def status(ctx):
-	logger.info(f"コマンド実行: status / 実行者: {ctx.user}")
-
+async def status(ctx) -> None:
 	await ctx.defer(ephemeral=False)
 	try:
 		await ctx.send_followup(embeds=await generate_serverstatus_embed(GuildConfig.data.config[str(ctx.guild_id)]["server_status_message"]["language"]))
@@ -363,15 +391,14 @@ async def status(ctx):
 		await ctx.send_followup(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
 
 @client.slash_command()
+@discord.guild_only()
 @discord.default_permissions(administrator=True)
 async def create(ctx,
 	channel: Option(
 		discord.TextChannel,
 		required=False
 	)
-):
-	logger.info(f"コマンド実行: create / 実行者: {ctx.user}")
-
+) -> None:
 	await ctx.defer(ephemeral=True)
 
 	try:
@@ -413,8 +440,7 @@ async def create(ctx,
 
 @client.slash_command()
 @discord.default_permissions(send_messages=True)
-async def ping(ctx):
-	logger.info(f"コマンド実行: ping / 実行者: {ctx.user}")
+async def ping(ctx) -> None:
 	try:
 		raw_ping = client.latency
 		ping = round(raw_ping * 1000)
@@ -426,8 +452,7 @@ async def ping(ctx):
 
 @client.slash_command()
 @discord.default_permissions(send_messages=True)
-async def about(ctx):
-	logger.info(f"コマンド実行: about / 実行者: {ctx.user}")
+async def about(ctx) -> None:
 	try:
 		embed = discord.Embed(color=discord.Colour.blue())
 		embed.set_author(name=app.NAME, icon_url=client.user.display_avatar.url)
@@ -441,7 +466,8 @@ async def about(ctx):
 		await ctx.respond(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
 
 @client.slash_command()
-async def synccommands(ctx):
+@discord.guild_only()
+async def synccommands(ctx) -> None:
 	try:
 		if await client.is_owner(ctx.user):
 			await ctx.defer(ephemeral=True)
