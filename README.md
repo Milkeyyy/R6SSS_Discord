@@ -10,7 +10,7 @@ Discordのテキストチャンネルにレインボーシックス シージの
 
 ## Bot
 ### 稼働状況
-![R6SSS Discord Bot](https://cronitor.io/badges/Za7Cbb/production/uXc8wYxprFTpoguQbbHGQ95r5u4.svg)
+![R6SSS Discord Bot](https://cronitor.io/badges/ncjpBt/production/HL2tEvnxU5AtBMfsEMI8O-smSZ0.svg)
 
 [**[Botをサーバーに招待]**](https://discord.com/oauth2/authorize?client_id=990497421488451615)
 
