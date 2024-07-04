@@ -2,7 +2,7 @@ from discord import Bot
 
 
 NAME = "R6SSS"
-VERSION = "1.6.0"
+VERSION = "2.0.0"
 
 # くらいあんと
 intents = None
