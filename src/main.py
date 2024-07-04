@@ -83,7 +83,7 @@ async def on_application_command_error(ctx: discord.ApplicationContext) -> None:
 # 1分毎にサーバーステータスを更新する
 serverstatus_loop_isrunning = False
 
-@tasks.loop(seconds=180.0)
+@tasks.loop(seconds=120.0)
 async def update_serverstatus() -> None:
 	global serverstatus_loop_isrunning
 	serverstatus_loop_isrunning = True
@@ -318,7 +318,7 @@ async def generate_serverstatus_embed(locale) -> None:
 			value="\n".join(status_list)
 		)
 		# 各プラットフォームごとに別の行にするために、リストで指定された数の空のフィールドを挿入する
-		for i in range(v[2]):
+		for _ in range(v[2]):
 			embed.add_field(name="", value="")
 
 	embeds.append(embed)
