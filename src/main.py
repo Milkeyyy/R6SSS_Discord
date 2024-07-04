@@ -48,7 +48,7 @@ async def on_ready() -> None:
 	logger.info("%s へログインしました！ (ID: %s)", client.user.display_name, str(client.user.id))
 
 	# コマンドのローカライズ
-	#i18n.localize_commands()
+	i18n.localize_commands()
 	#await client.sync_commands()
 
 	# ハートビートのキーを読み込み
