@@ -30,9 +30,10 @@ class GuildConfig:
 
 	data: Box
 
-	async def _convert_v1_guildconfig(item: dict) -> dict | None:
+	@classmethod
+	async def _convert_v1_guildconfig(cls, item: dict) -> dict | None:
 		if "info" not in item or "config" not in item:
-			data = Box(GuildConfig.DEFAULT_DATA.copy())
+			data = Box(cls.DEFAULT_DATA.copy())
 			for k, v in item.items():
 				if client.get_guild(int(k)) != None: # キー(ギルドのID)からギルドを取得して、存在するならギルドIDとみなして変換する
 					data.config[str(k)] = v
@@ -40,67 +41,74 @@ class GuildConfig:
 		else:
 			return None
 
-	async def _check_dict_items(item: dict, default_items: dict) -> None:
+	@classmethod
+	async def _check_dict_items(cls, item: dict, default_items: dict) -> None:
 		for k, v in default_items.items():
 			if k not in item:
 				item[k] = v
 			if type(item[k]) == dict:
-				await GuildConfig._check_dict_items(item[k], default_items[k])
+				await cls._check_dict_items(item[k], default_items[k])
 
-	async def check_guild(id: int) -> None:
+	@classmethod
+	async def check_guild(cls, id: int) -> None:
 		# 渡されたIDのデータをチェック
 		gid = str(id)
-		if gid not in GuildConfig.data.config:
-			await GuildConfig.create(gid)
-		await GuildConfig._check_dict_items(GuildConfig.data.config[gid], GuildConfig.DEFAULT_GUILD_DATA)
+		if gid not in cls.data.config:
+			await cls.create(gid)
+		await cls._check_dict_items(cls.data.config[gid], cls.DEFAULT_GUILD_DATA)
 
-	async def check() -> None:
+	@classmethod
+	async def check(cls) -> None:
 		# コンフィグファイルの各ギルドの項目チェック
 		for guild in client.guilds:
 			gid = str(guild.id)
-			if gid not in GuildConfig.data.config:
-				await GuildConfig.create(gid)
-			await GuildConfig._check_dict_items(GuildConfig.data.config[gid], GuildConfig.DEFAULT_GUILD_DATA)
+			if gid not in cls.data.config:
+				await cls.create(gid)
+			await cls._check_dict_items(cls.data.config[gid], cls.DEFAULT_GUILD_DATA)
 
-	async def load() -> None:
+	@classmethod
+	async def load(cls) -> None:
 		logger.info("ギルドコンフィグを読み込み")
-		if path.isfile(GuildConfig.FILE_PATH): # ファイルが存在する場合
+		if path.isfile(cls.FILE_PATH): # ファイルが存在する場合
 			# ファイルから読み込む
-			GuildConfig.data = Box.from_json(filename=GuildConfig.FILE_PATH, encoding="utf-8")
+			cls.data = Box.from_json(filename=cls.FILE_PATH, encoding="utf-8")
 
 			# v1以前のギルドコンフィグの変換
-			cd = await GuildConfig._convert_v1_guildconfig(GuildConfig.data.to_dict())
+			cd = await cls._convert_v1_guildconfig(cls.data.to_dict())
 			if cd != None:
-				GuildConfig.data = cd
-				GuildConfig.data.info.created_at = datetime.datetime.now(tz=datetime.timezone.utc).timestamp()
+				cls.data = cd
+				cls.data.info.created_at = datetime.datetime.now(tz=datetime.timezone.utc).timestamp()
 
 			# コンフィグファイルの項目チェック
-			await GuildConfig._check_dict_items(GuildConfig.data, GuildConfig.DEFAULT_DATA)
+			await cls._check_dict_items(cls.data, cls.DEFAULT_DATA)
 
 		else: # ファイルが存在しない場合
 			# 新しくギルドコンフィグを作成する
-			GuildConfig.data = Box(GuildConfig.DEFAULT_DATA.copy())
-			GuildConfig.data.info.created_at = datetime.datetime.now(tz=datetime.timezone.utc).timestamp()
+			cls.data = Box(cls.DEFAULT_DATA.copy())
+			cls.data.info.created_at = datetime.datetime.now(tz=datetime.timezone.utc).timestamp()
 			# ファイルへ保存する
-			await GuildConfig.save()
+			await cls.save()
 
 		# 各項目のチェック
-		await GuildConfig.check()
+		await cls.check()
 
-	async def save() -> None:
+	@classmethod
+	async def save(cls) -> None:
 		logger.info("ギルドコンフィグを保存")
-		GuildConfig.data.to_json(GuildConfig.FILE_PATH, encoding="utf-8", indent=2)
+		cls.data.to_json(cls.FILE_PATH, encoding="utf-8", indent=2)
 
-	async def create(gid: str) -> None:
+	@classmethod
+	async def create(cls, gid: str) -> None:
 		logger.info("ギルドコンフィグを作成: " + gid)
-		GuildConfig.data.config[gid] = GuildConfig.DEFAULT_GUILD_DATA.copy()
-		await GuildConfig.save()
+		cls.data.config[gid] = cls.DEFAULT_GUILD_DATA.copy()
+		await cls.save()
 
-	async def set(guild_id: int, keys: list, value: object) -> None:
-		obj = GuildConfig.data.config[str(guild_id)]
+	@classmethod
+	async def set(cls, guild_id: int, keys: list, value: object) -> None:
+		obj = cls.data.config[str(guild_id)]
 		root = keys[len(keys)-1]
 		keys.pop()
 		for key in keys:
 			obj = obj[key]
 		obj[root] = value
-		await GuildConfig.save()
+		await cls.save()
