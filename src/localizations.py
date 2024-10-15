@@ -17,7 +17,7 @@ def load_localedata() -> None:
 	global LOCALE_DATA
 
 	# 言語一覧
-	LOCALE_DATA = dict()
+	LOCALE_DATA = {}
 
 	# 言語ファイルを読み込む
 	logger.info("言語ファイルを読み込み")
@@ -43,7 +43,6 @@ def translate(text: str, lang: str="en_GB") -> str:
 	try:
 		return LOCALE_DATA[lang]["strings"][text]
 	except KeyError as e:
-		#logging.error(str(e))
 		return text
 
 load_localedata()
