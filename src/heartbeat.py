@@ -1,31 +1,22 @@
-import cronitor
-import logging
-import sys
+import os
 
+import cronitor
+
+from logger import logger
+
+
+heartbeat: cronitor.Monitor
+monitor: cronitor.Monitor
 
 def load_keys():
 	global heartbeat
 	global monitor
 
 	# APIキーを読み込み
-	try:
-		f = open('cronitor_keys.txt', 'r', encoding='UTF-8')
-	except FileNotFoundError as e:
-		logging.warning("Cronitorのキー(cronitor_keys.txt)が見つかりません")
-		logging.error(str(e))
-		sys.exit(1)
+	if not os.getenv("CRONITOR_API_KEY"):
+		logger.warning("CronitorのAPIキーが指定されていません")
+		return
 
-	v = [s.strip() for s in f.readlines()]
-
-	if len(v) < 1:
-		f.close()
-		logging.error("Cronitorのキーが指定されていません")
-		sys.exit(1)
-
-	logging.info(f"Cronitor API/Heartbeat Keys has been loaded: {v[0]}/{v[1]}/{v[2]}")
-
-	cronitor.api_key = v[0]
-	heartbeat = cronitor.Monitor(v[1])
-	monitor = cronitor.Monitor(v[2])
-
-	f.close()
+	cronitor.api_key = os.getenv("CRONITOR_API_KEY")
+	heartbeat = cronitor.Monitor(os.getenv("CRONITOR_HEARTBEAT_KEY"))
+	monitor = cronitor.Monitor(os.getenv("CRONITOR_MONITOR_KEY"))

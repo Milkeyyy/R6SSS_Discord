@@ -1,8 +1,10 @@
+import os
 import traceback
 
 import discord
 from discord.commands import Option
 from discord.ext import tasks
+from dotenv import load_dotenv()
 from pycord.i18n import _
 
 # ロガー
@@ -189,8 +191,8 @@ async def update_serverstatus() -> None:
 								notif_role_mention = ""
 
 							if notif_ch is not None:
-								embed = embeds[0]
-								embed.description = embed.description + "\n[**🌐 " + localizations.translate("Notification_Show_Server_Status", lang) + "**]" + "(" + msg.jump_url + ")"
+								embed: discord.Embed = embeds[0]
+								embed.description = f"{embed.description}\n[**🌐{localizations.translate('Notification_Show_Server_Status', lang)}**]({msg.jump_url})"
 								await notif_ch.send(
 									content=localizations.translate("Notification_Server_Status_Updated", lang) + "\n" + notif_role_mention,
 									embed=embed
@@ -329,7 +331,7 @@ async def generate_serverstatus_embed(locale) -> None:
 @client.slash_command()
 @discord.guild_only()
 @discord.default_permissions(administrator=True)
-async def setlanguage(ctx,
+async def setlanguage(ctx: discord.ApplicationContext,
 	locale: Option(
 		str,
 		choices=LOCALE_DATA.keys()
@@ -358,7 +360,7 @@ async def setlanguage(ctx,
 @client.slash_command()
 @discord.guild_only()
 @discord.default_permissions(administrator=True)
-async def setindicator(ctx,
+async def setindicator(ctx: discord.ApplicationContext,
 	enable: Option(
 		bool
 	)
@@ -382,7 +384,7 @@ async def setindicator(ctx,
 @client.slash_command()
 @discord.guild_only()
 @discord.default_permissions(send_messages=True)
-async def status(ctx) -> None:
+async def status(ctx: discord.ApplicationContext) -> None:
 	await ctx.defer(ephemeral=False)
 	try:
 		await ctx.send_followup(embeds=await generate_serverstatus_embed(GuildConfig.data.config[str(ctx.guild_id)]["server_status_message"]["language"]))
@@ -393,7 +395,7 @@ async def status(ctx) -> None:
 @client.slash_command()
 @discord.guild_only()
 @discord.default_permissions(administrator=True)
-async def create(ctx,
+async def create(ctx: discord.ApplicationContext,
 	channel: Option(
 		discord.TextChannel,
 		required=False
@@ -440,7 +442,7 @@ async def create(ctx,
 
 @client.slash_command()
 @discord.default_permissions(send_messages=True)
-async def ping(ctx) -> None:
+async def ping(ctx: discord.ApplicationContext) -> None:
 	try:
 		raw_ping = client.latency
 		ping = round(raw_ping * 1000)
@@ -452,7 +454,7 @@ async def ping(ctx) -> None:
 
 @client.slash_command()
 @discord.default_permissions(send_messages=True)
-async def about(ctx) -> None:
+async def about(ctx: discord.ApplicationContext) -> None:
 	try:
 		embed = discord.Embed(color=discord.Colour.blue())
 		embed.set_author(name=app.NAME, icon_url=client.user.display_avatar.url)
@@ -467,7 +469,7 @@ async def about(ctx) -> None:
 
 @client.slash_command()
 @discord.guild_only()
-async def synccommands(ctx) -> None:
+async def synccommands(ctx: discord.ApplicationContext) -> None:
 	try:
 		if await client.is_owner(ctx.user):
 			await ctx.defer(ephemeral=True)
@@ -483,12 +485,15 @@ async def synccommands(ctx) -> None:
 
 # ログイン
 try:
+	# .envファイルが存在する場合はファイルから環境変数を読み込む
+	env_path = os.path.join(os.getcwd(), ".env")
+	if os.path.isfile(env_path):
+		load_dotenv(env_path)
+
 	# 言語データを読み込む
 	#localizations.load_localedata()
+
 	# ログイン
-	f = open('token.txt', 'r', encoding='UTF-8')
-	client.run(f.read())
-	f.close()
+	client.run(os.getenv("CLIENT_TOKEN"))
 except Exception as e:
 	logger.error(traceback.format_exc())
-	#os.system("kill 1")
