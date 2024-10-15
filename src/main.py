@@ -106,6 +106,8 @@ async def update_serverstatus() -> None:
 
 		# サーバーステータスを取得する
 		status = await serverstatus.get()
+		if status is None:
+			return
 
 		# サーバーステータスを更新する
 		serverstatus.data = status
@@ -254,7 +256,7 @@ async def generate_serverstatus_embed(locale) -> None:
 	# 各プラットフォームごとの埋め込みメッセージを作成
 	embed = discord.Embed(color=color_list["PC"])
 	embed.title = "📶 R6S Server Status"
-	embed.description = "🕒 " + localizations.translate("Last Update", locale) + ": " + f"<t:{status['_Update_At']}:f> (<t:{status['_Update_At']}:R>)"
+	embed.description = "🕒 " + localizations.translate("Last Update", locale) + ": " + f"<t:{serverstatus.updated_at}:f> (<t:{serverstatus.updated_at}:R>)"
 	embed.set_footer(text="⚠️\n" + localizations.translate("NotAffiliatedWithOrRndorsedBy", locale))
 
 	for _, v in pf_list.items():
@@ -293,9 +295,8 @@ async def generate_serverstatus_embed(locale) -> None:
 		f_list = []
 		f_text = ""
 		f_status_text = ""
-		for f, s in status[pf_id]["Status"].items():
-			if f == "Connectivity":
-				continue
+		# 各サービスをループしてステータスに合わせてアイコンとテキストを設定
+		for f, s in status[pf_id]["Status"]["Features"].items():
 			# 通常
 			f_status_icon = status_icon_set.OPERATIONAL
 			f_status_text = localizations.translate(s, locale)
