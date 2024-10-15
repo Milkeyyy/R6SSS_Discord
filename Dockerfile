@@ -2,7 +2,7 @@
 FROM python:3.12
 
 # 
-WORKDIR /code
+WORKDIR /
 
 # 
 COPY ./requirements.txt /code/requirements.txt
@@ -15,4 +15,4 @@ COPY src/*.py /code/
 COPY locales/*.json /locales/
 
 # 
-CMD ["python", "./main.py"]
+CMD ["python", "./code/main.py"]
