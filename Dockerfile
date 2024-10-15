@@ -12,7 +12,7 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
 # 
 COPY src/*.py /code/
-COPY src/locales/*.json /code/locales/
+COPY locales/*.json /code/locales/
 
 # 
 CMD ["python", "./main.py"]
