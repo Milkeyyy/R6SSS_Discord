@@ -1,7 +1,6 @@
 from glob import glob
 import json
-import os
-from os import path
+from os import getcwd, path
 
 from pycord.i18n import I18n
 
@@ -22,7 +21,7 @@ def load_localedata() -> None:
 
 	# 言語ファイルを読み込む
 	logger.info("言語ファイルを読み込み")
-	logger.info("- %s", os.getcwd())
+	logger.info("- %s", getcwd())
 	for f in glob("./locales/*.json"):
 		lang = path.splitext(path.basename(f))[0]
 		logger.info("- " + lang)
