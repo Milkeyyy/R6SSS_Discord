@@ -10,7 +10,7 @@ API_URL = "https://api-r6sss.milkeyyy.com/v2/status"
 
 # サーバーステータス辞書
 data: dict = {}
-updated_at: float = 0.0
+updated_at: int = 0
 
 # テキストチャンネルの名前に表示するステータスインジケーター(絵文字)
 indicator = status_indicator.Unknown
@@ -29,7 +29,7 @@ async def get() -> dict[str, dict] | None:
 		return None
 
 	status = result.json()["data"]
-	updated_at = datetime.datetime.now().timestamp()
+	updated_at = int(datetime.datetime.now().timestamp())
 
 	status_list = []
 	# ステータスインジケーターを設定
