@@ -4,7 +4,10 @@ import traceback
 import discord
 from discord.commands import Option
 from discord.ext import tasks
-from dotenv import load_dotenv()
+try:
+	from dotenv import load_dotenv
+except ImportError:
+	pass
 from pycord.i18n import _
 
 # ロガー
