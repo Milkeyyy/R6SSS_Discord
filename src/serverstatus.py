@@ -46,7 +46,7 @@ async def get() -> dict[str, dict] | None:
 			indicator = status_indicator.Interrupted
 		if st == "Degraded":
 			indicator = status_indicator.Degraded
-		if v["Maintenance"]:
+		if v["Status"]["Maintenance"]:
 			indicator = status_indicator.Maintenance
 
 	return status

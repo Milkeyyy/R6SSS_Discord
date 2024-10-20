@@ -288,7 +288,7 @@ async def generate_serverstatus_embed(locale) -> None:
 		connectivity_text = localizations.translate(status[pf_id]["Status"]["Connectivity"], locale)
 
 		mt_text = ""
-		if status[pf_id]["Maintenance"]:
+		if status[pf_id]["Status"]["Maintenance"]:
 			status_icon = status_icon_set.MAINTENANCE
 			connectivity_text = localizations.translate("Maintenance", locale)
 
@@ -304,7 +304,7 @@ async def generate_serverstatus_embed(locale) -> None:
 			if s != "Operational":
 				f_status_icon = status_icon_set.DEGRADED
 			# メンテナンス
-			if status[pf_id]["Maintenance"]:
+			if status[pf_id]["Status"]["Maintenance"]:
 				f_status_icon = status_icon_set.MAINTENANCE
 			# 不明
 			if s == "Unknown":
