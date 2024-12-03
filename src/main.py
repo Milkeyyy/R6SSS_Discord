@@ -1,3 +1,4 @@
+import datetime
 import os
 import traceback
 
@@ -8,6 +9,7 @@ try:
 	from dotenv import load_dotenv
 except ImportError:
 	pass
+import httpx
 from pycord.i18n import _
 
 # ロガー
@@ -22,6 +24,9 @@ from config import GuildConfig
 
 # Cronitor
 import heartbeat
+
+# スケジュール
+import maintenance_schedule
 
 # サーバーステータス
 import serverstatus
@@ -230,7 +235,7 @@ async def after_updateserverstatus() -> None:
 		update_serverstatus.start()
 
 # サーバーステータス埋め込みメッセージを更新
-async def generate_serverstatus_embed(locale) -> None:
+async def generate_serverstatus_embed(locale) -> list[discord.Embed]:
 	pf_list = {
 		"PC": ["PC", "PC", 2],
 		"PS4": ["PS4", "PS4", 0],
@@ -328,6 +333,59 @@ async def generate_serverstatus_embed(locale) -> None:
 			embed.add_field(name="", value="")
 
 	embeds.append(embed)
+
+	# メンテナンススケジュール情報を取得
+	sched = await maintenance_schedule.get()
+
+	create = True
+	#dt = "**:calendar: " + localizations.translate("MaintenanceSchedule_ScheduledDT", locale) + "**\n"
+	dt = ""
+	# スケジュール埋め込みを生成
+	if sched is not None:
+		# 全プラットフォーム同一
+		if "All" in sched["Platforms"]:
+			# スケジュールが範囲内か判定
+			if datetime.datetime.now().timestamp() >= (sched["Platforms"]["All"]["Timestamp"] + (sched["Downtime"] * 60)):
+				create = False
+			# 予定日時一覧を生成
+			dt = "・**" + localizations.translate('Platform_All', locale) + f"**: <t:{sched['Platforms']['All']['Timestamp']}:f> (<t:{sched['Platforms']['All']['Timestamp']}:R>)" + "\n"
+		else: # プラットフォーム別
+			for p, d in sched["Platforms"].items(): 
+				# スケジュールが範囲内か判定
+				if datetime.datetime.now().timestamp() >= (d["Timestamp"] + (sched["Downtime"] * 60)):
+					create = False
+					break
+				# 予定日時一覧を生成
+				dt = dt + "・**" + localizations.translate(f'Platform_{p}', locale) + f"**: <t:{d['Timestamp']}:f> (<t:{d['Timestamp']}:R>)" + "\n"
+
+		if create:
+			embed = discord.Embed(
+				colour=discord.colour.Colour.nitro_pink(),
+				title=":wrench::calendar: " + localizations.translate("MaintenanceSchedule", locale),
+				description="**" + sched["Title"] + "**\n" + sched["Detail"],
+				footer=discord.EmbedFooter("⚠️\n" + localizations.translate("MaintenanceSchedule_Notes", locale)),
+				fields=[
+					# ダウンタイム
+					discord.EmbedField(
+						name="**:clock3: " + localizations.translate("MaintenanceSchedule_Downtime", locale) + "**",
+						value="・" + str(sched["Downtime"]) + " " + localizations.translate("MaintenanceSchedule_Downtime_Minute", locale)
+					),
+					# 各プラットフォームの予定日時
+					discord.EmbedField(
+						name="**:video_game: " + localizations.translate("MaintenanceSchedule_TargetPlatform", locale) + "**",
+						value=dt
+					)
+				]
+			)
+		else: # 予定されているメンテナンスがない場合
+			embed = discord.Embed(
+				colour=discord.colour.Colour.nitro_pink(),
+				title=":wrench::calendar: " + localizations.translate("MaintenanceSchedule", locale),
+				description=localizations.translate("MaintenanceSchedule_NoMaintenanceScheduled", locale),
+				footer=discord.EmbedFooter("⚠️\n" + localizations.translate("MaintenanceSchedule_Notes", locale))
+			)
+
+		embeds.append(embed)
 
 	return embeds
 
