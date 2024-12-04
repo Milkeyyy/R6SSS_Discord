@@ -450,7 +450,7 @@ async def setindicator(ctx: discord.ApplicationContext,
 async def status(ctx: discord.ApplicationContext) -> None:
 	await ctx.defer(ephemeral=False)
 	try:
-		sched = maintenance_schedule.get()
+		sched = await maintenance_schedule.get()
 		await ctx.send_followup(embeds=await generate_serverstatus_embed(GuildConfig.data.config[str(ctx.guild_id)]["server_status_message"]["language"], sched))
 	except Exception as e:
 		logger.error(traceback.format_exc())
@@ -483,7 +483,7 @@ async def create(ctx: discord.ApplicationContext,
 
 		# サーバーステータス埋め込みメッセージを送信
 		try:
-			sched = maintenance_schedule.get()
+			sched = await maintenance_schedule.get()
 			msg = await ch.send(embeds=await generate_serverstatus_embed(GuildConfig.data.config[str(ctx.guild_id)]["server_status_message"]["language"], sched))
 		except Exception as e:
 			if type(e) == discord.errors.ApplicationCommandInvokeError and str(e).endswith("Missing Permissions"):
