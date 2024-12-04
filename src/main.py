@@ -9,7 +9,6 @@ try:
 	from dotenv import load_dotenv
 except ImportError:
 	pass
-import httpx
 from pycord.i18n import _
 
 # ロガー
@@ -109,6 +108,9 @@ async def update_serverstatus() -> None:
 	try:
 		await GuildConfig.save()
 
+		# メンテナンススケジュール情報を取得
+		sched = await maintenance_schedule.get()
+
 		# サーバーステータスを取得する
 		status = await serverstatus.get()
 		if status is None:
@@ -144,6 +146,7 @@ async def update_serverstatus() -> None:
 						continue # ループを続ける
 
 					ch_name = ch.name
+					logger.info("- チャンネル: #%s", ch_name)
 
 					e = ""
 					try:
@@ -174,7 +177,7 @@ async def update_serverstatus() -> None:
 
 						try:
 							# 埋め込みメッセージを生成
-							embeds = await generate_serverstatus_embed(lang)
+							embeds = await generate_serverstatus_embed(lang, sched)
 						except Exception as e:
 							embeds = None
 							logger.error(traceback.format_exc())
@@ -235,7 +238,7 @@ async def after_updateserverstatus() -> None:
 		update_serverstatus.start()
 
 # サーバーステータス埋め込みメッセージを更新
-async def generate_serverstatus_embed(locale) -> list[discord.Embed]:
+async def generate_serverstatus_embed(locale, sched) -> list[discord.Embed]:
 	pf_list = {
 		"PC": ["PC", "PC", 2],
 		"PS4": ["PS4", "PS4", 0],
@@ -334,29 +337,27 @@ async def generate_serverstatus_embed(locale) -> list[discord.Embed]:
 
 	embeds.append(embed)
 
-	# メンテナンススケジュール情報を取得
-	sched = await maintenance_schedule.get()
-
 	create = True
 	#dt = "**:calendar: " + localizations.translate("MaintenanceSchedule_ScheduledDT", locale) + "**\n"
 	dt = ""
 	# スケジュール埋め込みを生成
 	if sched is not None:
+		platform_list = [p["Name"] for p in sched["Platforms"]]
 		# 全プラットフォーム同一
-		if "All" in sched["Platforms"]:
+		if "All" in platform_list:
 			# スケジュールが範囲内か判定
-			if datetime.datetime.now().timestamp() >= (sched["Platforms"]["All"]["Timestamp"] + (sched["Downtime"] * 60)):
+			if datetime.datetime.now().timestamp() >= (sched["Timestamp"] + (sched["Downtime"] * 60)):
 				create = False
 			# 予定日時一覧を生成
-			dt = "・**" + localizations.translate('Platform_All', locale) + f"**: <t:{sched['Platforms']['All']['Timestamp']}:f> (<t:{sched['Platforms']['All']['Timestamp']}:R>)" + "\n"
+			dt = "・**" + localizations.translate('Platform_All', locale) + f"**: <t:{sched['Timestamp']}:f> (<t:{sched['Timestamp']}:R>)" + "\n"
 		else: # プラットフォーム別
-			for p, d in sched["Platforms"].items(): 
-				# スケジュールが範囲内か判定
-				if datetime.datetime.now().timestamp() >= (d["Timestamp"] + (sched["Downtime"] * 60)):
-					create = False
-					break
-				# 予定日時一覧を生成
-				dt = dt + "・**" + localizations.translate(f'Platform_{p}', locale) + f"**: <t:{d['Timestamp']}:f> (<t:{d['Timestamp']}:R>)" + "\n"
+			# スケジュールが範囲内か判定
+			if datetime.datetime.now().timestamp() >= (sched["Timestamp"] + (sched["Downtime"] * 60)):
+				create = False
+			else:
+				for p in platform_list:
+					# 予定日時一覧を生成
+					dt = dt + "・**" + localizations.translate(f'Platform_{p}', locale) + f"**: <t:{sched['Timestamp']}:f> (<t:{sched['Timestamp']}:R>)" + "\n"
 
 		if create:
 			embed = discord.Embed(
@@ -449,7 +450,8 @@ async def setindicator(ctx: discord.ApplicationContext,
 async def status(ctx: discord.ApplicationContext) -> None:
 	await ctx.defer(ephemeral=False)
 	try:
-		await ctx.send_followup(embeds=await generate_serverstatus_embed(GuildConfig.data.config[str(ctx.guild_id)]["server_status_message"]["language"]))
+		sched = maintenance_schedule.get()
+		await ctx.send_followup(embeds=await generate_serverstatus_embed(GuildConfig.data.config[str(ctx.guild_id)]["server_status_message"]["language"]), sched=sched)
 	except Exception as e:
 		logger.error(traceback.format_exc())
 		await ctx.send_followup(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
@@ -481,7 +483,8 @@ async def create(ctx: discord.ApplicationContext,
 
 		# サーバーステータス埋め込みメッセージを送信
 		try:
-			msg = await ch.send(embeds=await generate_serverstatus_embed(GuildConfig.data.config[str(ctx.guild_id)]["server_status_message"]["language"]))
+			sched = maintenance_schedule.get()
+			msg = await ch.send(embeds=await generate_serverstatus_embed(GuildConfig.data.config[str(ctx.guild_id)]["server_status_message"]["language"]), sched=sched)
 		except Exception as e:
 			if type(e) == discord.errors.ApplicationCommandInvokeError and str(e).endswith("Missing Permissions"):
 				await ctx.send_followup(content=_("DontHavePermission_SendMessage", ch.mention))
