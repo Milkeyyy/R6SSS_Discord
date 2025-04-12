@@ -243,8 +243,8 @@ async def generate_serverstatus_embed(locale, sched) -> list[discord.Embed]:
 		"PC": ["PC", "PC", 2],
 		"PS4": ["PS4", "PS4", 0],
 		"PS5": ["PS5", "PS5", 1],
-		"XB1": ["XBOXONE", "XB1", 0],
-		"XBSX": ["XBOX SERIES X", "XBSX/S", 1]
+		"XB1": ["XB1", "XB1", 0],
+		"XBSX": ["XBSX", "XBSX/S", 1]
 	}
 
 	# 各プラットフォームの埋め込みメッセージの色
