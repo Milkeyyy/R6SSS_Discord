@@ -60,9 +60,6 @@ async def on_ready() -> None:
 	i18n.localize_commands()
 	#await client.sync_commands()
 
-	# ハートビートのキーを読み込み
-	heartbeat.load_keys()
-
 	# ギルドデータの確認を開始
 	await GuildConfig.load()
 	await GuildConfig.check()
