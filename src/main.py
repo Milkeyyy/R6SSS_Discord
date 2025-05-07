@@ -10,6 +10,7 @@ try:
 except ImportError:
 	pass
 from pycord.i18n import _
+import r6sss
 
 # ロガー
 from logger import logger
@@ -21,6 +22,9 @@ from client import client
 # コンフィグ
 from config import GuildConfig
 
+# 埋め込み
+import embeds
+
 # Uptime Kuma
 from kumasan import KumaSan
 
@@ -28,7 +32,7 @@ from kumasan import KumaSan
 import maintenance_schedule
 
 # サーバーステータス
-import serverstatus
+from server_status import ServerStatusManager
 
 # アイコン
 import platform_icon
@@ -105,13 +109,11 @@ async def update_serverstatus() -> None:
 		# メンテナンススケジュール情報を取得
 		sched = await maintenance_schedule.get()
 
-		# サーバーステータスを取得する
-		status = await serverstatus.get()
-		if status is None:
+		# サーバーステータスを取得/更新する
+		prev_status = ServerStatusManager.data
+		await ServerStatusManager.update()
+		if ServerStatusManager.data is None:
 			return
-
-		# サーバーステータスを更新する
-		serverstatus.data = status
 
 		# 各ギルドの埋め込みメッセージIDチェック、存在する場合はメッセージを更新する
 		for guild in client.guilds:
@@ -164,46 +166,78 @@ async def update_serverstatus() -> None:
 							if ch_name[0] in status_indicator.List:
 								ch_name = ch_name[1:]
 							if GuildConfig.data.config[str(guild.id)]["server_status_message"]["status_indicator"]:
-								await msg.channel.edit(name=serverstatus.indicator + ch_name)
+								await msg.channel.edit(name=ServerStatusManager.indicator + ch_name)
 						except Exception as e:
 							logger.error(traceback.format_exc())
 							logger.error("ギルド %s のステータスインジケーターの更新に失敗: %s", guild.name, str(e))
 
 						try:
 							# 埋め込みメッセージを生成
-							embeds = await generate_serverstatus_embed(lang, sched)
+							server_status_embeds = await generate_serverstatus_embed(lang, sched)
 						except Exception as e:
-							embeds = None
+							server_status_embeds = None
 							logger.error(traceback.format_exc())
 							logger.error("サーバーステータスメッセージの生成に失敗: %s", str(e))
 
 						try:
 							# サーバーステータスメッセージを編集
-							if embeds is not None:
-								await msg.edit(embeds=embeds)
+							if server_status_embeds is not None:
+								await msg.edit(embeds=server_status_embeds)
 						except Exception as e:
 							logger.error(traceback.format_exc())
 							logger.error("サーバーステータスメッセージの生成に失敗: %s", str(e))
 
 						try:
 							# TODO: ここにサーバーステータスが変更されたかチェックするコードを書く
+							if prev_status is not None:
+								notif_embeds = []
 
-							# 通知メッセージを送信
-							notif_ch = guild.get_channel(notif_ch_id)
-							notif_role = guild.get_role(notif_role_id)
+								if client.user is not None:
+									embed_author = discord.EmbedAuthor(client.user.display_name, icon_url=client.user.display_avatar.url)
+								else:
+									embed_author = None
 
-							if notif_role is not None and notif_role.mentionable:
-								notif_role_mention = notif_role.mention
-							else:
-								notif_role_mention = ""
+								# サーバーステータスの比較を行う
+								compare_result = r6sss.compare_server_status(prev_status, ServerStatusManager.data)
 
-							if notif_ch is not None:
-								embed: discord.Embed = embeds[0]
-								embed.description = f"{embed.description}\n[**🌐{localizations.translate('Notification_Show_Server_Status', lang)}**]({msg.jump_url})"
-								await notif_ch.send(
-									content=localizations.translate("Notification_Server_Status_Updated", lang) + "\n" + notif_role_mention,
-									embed=embed
-								)
+								for result in compare_result:
+									# ステータスの比較結果から通知用のEmbedを生成する
+									notif_embeds.append(embeds.Notification.get_by_comparison_result(result, lang))
+									# 対象プラットフォームの一覧テキストを生成
+									# 全プラットフォームの場合は専用のテキストにする
+									# if {p.platform for p in ServerStatusManager.data}.issubset(set(result.platforms)):
+									# 	target_platforms_text = localizations.translate("Platform_All", lang=lang)
+									# else:
+									# 	target_platforms_text = " | ".join([platform_icon.LIST[p.value] + " " + p.name for p in result.platforms])
+
+									# if result.detail == r6sss.ComparisonDetail.START_MAINTENANCE:
+									# 	# メンテナンス開始
+									# 	logger.info("通知送信: メンテナンス開始")
+									# 	notif_embeds.append(discord.Embed(
+									# 		color=discord.Colour.light_grey(),
+									# 		title=localizations.translate("Title_Maintenance_Start", lang=lang),
+									# 		description="**" + localizations.translate("TargetPlatform", lang=lang) + ": " + target_platforms_text + "**",
+									# 		author=embed_author,
+									# 	))
+
+								# 通知メッセージを送信するチャンネルを取得
+								notif_ch = guild.get_channel(notif_ch_id)
+								notif_role = guild.get_role(notif_role_id)
+
+								# メンションが可能な場合はメンション用のテキストを設定
+								if notif_role is not None and notif_role.mentionable:
+									notif_role_mention = notif_role.mention
+								else:
+									notif_role_mention = ""
+
+								# 通知メッセージを送信
+								if notif_ch is not None and notif_embeds is not None:
+									for notif_embed in notif_embeds:
+										notif_embed.description = f"[**💬 {localizations.translate('Notification_Show_Server_Status', lang=lang)}**]({msg.jump_url})\n{notif_embed.description}"
+									await notif_ch.send(
+										content=localizations.translate("Notification_Server_Status_Updated", lang=lang) + "\n" + notif_role_mention,
+										embeds=notif_embeds
+									)
 
 						except Exception as e:
 							logger.error(traceback.format_exc())
@@ -252,13 +286,23 @@ async def generate_serverstatus_embed(locale, sched) -> list[discord.Embed]:
 	embeds = []
 
 	# サーバーステータスを取得
-	status = serverstatus.data
+	status = ServerStatusManager.data
+
+	if status is None:
+		# サーバーステータスが取得できない場合は、エラーメッセージを返す
+		return [
+			discord.Embed(
+				color=discord.Colour.light_grey(),
+				title=localizations.translate("Embed_Unknown_Title", lang=locale),
+				description=localizations.translate("Embed_Unknown_Desc", lang=locale),
+			)
+		]
 
 	# 各プラットフォームごとの埋め込みメッセージを作成
 	embed = discord.Embed(color=color_list["PC"])
 	embed.title = "📶 R6S Server Status"
-	embed.description = "🕒 " + localizations.translate("Last Update", locale) + ": " + f"<t:{serverstatus.updated_at}:f> (<t:{serverstatus.updated_at}:R>)"
-	embed.set_footer(text="⚠️\n" + localizations.translate("NotAffiliatedWithOrRndorsedBy", locale))
+	embed.description = "🕒 " + localizations.translate("Last Update", lang=locale) + ": " + f"<t:{ServerStatusManager.updated_at}:f> (<t:{ServerStatusManager.updated_at}:R>)"
+	embed.set_footer(text="⚠️\n" + localizations.translate("NotAffiliatedWithOrRndorsedBy", lang=locale))
 
 	for _, v in pf_list.items():
 		status_list = []
@@ -286,12 +330,12 @@ async def generate_serverstatus_embed(locale, sched) -> list[discord.Embed]:
 		else:
 			status_icon = status_icon_set.UNKNOWN
 
-		connectivity_text = localizations.translate(status[pf_id]["Status"]["Connectivity"], locale)
+		connectivity_text = localizations.translate(status[pf_id]["Status"]["Connectivity"], lang=locale)
 
 		mt_text = ""
 		if status[pf_id]["Status"]["Maintenance"]:
 			status_icon = status_icon_set.MAINTENANCE
-			connectivity_text = localizations.translate("Maintenance", locale)
+			connectivity_text = localizations.translate("Maintenance", lang=locale)
 
 		f_list = []
 		f_text = ""
@@ -300,7 +344,7 @@ async def generate_serverstatus_embed(locale, sched) -> list[discord.Embed]:
 		for f, s in status[pf_id]["Status"]["Features"].items():
 			# 通常
 			f_status_icon = status_icon_set.OPERATIONAL
-			f_status_text = localizations.translate(s, locale)
+			f_status_text = localizations.translate(s, lang=locale)
 			# 停止
 			if s != "Operational":
 				f_status_icon = status_icon_set.DEGRADED
@@ -310,9 +354,9 @@ async def generate_serverstatus_embed(locale, sched) -> list[discord.Embed]:
 			# 不明
 			if s == "Unknown":
 				f_status_icon = status_icon_set.UNKNOWN
-				f_status_text = localizations.translate("Unknown", locale)
+				f_status_text = localizations.translate("Unknown", lang=locale)
 
-			f_list.append("" + localizations.translate(f, locale) + "\n┗ " + f_status_icon + "`" + f_status_text + "`")
+			f_list.append("" + localizations.translate(f, lang=locale) + "\n┗ " + f_status_icon + "`" + f_status_text + "`")
 
 		f_text = "" + "\n".join(f_list)
 
@@ -342,7 +386,7 @@ async def generate_serverstatus_embed(locale, sched) -> list[discord.Embed]:
 			if datetime.datetime.now().timestamp() >= (sched["Timestamp"] + (sched["Downtime"] * 60)):
 				create = False
 			# 予定日時一覧を生成
-			dt = "・**" + localizations.translate('Platform_All', locale) + f"**: <t:{sched['Timestamp']}:f> (<t:{sched['Timestamp']}:R>)" + "\n"
+			dt = "・**" + localizations.translate('Platform_All', lang=locale) + f"**: <t:{sched['Timestamp']}:f> (<t:{sched['Timestamp']}:R>)" + "\n"
 		else: # プラットフォーム別
 			# スケジュールが範囲内か判定
 			if datetime.datetime.now().timestamp() >= (sched["Timestamp"] + (sched["Downtime"] * 60)):
@@ -350,23 +394,23 @@ async def generate_serverstatus_embed(locale, sched) -> list[discord.Embed]:
 			else:
 				for p in platform_list:
 					# 予定日時一覧を生成
-					dt = dt + "・**" + localizations.translate(f'Platform_{p}', locale) + f"**: <t:{sched['Timestamp']}:f> (<t:{sched['Timestamp']}:R>)" + "\n"
+					dt = dt + "・**" + localizations.translate(f'Platform_{p}', lang=locale) + f"**: <t:{sched['Timestamp']}:f> (<t:{sched['Timestamp']}:R>)" + "\n"
 
 		if create:
 			embed = discord.Embed(
 				colour=discord.colour.Colour.nitro_pink(),
-				title=":wrench::calendar: " + localizations.translate("MaintenanceSchedule", locale),
+				title=":wrench::calendar: " + localizations.translate("MaintenanceSchedule", lang=locale),
 				description="**" + sched["Title"] + "**\n" + sched["Detail"],
-				footer=discord.EmbedFooter("⚠️\n" + localizations.translate("MaintenanceSchedule_Notes", locale)),
+				footer=discord.EmbedFooter("⚠️\n" + localizations.translate("MaintenanceSchedule_Notes", lang=locale)),
 				fields=[
 					# ダウンタイム
 					discord.EmbedField(
-						name="**:clock3: " + localizations.translate("MaintenanceSchedule_Downtime", locale) + "**",
-						value="・" + str(sched["Downtime"]) + " " + localizations.translate("MaintenanceSchedule_Downtime_Minute", locale)
+						name="**:clock3: " + localizations.translate("MaintenanceSchedule_Downtime", lang=locale) + "**",
+						value="・" + str(sched["Downtime"]) + " " + localizations.translate("MaintenanceSchedule_Downtime_Minute", lang=locale)
 					),
 					# 各プラットフォームの予定日時
 					discord.EmbedField(
-						name="**:video_game: " + localizations.translate("MaintenanceSchedule_TargetPlatform", locale) + "**",
+						name="**:video_game: " + localizations.translate("MaintenanceSchedule_TargetPlatform", lang=locale) + "**",
 						value=dt
 					)
 				]
@@ -374,9 +418,9 @@ async def generate_serverstatus_embed(locale, sched) -> list[discord.Embed]:
 		else: # 予定されているメンテナンスがない場合
 			embed = discord.Embed(
 				colour=discord.colour.Colour.nitro_pink(),
-				title=":wrench::calendar: " + localizations.translate("MaintenanceSchedule", locale),
-				description=localizations.translate("MaintenanceSchedule_NoMaintenanceScheduled", locale),
-				footer=discord.EmbedFooter("⚠️\n" + localizations.translate("MaintenanceSchedule_Notes", locale))
+				title=":wrench::calendar: " + localizations.translate("MaintenanceSchedule", lang=locale),
+				description=localizations.translate("MaintenanceSchedule_NoMaintenanceScheduled", lang=locale),
+				footer=discord.EmbedFooter("⚠️\n" + localizations.translate("MaintenanceSchedule_Notes", lang=locale))
 			)
 
 		embeds.append(embed)

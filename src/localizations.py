@@ -37,12 +37,15 @@ def load_localedata() -> None:
 	)
 	#print(i18n.current_locale)
 
-def translate(text: str, lang: str="en_GB") -> str:
+def translate(text: str, values: list = [], lang: str="en_GB") -> str:
 	global LOCALE_DATA
 
 	try:
-		return LOCALE_DATA[lang]["strings"][text]
+		return LOCALE_DATA[lang]["strings"][text].format(values)
 	except KeyError as e:
+		logger.error("Translate KeyError: %s", str(e))
 		return text
+
+_ = translate
 
 load_localedata()
