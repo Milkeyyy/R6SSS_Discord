@@ -1,4 +1,5 @@
 import datetime
+import json
 import os
 import traceback
 
@@ -565,6 +566,35 @@ async def about(ctx: discord.ApplicationContext) -> None:
 		embed.add_field(name="Library", value=f"Pycord: `{discord.__version__}`")
 
 		await ctx.respond(embed=embed)
+	except Exception as e:
+		logger.error(traceback.format_exc())
+		await ctx.respond(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
+
+@client.slash_command()
+@discord.guild_only()
+async def test_notification(ctx: discord.ApplicationContext, comparison_target: str) -> None:
+	try:
+		if await client.is_owner(ctx.user):
+			await ctx.defer(ephemeral=True)
+
+			raw_status = json.loads(comparison_target)["data"]
+			status_list = []
+			for _platform, _status in raw_status.items():
+				status_list.append(r6sss.functions.Status(r6sss.types.Platform(_platform), _status))
+
+			# 比較を実行
+			if ServerStatusManager.data is None:
+				raise Exception("ServerStatusManager.data is None")
+			compare_result = r6sss.compare_server_status(ServerStatusManager.data, status_list)
+
+			# 通知メッセージを送信
+			for result in compare_result:
+				await ctx.respond(
+					content=f"Test notification message\nType: `{result.detail}`",
+					embeds=embeds.Notification.get_by_comparison_result(result, "ja")
+				)
+		else:
+			await ctx.respond(content=_("Cmd_General_DontHavePermission"), ephemeral=True)
 	except Exception as e:
 		logger.error(traceback.format_exc())
 		await ctx.respond(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
