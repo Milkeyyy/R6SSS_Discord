@@ -11,9 +11,10 @@ API_URL = "https://api-r6sss.milkeyyy.com/v2/status"
 class ServerStatusManager:
 	"""サーバーステータスを管理するクラス"""
 
-	data = []
-	updated_at = 0
-	indicator = status_indicator.Unknown # テキストチャンネルの名前に表示するステータスインジケーター(絵文字)
+	def __init__(self) -> None:
+		self.data = []
+		self.updated_at = 0
+		self.indicator = status_indicator.Unknown # テキストチャンネルの名前に表示するステータスインジケーター(絵文字)
 
 	@classmethod
 	async def get(cls) -> list[r6sss.Status] | None:
