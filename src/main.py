@@ -111,7 +111,6 @@ async def update_serverstatus() -> None:
 		sched = await MaintenanceScheduleManager.get()
 
 		# サーバーステータスを取得/更新する
-		prev_status = ServerStatusManager.data
 		await ServerStatusManager.update()
 		if ServerStatusManager.data is None:
 			return
@@ -190,7 +189,7 @@ async def update_serverstatus() -> None:
 
 						try:
 							# TODO: ここにサーバーステータスが変更されたかチェックするコードを書く
-							if prev_status is not None:
+							if ServerStatusManager.previous_data:
 								notif_embeds = []
 
 								if client.user is not None:
@@ -199,7 +198,7 @@ async def update_serverstatus() -> None:
 									embed_author = None
 
 								# サーバーステータスの比較を行う
-								compare_result = r6sss.compare_server_status(prev_status, ServerStatusManager.data)
+								compare_result = r6sss.compare_server_status(ServerStatusManager.previous_data, ServerStatusManager.data)
 
 								for result in compare_result:
 									# ステータスの比較結果から通知用のEmbedを生成する
@@ -267,30 +266,21 @@ async def after_updateserverstatus() -> None:
 
 # サーバーステータス埋め込みメッセージを更新
 async def generate_serverstatus_embed(locale, sched) -> list[discord.Embed]:
-	pf_list = {
-		"PC": ["PC", "PC", 2],
-		"PS4": ["PS4", "PS4", 0],
-		"PS5": ["PS5", "PS5", 1],
-		"XB1": ["XB1", "XB1", 0],
-		"XBSX": ["XBSX", "XBSX/S", 1]
-	}
-
-	# 各プラットフォームの埋め込みメッセージの色
-	color_list = {
-		"PC": discord.Colour.from_rgb(255, 255, 255),
-		"PS4": discord.Colour.from_rgb(0, 67, 156),
-		"PS5": discord.Colour.from_rgb(0, 67, 156),
-		"XB1": discord.Colour.from_rgb(16, 124, 16),
-		"XBSX": discord.Colour.from_rgb(16, 124, 16)
+	embed_settings = {
+		"PC": [discord.Colour.from_rgb(255, 255, 255), 2], # 埋め込みの色, 埋め込みのスペーシング
+		"PS4": [discord.Colour.from_rgb(0, 67, 156), 0],
+		"PS5": [discord.Colour.from_rgb(0, 67, 156), 1],
+		"XB1": [discord.Colour.from_rgb(16, 124, 16), 0],
+		"XBSX": [discord.Colour.from_rgb(16, 124, 16), 1]
 	}
 
 	embeds = []
 
 	# サーバーステータスを取得
-	status = ServerStatusManager.data
+	status_list = ServerStatusManager.data
 
-	if status is None:
-		# サーバーステータスが取得できない場合は、エラーメッセージを返す
+	# サーバーステータスが取得できない場合は、エラーメッセージを返す
+	if status_list is None:
 		return [
 			discord.Embed(
 				color=discord.Colour.light_grey(),
@@ -300,77 +290,83 @@ async def generate_serverstatus_embed(locale, sched) -> list[discord.Embed]:
 		]
 
 	# 各プラットフォームごとの埋め込みメッセージを作成
-	embed = discord.Embed(color=color_list["PC"])
+	embed = discord.Embed(color=embed_settings["PC"][0]) # 色は白で固定
 	embed.title = "📶 R6S Server Status"
 	embed.description = "🕒 " + localizations.translate("Last Update", lang=locale) + ": " + f"<t:{ServerStatusManager.updated_at}:f> (<t:{ServerStatusManager.updated_at}:R>)"
 	embed.set_footer(text="⚠️\n" + localizations.translate("NotAffiliatedWithOrRndorsedBy", lang=locale))
 
-	for _, v in pf_list.items():
-		status_list = []
+	status_index = -1
+	for status in status_list:
+		status_index += 1
 
-		pf_id = v[0] # PC, PS4, XB1...
-		pf_display_name = v[1] # プラットフォームの表示名
+		connectivity_text_list = []
+
+		pf_id = status.platform.name # PC, PS4, XB1...
+		pf_display_name = status.platform.value # プラットフォームの表示名
 
 		if pf_id.startswith("_"):
 			continue
 
 		# サーバーの状態によってアイコンを変更する
 		# 問題なし
-		if status[pf_id]["Status"]["Connectivity"] == "Operational":
+		if status.connectivity == "Operational":
 			status_icon = status_icon_set.OPERATIONAL
 		# 計画メンテナンス
-		elif status[pf_id]["Status"]["Connectivity"] == "Maintenance":
+		elif status.connectivity == "Maintenance":
 			status_icon = status_icon_set.MAINTENANCE
 		# 想定外の問題
-		elif status[pf_id]["Status"]["Connectivity"] == "Interrupted":
+		elif status.connectivity == "Interrupted":
 			status_icon = status_icon_set.INTERRUPTED
 		# 想定外の停止
-		elif status[pf_id]["Status"]["Connectivity"] == "Degraded":
+		elif status.connectivity == "Degraded":
 			status_icon = status_icon_set.DEGRADED
 		# それ以外
 		else:
 			status_icon = status_icon_set.UNKNOWN
 
-		connectivity_text = localizations.translate(status[pf_id]["Status"]["Connectivity"], lang=locale)
+		connectivity_text = localizations.translate(status.connectivity, lang=locale)
 
 		mt_text = ""
-		if status[pf_id]["Status"]["Maintenance"]:
+		if status.maintenance:
 			status_icon = status_icon_set.MAINTENANCE
 			connectivity_text = localizations.translate("Maintenance", lang=locale)
 
-		f_list = []
-		f_text = ""
-		f_status_text = ""
+		features_list = []
+		features_text = ""
+		features_status_text = ""
 		# 各サービスをループしてステータスに合わせてアイコンとテキストを設定
-		for f, s in status[pf_id]["Status"]["Features"].items():
+		#for f, s in status[pf_id]["Status"]["Features"].items():
+		for s in [("Authentication", status.authentication), ("Matchmaking", status.matchmaking), ("Purchase", status.purchase)]: 
 			# 通常
 			f_status_icon = status_icon_set.OPERATIONAL
-			f_status_text = localizations.translate(s, lang=locale)
+			features_status_text = localizations.translate(s[1], lang=locale)
 			# 停止
-			if s != "Operational":
+			if s[1] != "Operational":
 				f_status_icon = status_icon_set.DEGRADED
 			# メンテナンス
-			if status[pf_id]["Status"]["Maintenance"]:
+			if status.maintenance:
 				f_status_icon = status_icon_set.MAINTENANCE
 			# 不明
-			if s == "Unknown":
+			if s[1] == "Unknown":
 				f_status_icon = status_icon_set.UNKNOWN
-				f_status_text = localizations.translate("Unknown", lang=locale)
+				features_status_text = localizations.translate("Unknown", lang=locale)
 
-			f_list.append("" + localizations.translate(f, lang=locale) + "\n┗ " + f_status_icon + "`" + f_status_text + "`")
+			features_list.append("" + localizations.translate(s[0], lang=locale) + "\n┗ " + f_status_icon + "`" + features_status_text + "`")
 
-		f_text = "" + "\n".join(f_list)
+		features_text = "" + "\n".join(features_list)
 
 		# 埋め込みメッセージにプラットフォームのフィールドを追加
-		status_list.append(mt_text + f_text)
+		connectivity_text_list.append(mt_text + features_text)
 
 		# プラットフォームのステータスのフィールドを追加
 		embed.add_field(
-			name=platform_icon.LIST[v[0]] + " " + pf_display_name + " - " + status_icon + "**`" + connectivity_text + "`**",
-			value="\n".join(status_list)
+			name=platform_icon.LIST[status.platform.name] + " " + pf_display_name + " - " + status_icon + "**`" + connectivity_text + "`**",
+			value="\n".join(connectivity_text_list)
 		)
 		# 各プラットフォームごとに別の行にするために、リストで指定された数の空のフィールドを挿入する
-		for _ in range(v[2]):
+		# for _ in range(embed_settings[status.platform.value][1]):
+		# 	embed.add_field(name="", value="")
+		for _ in range(list(embed_settings.values())[status_index][1]):
 			embed.add_field(name="", value="")
 
 	embeds.append(embed)
@@ -456,7 +452,7 @@ async def setlanguage(ctx: discord.ApplicationContext,
 		await ctx.send_followup(content=_("Cmd_setlanguage_Success", GuildConfig.data.config[str(ctx.guild.id)]["server_status_message"]["language"]))
 	except Exception as e:
 		logger.error(traceback.format_exc())
-		await ctx.send_followup(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
+		await ctx.send_followup(embed=embeds.Notification.internal_error())
 
 @client.slash_command()
 @discord.guild_only()
