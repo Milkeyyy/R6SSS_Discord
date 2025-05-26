@@ -691,7 +691,7 @@ async def test_notification(ctx: discord.ApplicationContext, comparison_target: 
 			for result in compare_result:
 				await ctx.respond(
 					content=f"Test notification message\nType: `{result.detail}`",
-					embeds=embeds.Notification.get_by_comparison_result(result, "ja")
+					embed=embeds.Notification.get_by_comparison_result(result, "ja")
 				)
 		else:
 			await ctx.respond(content=_("CmdMsg_DontHavePermission_Execution"), ephemeral=True)
