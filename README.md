@@ -1,18 +1,22 @@
-# R6SSS
+# R6SSS Discord Bot
 Discordのテキストチャンネルにレインボーシックス シージのサーバーステータスを送信してくれるBotです。
+
+
+[**[Botをサーバーへ招待する]**](https://discord.com/oauth2/authorize?client_id=990497421488451615)
+
+### 稼働状況
+[![Status](http://status.milkeyyy.com/api/badge/13/status?style=for-the-badge)](https://status.milkeyyy.com/)
+
 
 ![Preview](https://github.com/Milkeyyy/R6SServerStatusBot/assets/59532514/2c1ee137-133c-470d-be9d-592b96b8602f)
 
 
-[**🛡️ サポート Discord サーバー**](https://discord.gg/bMf9dDjndC)
+### Discord 以外の Bot はこちら
+[![Bluesky](https://badgen.org/img/bluesky/r6sss.milkeyyy.com/followers?style=for-the-badge&label=Bluesky)](https://bsky.app/profile/r6sss.milkeyyy.com)
 
-[**📶 サービスステータス**](https://milkeyyy-services.cronitorstatus.com)
+### サポート
+[![Discord](https://img.shields.io/discord/889239399550844978?style=for-the-badge&label=Discord)](https://discord.gg/bMf9dDjndC)
 
-## Bot
-### 稼働状況
-![R6SSS Discord Bot](https://cronitor.io/badges/ncjpBt/production/HL2tEvnxU5AtBMfsEMI8O-smSZ0.svg)
-
-[**[Botをサーバーに招待]**](https://discord.com/oauth2/authorize?client_id=990497421488451615)
 
 ## コマンド
 - `create [テキストチャンネル]`
@@ -21,13 +25,16 @@ Discordのテキストチャンネルにレインボーシックス シージの
     - テキストチャンネルを指定しなかった場合は、コマンドを実行したチャンネルへ送信されます。
 - `status`
   - 現在のサーバーステータスを送信します。(自動更新はされません)
-- `setindicator <True/False>`
+- `setindicator <有効/無効>`
   - サーバーステータスのインジケーター(絵文字)をテキストチャンネルの名前の先頭に表示するかどうかを設定します。
 - `setlanguage <言語>`
   - サーバーステータスの表示言語を設定します。
   - 指定できる言語
     - `en-GB` / `en-US` (English / 英語)
     - `ja` (日本語 / Japanese)
+- `setnotification <有効/無効> [テキストチャンネル] [ロール]`
+  - サーバーステータスに変化があった際に送信される通知を設定します。
+    - テキストチャンネルを指定しなかった場合は、コマンドを実行したチャンネルへ送信されます。
 - `ping`
   - このBotのレイテンシーを送信します。
 - `about`
