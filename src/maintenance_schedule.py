@@ -7,7 +7,7 @@ API_URL = "https://api-r6sss.milkeyyy.com/v2/schedule/latest"
 
 
 class MaintenanceScheduleManager:
-	schedule: dict | None
+	schedule: dict | None = None
 
 	@classmethod
 	async def get(cls) -> dict | None:
