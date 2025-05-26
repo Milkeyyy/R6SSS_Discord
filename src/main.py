@@ -453,8 +453,11 @@ async def setlanguage(ctx: discord.ApplicationContext,
 		# ギルドデータを保存
 		await GuildConfig.save()
 
-		await ctx.send_followup(content=_("Cmd_setlanguage_Success", GuildConfig.data.config[str(ctx.guild.id)]["server_status_message"]["language"]))
-	except Exception as e:
+		await ctx.send_followup(embed=embeds.Notification.success(description=_("Cmd_setlanguage_Success", GuildConfig.data.config[str(ctx.guild.id)]["server_status_message"]["language"])))
+	except Exception:
+		# 設定をリセット
+		GuildConfig.data.config[str(ctx.guild.id)]["server_status_message"]["language"] = "en_GB"
+		await GuildConfig.save()
 		logger.error(traceback.format_exc())
 		await ctx.send_followup(embed=embeds.Notification.internal_error())
 
@@ -477,10 +480,13 @@ async def setindicator(ctx: discord.ApplicationContext,
 		# ギルドデータを保存
 		await GuildConfig.save()
 
-		await ctx.send_followup(content=_("Cmd_setindicator_Success", str(enable)))
-	except Exception as e:
+		await ctx.send_followup(embed=embeds.Notification.success(description=_("Cmd_setindicator_Success", str(enable))))
+	except Exception:
+		# 設定をリセット
+		GuildConfig.data.config[str(ctx.guild.id)]["server_status_message"]["status_indicator"] = False
+		await GuildConfig.save()
 		logger.error(traceback.format_exc())
-		await ctx.send_followup(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
+		await ctx.send_followup(embed=embeds.Notification.internal_error())
 
 @client.slash_command()
 @discord.guild_only()
@@ -490,9 +496,9 @@ async def status(ctx: discord.ApplicationContext) -> None:
 	try:
 		sched = MaintenanceScheduleManager.schedule
 		await ctx.send_followup(embeds=await generate_serverstatus_embed(GuildConfig.data.config[str(ctx.guild_id)]["server_status_message"]["language"], sched))
-	except Exception as e:
+	except Exception:
 		logger.error(traceback.format_exc())
-		await ctx.send_followup(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
+		await ctx.send_followup(embed=embeds.Notification.internal_error())
 
 @client.slash_command()
 @discord.guild_only()
@@ -511,7 +517,7 @@ async def create(ctx: discord.ApplicationContext,
 
 		additional_msg = ""
 		if GuildConfig.data.config[str(ctx.guild_id)]["server_status_message"]["message_id"] != 0:
-			additional_msg = f"\n({_('Cmd_create_Old messages you previously sent will no longer be updated.')})"
+			additional_msg = f"\n({_('Cmd_create_OldMessagesWillNoLongerBeUpdated')})"
 
 		if channel is None:
 			ch_id = ctx.channel_id
@@ -524,11 +530,13 @@ async def create(ctx: discord.ApplicationContext,
 			sched = MaintenanceScheduleManager.schedule
 			msg = await ch.send(embeds=await generate_serverstatus_embed(GuildConfig.data.config[str(ctx.guild_id)]["server_status_message"]["language"], sched))
 		except Exception as e:
-			if type(e) == discord.errors.ApplicationCommandInvokeError and str(e).endswith("Missing Permissions"):
-				await ctx.send_followup(content=_("DontHavePermission_SendMessage", ch.mention))
+			# 権限エラー
+			if isinstance(e, discord.errors.ApplicationCommandInvokeError) and str(e).endswith("Missing Permissions"):
+				await ctx.send_followup(embed=embeds.Notification.error(description=_("CmdMsg_DontHavePermission_SendMessage", ch.mention)))
+			# それ以外のエラー
 			else:
 				logger.error(traceback.format_exc())
-				await ctx.send_followup(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
+				await ctx.send_followup(embed=embeds.Notification.internal_error())
 			return
 
 		# 送信したチャンネルとメッセージのIDをギルドデータへ保存する
@@ -538,10 +546,14 @@ async def create(ctx: discord.ApplicationContext,
 		# ギルドデータを保存
 		await GuildConfig.save()
 
-		await ctx.send_followup(content=_("Cmd_create_Success", ch.mention) + additional_msg)
-	except Exception as e:
+		await ctx.send_followup(embed=embeds.Notification.success(description=_("Cmd_create_Success", ch.mention) + additional_msg))
+	except Exception:
+		# 設定をリセット
+		GuildConfig.data.config[str(ctx.guild_id)]["server_status_message"]["channel_id"] = 0
+		GuildConfig.data.config[str(ctx.guild_id)]["server_status_message"]["message_id"] = 0
+		await GuildConfig.save()
 		logger.error(traceback.format_exc())
-		await ctx.send_followup(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
+		await ctx.send_followup(embed=embeds.Notification.internal_error())
 
 @client.slash_command()
 @discord.default_permissions(send_messages=True)
@@ -551,9 +563,9 @@ async def ping(ctx: discord.ApplicationContext) -> None:
 		ping = round(raw_ping * 1000)
 		ping_embed = discord.Embed(title="Pong!",description=f"Latency: **`{ping}`** ms",color=discord.Colour.from_rgb(79,168,254))
 		await ctx.respond(embed=ping_embed)
-	except Exception as e:
+	except Exception:
 		logger.error(traceback.format_exc())
-		await ctx.respond(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
+		await ctx.send_followup(embed=embeds.Notification.internal_error())
 
 @client.slash_command()
 @discord.default_permissions(send_messages=True)
@@ -561,14 +573,14 @@ async def about(ctx: discord.ApplicationContext) -> None:
 	try:
 		embed = discord.Embed(color=discord.Colour.blue())
 		embed.set_author(name=app.NAME, icon_url=client.user.display_avatar.url)
-		embed.set_footer(text=f"Developed by Milkeyyy")
+		embed.set_footer(text="Developed by Milkeyyy")
 		embed.add_field(name="Version", value="`" + app.VERSION + "`")
 		embed.add_field(name="Library", value=f"Pycord: `{discord.__version__}`")
 
 		await ctx.respond(embed=embed)
-	except Exception as e:
+	except Exception:
 		logger.error(traceback.format_exc())
-		await ctx.respond(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
+		await ctx.send_followup(embed=embeds.Notification.internal_error())
 
 @client.slash_command()
 @discord.guild_only()
@@ -594,10 +606,10 @@ async def test_notification(ctx: discord.ApplicationContext, comparison_target: 
 					embeds=embeds.Notification.get_by_comparison_result(result, "ja")
 				)
 		else:
-			await ctx.respond(content=_("Cmd_General_DontHavePermission"), ephemeral=True)
-	except Exception as e:
+			await ctx.respond(content=_("CmdMsg_DontHavePermission_Execution"), ephemeral=True)
+	except Exception:
 		logger.error(traceback.format_exc())
-		await ctx.respond(content=_("An error occurred when running the command") + ": `" + str(e) + "`")
+		await ctx.send_followup(embed=embeds.Notification.internal_error())
 
 @client.slash_command()
 @discord.guild_only()
@@ -609,10 +621,10 @@ async def synccommands(ctx: discord.ApplicationContext) -> None:
 			await client.sync_commands()
 			await ctx.send_followup(content="コマンドを同期しました。")
 		else:
-			await ctx.respond(content=_("Cmd_General_DontHavePermission"), ephemeral=True)
-	except Exception as e:
+			await ctx.respond(content=_("CmdMsg_DontHavePermission_Execution"), ephemeral=True)
+	except Exception:
 		logger.error(traceback.format_exc())
-		await ctx.respond(content=_("An error occurred when running the command") + ": `" + str(e) + "`", ephemeral=True)
+		await ctx.send_followup(embed=embeds.Notification.internal_error(), ephemeral=True)
 
 
 # ログイン

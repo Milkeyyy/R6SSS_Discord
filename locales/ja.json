@@ -3,6 +3,8 @@
 		"name": "日本語 / Japanese"
 	},
 	"strings": {
+		"True": "有効",
+		"False": "無効",
 		"No Issues": "問題なし",
 		"Maintenance": "メンテナンス",
 		"Unplanned Issues": "想定外の問題",
@@ -54,13 +56,22 @@
 		"NotAffiliatedWithOrRndorsedBy": "この Bot は Ubisoft と提携または承認されていません。\nサーバーステータスの正確性は保証されません。",
 		"Notification_Server_Status_Updated": "サーバーステータスが更新されました。",
 		"Notification_Show_Server_Status": "サーバーステータスを表示",
-		"Cmd_General_DontHavePermission": "あなたにはこのコマンドを実行する権限がありません！",
-		"An error occurred when running the command": "コマンドの実行時にエラーが発生しました",
-		"DontHavePermission_SendMessage": "テキストチャンネル {0} へメッセージを送信する権限がありません！",
+		"CmdMsg_DontHavePermission_Execution": "あなたにはこのコマンドを実行する権限がありません！",
+		"CmdMsg_DontHavePermission_SendMessage": "テキストチャンネル {0} へメッセージを送信する権限がありません！",
+		"CmdMsg_TextChannelNotFound": "指定されたテキストチャンネルが見つかりません。",
+		"CmdMsg_Success": "完了",
+		"CmdMsg_Warning": "警告",
+		"CmdMsg_ExcutionError": "コマンドの実行時にエラーが発生しました",
+		"CmdMsg_InternalError": "内部エラー",
+		"CmdMsg_InternalError_Description": "内部エラーが発生しました。もう一度お試しください。\n(この問題が解決しない場合は、開発者へ報告してください。)",
 		"Cmd_setlanguage_Success": "サーバーステータスメッセージの言語を `{0}` に設定しました。",
 		"Cmd_setindicator_Success": "サーバーステータスインジケーターの表示を `{0}` に設定しました。",
+		"Cmd_setnotification_Success": "サーバーステータスの通知メッセージを `{0}` に設定しました。",
+		"Cmd_setnotification_Channel": "テキストチャンネル",
+		"Cmd_setnotification_Mention": "メンション",
+		"Cmd_setnotification_RoleIsNotMentionable": "指定されたロールへのメンションは許可されていません。",
 		"Cmd_create_Success": "テキストチャンネル {0} へサーバーステータスメッセージを送信しました。\n以後このメッセージは自動的に更新されます。",
-		"Cmd_create_Old messages you previously sent will no longer be updated.": "以前送信した古いメッセージは更新されなくなります。"
+		"Cmd_create_OldMessagesWillNoLongerBeUpdated": "以前送信した古いメッセージは更新されなくなります。"
 	},
 	"commands": {
 		"synccommands": {
@@ -92,6 +103,24 @@
 				"enable": {
 					"name": "有効",
 					"description": "True: 有効 / False: 無効"
+				}
+			}
+		},
+		"setnotification": {
+			"name": "setnotification",
+			"description": "サーバーステータスに変化があった際に送信される通知を設定します。",
+			"options": {
+				"enable": {
+					"name": "有効",
+					"description": "True: 有効 / False: 無効"
+				},
+				"channel": {
+					"name": "テキストチャンネル",
+					"description": "通知メッセージを送信するテキストチャンネル。指定しない場合は現在ステータスが送信されているチャンネルへ送信されます。"
+				},
+				"role": {
+					"name": "ロール",
+					"description": "通知メッセージの送信時にメンションするロール。"
 				}
 			}
 		},
