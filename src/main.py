@@ -444,7 +444,7 @@ async def setlanguage(ctx: discord.ApplicationContext,
 		# ギルドデータをチェック
 		await GuildConfig.check_guild(ctx.guild.id)
 
-		if locale in localizations.LOCALE_DATA.keys():
+		if locale in localizations.LOCALE_DATA:
 			#GuildConfig.data.config[str(ctx.guild.id)]["server_status_message"]["language"] = [k for k, v in localizations.LOCALE_DATA.keys() if v == locale][0]
 			GuildConfig.data.config[str(ctx.guild.id)]["server_status_message"]["language"] = locale
 		else:
@@ -484,6 +484,94 @@ async def setindicator(ctx: discord.ApplicationContext,
 	except Exception:
 		# 設定をリセット
 		GuildConfig.data.config[str(ctx.guild.id)]["server_status_message"]["status_indicator"] = False
+		await GuildConfig.save()
+		logger.error(traceback.format_exc())
+		await ctx.send_followup(embed=embeds.Notification.internal_error())
+
+@client.slash_command()
+@discord.guild_only()
+@discord.default_permissions(administrator=True)
+async def setnotification(ctx: discord.ApplicationContext,
+	enable: Option(
+		bool,
+		required=True
+	),
+	channel: Option(
+		discord.TextChannel,
+		required=False
+	),
+	role: Option(
+		discord.Role,
+		required=False
+	)
+) -> None:
+	await ctx.defer(ephemeral=True)
+
+	try:
+		# ギルドデータをチェック
+		await GuildConfig.check_guild(ctx.guild.id)
+
+		# 有効化
+		if enable:
+			# チャンネルが指定されていない場合はコマンドが実行されたチャンネルにする
+			if channel is None:
+				ch_id = ctx.channel_id
+			else:
+				ch_id = channel.id
+
+			# 指定されたチャンネルが存在するかチェックする
+			ch = client.get_channel(ch_id)
+			# 見つからない場合はエラーメッセージを送信する
+			if not ch:
+				await ctx.send_followup(embed=embeds.Notification.error(description=_("CmdMsg_TextChannelNotFound")))
+				return
+			# メッセージを送信する権限がない場合もエラーメッセージを送信する
+			if not ch.can_send():
+				await ctx.send_followup(embed=embeds.Notification.error(description=_("CmdMsg_DontHavePermission_SendMessage")))
+				return
+
+			# ロールが指定されている場合
+			if role:
+				# 指定されたロールがメンション可能かチェックする
+				# メンションができない場合はエラーメッセージを送信する
+				if not role.mentionable:
+					await ctx.send_followup(embed=embeds.Notification.error(description=_("Cmd_setnotification_RoleIsNotMentionable")))
+					return
+				# 指定されたロールのIDを保存
+				GuildConfig.data.config[str(ctx.guild.id)]["server_status_notification"]["role_id"] = role.id
+			# ロールが指定されていない場合
+			else:
+				# メンションを無効化
+				GuildConfig.data.config[str(ctx.guild.id)]["server_status_notification"]["role_id"] = 0
+
+			# 指定されたチャンネルのIDを保存
+			GuildConfig.data.config[str(ctx.guild.id)]["server_status_notification"]["channel_id"] = ch_id
+
+		# 無効化
+		else:
+			GuildConfig.data.config[str(ctx.guild.id)]["server_status_notification"]["channel_id"] = 0
+			GuildConfig.data.config[str(ctx.guild.id)]["server_status_notification"]["role_id"] = 0
+
+		# ギルドデータを保存
+		await GuildConfig.save()
+
+		# 設定完了メッセージを送信する
+		success_embed = embeds.Notification.success(description=_("Cmd_setnotification_Success", _(str(enable))))
+		if enable:
+			# テキストチャンネルの項目
+			success_embed.add_field(name=_("Cmd_setnotification_Channel"), value=ch.mention)
+			# メンションが有効かどうかの項目
+			if role:
+				mention_settings_text = role.mention
+			else:
+				mention_settings_text = _("False")
+			success_embed.add_field(name=_("Cmd_setnotification_Mention"), value=mention_settings_text)
+		await ctx.send_followup(embed=success_embed)
+	# 例外発生時
+	except Exception:
+		# 設定をリセット
+		GuildConfig.data.config[str(ctx.guild.id)]["server_status_notification"]["channel_id"] = 0
+		GuildConfig.data.config[str(ctx.guild.id)]["server_status_notification"]["role_id"] = 0
 		await GuildConfig.save()
 		logger.error(traceback.format_exc())
 		await ctx.send_followup(embed=embeds.Notification.internal_error())
