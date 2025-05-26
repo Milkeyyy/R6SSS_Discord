@@ -72,6 +72,7 @@ async def on_ready() -> None:
 	logger.info("サーバーステータスの定期更新開始")
 	update_serverstatus.start()
 
+
 # アプリケーションコマンド実行時のイベント
 @client.event
 async def on_application_command_completion(ctx: discord.ApplicationContext) -> None:
@@ -87,8 +88,9 @@ async def on_application_command_completion(ctx: discord.ApplicationContext) -> 
 
 # アプリケーションコマンドエラー時のイベント
 @client.event
-async def on_application_command_error(ctx: discord.ApplicationContext) -> None:
-	pass
+async def on_application_command_error(ctx: discord.ApplicationContext, ex: discord.DiscordException) -> None:
+	logger.error("アプリケーションコマンド実行エラー")
+	logger.error(ex)
 
 
 # 1分毎にサーバーステータスを更新する
