@@ -5,13 +5,11 @@ import r6sss
 import status_indicator
 
 
-API_URL = "https://api-r6sss.milkeyyy.com/v2/status"
-
-
 class ServerStatusManager:
 	"""サーバーステータスを管理するクラス"""
 
-	data = []
+	data: list = []
+	previous_data: list = []
 	updated_at = 0
 	indicator = status_indicator.Unknown # テキストチャンネルの名前に表示するステータスインジケーター(絵文字)
 
@@ -46,4 +44,5 @@ class ServerStatusManager:
 	@classmethod
 	async def update(cls) -> None:
 		"""サーバーステータスを更新する"""
+		cls.previous_data = cls.data
 		cls.data = await cls.get()
