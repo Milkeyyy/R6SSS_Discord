@@ -235,11 +235,13 @@ async def update_serverstatus() -> None:
 								# 通知メッセージを送信
 								if notif_ch is not None and notif_embeds is not None:
 									for notif_embed in notif_embeds:
-										notif_embed.description = f"[**💬 {localizations.translate('Notification_Show_Server_Status', lang=lang)}**]({msg.jump_url})\n{notif_embed.description}"
-									await notif_ch.send(
-										content=localizations.translate("Notification_Server_Status_Updated", lang=lang) + "\n" + notif_role_mention,
-										embeds=notif_embeds
-									)
+										if notif_embed is not None:
+											notif_embed.description = f"[**💬 {localizations.translate('Notification_Show_Server_Status', lang=lang)}**]({msg.jump_url})\n{notif_embed.description}"
+									if notif_embeds:
+										await notif_ch.send(
+											content=localizations.translate("Notification_Server_Status_Updated", lang=lang) + "\n" + notif_role_mention,
+											embeds=notif_embeds
+										)
 
 						except Exception as e:
 							logger.error(traceback.format_exc())
