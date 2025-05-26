@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+from sys import exit
 import traceback
 
 import discord
@@ -732,3 +733,4 @@ try:
 	client.run(os.getenv("CLIENT_TOKEN"))
 except Exception as e:
 	logger.error(traceback.format_exc())
+	exit(1)
