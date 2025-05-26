@@ -616,7 +616,10 @@ try:
 	# .envファイルが存在する場合はファイルから環境変数を読み込む
 	env_path = os.path.join(os.getcwd(), ".env")
 	if os.path.isfile(env_path):
-		load_dotenv(env_path)
+		try:
+			load_dotenv(env_path)
+		except NameError:
+			pass
 
 	# 言語データを読み込む
 	#localizations.load_localedata()
