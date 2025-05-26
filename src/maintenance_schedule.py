@@ -6,16 +6,20 @@ from logger import logger
 API_URL = "https://api-r6sss.milkeyyy.com/v2/schedule/latest"
 
 
-async def get() -> dict | None:
-	"""最新のメンテナンススケジュールを取得して整えて返す"""
+class MaintenanceScheduleManager:
+	schedule: dict | None
 
-	# メンテナンススケジュールを取得
-	result = httpx.get(API_URL)
-	if result.status_code != 200:
-		logger.error("メンテナンススケジュールの取得に失敗")
-		logger.error("- %s %s", str(result.status_code), result.json()["detail"])
-		return None
+	@classmethod
+	async def get(cls) -> dict | None:
+		"""最新のメンテナンススケジュールを取得して整えて返す"""
 
-	sched = result.json()["data"]
+		# メンテナンススケジュールを取得
+		result = httpx.get(API_URL)
+		if result.status_code != 200:
+			logger.error("メンテナンススケジュールの取得に失敗")
+			logger.error("- %s %s", str(result.status_code), result.json()["detail"])
+			return None
 
-	return sched
+		cls.schedule = result.json()["data"]
+
+		return cls.schedule

@@ -30,7 +30,7 @@ import embeds
 from kumasan import KumaSan
 
 # スケジュール
-import maintenance_schedule
+from maintenance_schedule import MaintenanceScheduleManager
 
 # サーバーステータス
 from server_status import ServerStatusManager
@@ -108,7 +108,7 @@ async def update_serverstatus() -> None:
 		await GuildConfig.save()
 
 		# メンテナンススケジュール情報を取得
-		sched = await maintenance_schedule.get()
+		sched = await MaintenanceScheduleManager.get()
 
 		# サーバーステータスを取得/更新する
 		prev_status = ServerStatusManager.data
@@ -488,7 +488,7 @@ async def setindicator(ctx: discord.ApplicationContext,
 async def status(ctx: discord.ApplicationContext) -> None:
 	await ctx.defer(ephemeral=False)
 	try:
-		sched = await maintenance_schedule.get()
+		sched = MaintenanceScheduleManager.schedule
 		await ctx.send_followup(embeds=await generate_serverstatus_embed(GuildConfig.data.config[str(ctx.guild_id)]["server_status_message"]["language"], sched))
 	except Exception as e:
 		logger.error(traceback.format_exc())
@@ -521,7 +521,7 @@ async def create(ctx: discord.ApplicationContext,
 
 		# サーバーステータス埋め込みメッセージを送信
 		try:
-			sched = await maintenance_schedule.get()
+			sched = MaintenanceScheduleManager.schedule
 			msg = await ch.send(embeds=await generate_serverstatus_embed(GuildConfig.data.config[str(ctx.guild_id)]["server_status_message"]["language"], sched))
 		except Exception as e:
 			if type(e) == discord.errors.ApplicationCommandInvokeError and str(e).endswith("Missing Permissions"):
