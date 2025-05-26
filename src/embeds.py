@@ -1,4 +1,5 @@
 import discord
+from pycord.i18n import _
 import r6sss
 
 from client import client
@@ -8,6 +9,59 @@ from server_status import ServerStatusManager
 
 
 class Notification:
+	@classmethod
+	def success(cls, title: str = "", description: str = ""):
+		"""成功時用埋め込みメッセージ"""
+
+		if title == "":
+			title = _("CmdMsg_Success")
+
+		embed = discord.Embed(
+			title=":white_check_mark: " + title,
+			description=description,
+			colour=discord.Colour.from_rgb(140, 176, 91)
+		)
+		return embed
+
+	@classmethod
+	def warning(cls, title: str = "", description: str = ""):
+		"""警告用埋め込みメッセージ"""
+
+		if title == "":
+			title = _("CmdMsg_Warning")
+
+		embed = discord.Embed(
+			title=":warning: " + title,
+			description=description,
+			colour=discord.Colour.from_rgb(228, 146, 16)
+		)
+		return embed
+
+	@classmethod
+	def error(cls, title: str = "", description: str = ""):
+		"""エラー発生時用埋め込みメッセージ"""
+
+		if title == "":
+			title = _("CmdMsg_ExcutionError")
+
+		embed = discord.Embed(
+			title=":no_entry_sign: " + title,
+			description=description,
+			colour=discord.Colour.from_rgb(247, 206, 80)
+		)
+		return embed
+
+	@classmethod
+	def internal_error(cls):
+		"""内部エラー発生時用埋め込みメッセージ"""
+
+		embed = discord.Embed(
+			title=":closed_book: " + _("CmdMsg_InternalError"),
+			description = _("CmdMsg_InternalError_Description"),
+			colour=discord.Colour.from_rgb(205, 61, 66)
+		)
+		return embed
+
 	@classmethod
 	def get_by_comparison_result(cls, result: r6sss.ComparisonResult, lang: str) -> discord.Embed | None:
 		"""サーバーステータスの比較結果から通知用のEmbedを生成する"""
