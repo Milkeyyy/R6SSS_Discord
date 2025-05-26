@@ -16,5 +16,5 @@ class KumaSan:
 		result = httpx.get(
 			url=base_url,
 			params={"status": state, "msg": message, "ping": ping},
-			timeout=5
+			timeout=15
 		)
