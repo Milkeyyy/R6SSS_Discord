@@ -401,7 +401,7 @@ async def generate_serverstatus_embed(locale, sched: MaintenanceSchedule) -> lis
 		else: # TODO: プラットフォームごとに実施日時が異なる場合があるかもしれないのでそれに対応する？
 			for p in platform_list:
 				# プラットフォーム一覧テキストを生成
-				pf_list_text = pf_list_text + "・**" + localizations.translate(f'Platform_{p.name}', lang=locale) + "**\n"
+				pf_list_text = pf_list_text + "- **" + localizations.translate(f'Platform_{p.name}', lang=locale) + "**\n"
 
 		if create:
 			# 埋め込みメッセージを生成
@@ -414,12 +414,12 @@ async def generate_serverstatus_embed(locale, sched: MaintenanceSchedule) -> lis
 					# ダウンタイム
 					discord.EmbedField(
 						name="**:clock3: " + localizations.translate("MaintenanceSchedule_Downtime", lang=locale) + "**",
-						value="・" + str(sched.downtime) + " " + localizations.translate("MaintenanceSchedule_Downtime_Minute", lang=locale)
+						value="- " + str(sched.downtime) + " " + localizations.translate("MaintenanceSchedule_Downtime_Minute", lang=locale)
 					),
 					# 予定日時
 					discord.EmbedField(
 						name="**:calendar: " + localizations.translate("MaintenanceSchedule_ScheduledDT", lang=locale) + "**",
-						value=f"<t:{date_timestamp}:f> (<t:{date_timestamp}:R>)"
+						value=f"- <t:{date_timestamp}:f> (<t:{date_timestamp}:R>)"
 					),
 					# 対象プラットフォーム一覧
 					discord.EmbedField(
