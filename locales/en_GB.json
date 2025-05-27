@@ -119,15 +119,15 @@
 				},
 				"channel": {
 					"name": "channel",
-					"description": "通知メッセージを送信するテキストチャンネルを設定します。"
+					"description": "Set the text channel to send notification messages to."
 				},
 				"role": {
 					"name": "role",
-					"description": "通知メッセージの送信時にメンションするロールを設定します。"
+					"description": "Sets the roles to mention when sending notification messages."
 				},
 				"auto_delete": {
 					"name": "autodelete",
-					"description": "通知メッセージが送信されてから一定時間経過後に自動削除するかどうかを設定します。 (0 で無効化"
+					"description": "Set whether to automatically delete after a certain period of time. (0 disables)"
 				}
 			}
 		},
@@ -141,7 +141,7 @@
 			"options": {
 				"channel": {
 					"name": "channel",
-					"description": "サーバーステータスを送信するテキストチャンネルを設定します。"
+					"description": "Sets the text channel on which to send server status."
 				}
 			}
 		}
