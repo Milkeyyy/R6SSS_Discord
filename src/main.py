@@ -240,10 +240,20 @@ async def update_serverstatus() -> None:
 										if notif_embed is not None:
 											notif_embed.description = f"[**💬 {localizations.translate('Notification_Show_Server_Status', lang=lang)}**]({msg.jump_url})\n{notif_embed.description}"
 									if notif_embeds:
-										await notif_ch.send(
-											content=localizations.translate("Notification_Server_Status_Updated", lang=lang) + "\n" + notif_role_mention,
-											embeds=notif_embeds
-										)
+										# 自動削除が有効の場合は削除までの時間を指定する
+										notif_delete_after_seconds = int(GuildConfig.data.config[str(guild.id)]["server_status_notification"]["delete_after"])
+										if notif_delete_after_seconds > 0:
+											await notif_ch.send(
+												content=localizations.translate("Notification_Server_Status_Updated", lang=lang) + "\n" + notif_role_mention,
+												embeds=notif_embeds,
+												delete_after=notif_delete_after_seconds
+											)
+										# 自動削除が無効の場合は削除までの時間を指定しない
+										else:
+											await notif_ch.send(
+												content=localizations.translate("Notification_Server_Status_Updated", lang=lang) + "\n" + notif_role_mention,
+												embeds=notif_embeds
+											)
 
 						except Exception as e:
 							logger.error(traceback.format_exc())
@@ -523,6 +533,13 @@ async def setnotification(ctx: discord.ApplicationContext,
 	role: Option(
 		discord.Role,
 		required=False
+	),
+	auto_delete: Option(
+		int,
+		required=False,
+		default=10,
+		min_value=0,
+		max_value=600
 	)
 ) -> None:
 	await ctx.defer(ephemeral=True)
@@ -564,6 +581,14 @@ async def setnotification(ctx: discord.ApplicationContext,
 				# メンションを無効化
 				GuildConfig.data.config[str(ctx.guild.id)]["server_status_notification"]["role_id"] = 0
 
+			# 自動削除の値が設定されている場合
+			if auto_delete:
+				# 秒数を保存
+				GuildConfig.data.config[str(ctx.guild.id)]["server_status_notification"]["auto_delete"] = auto_delete
+			# 指定されていない場合はデフォルト値の10秒にする
+			else:
+				GuildConfig.data.config[str(ctx.guild.id)]["server_status_notification"]["auto_delete"] = 10
+
 			# 指定されたチャンネルのIDを保存
 			GuildConfig.data.config[str(ctx.guild.id)]["server_status_notification"]["channel_id"] = ch_id
 
@@ -571,6 +596,7 @@ async def setnotification(ctx: discord.ApplicationContext,
 		else:
 			GuildConfig.data.config[str(ctx.guild.id)]["server_status_notification"]["channel_id"] = 0
 			GuildConfig.data.config[str(ctx.guild.id)]["server_status_notification"]["role_id"] = 0
+			GuildConfig.data.config[str(ctx.guild.id)]["server_status_notification"]["auto_delete"] = 0
 
 		# ギルドデータを保存
 		await GuildConfig.save()
@@ -592,6 +618,7 @@ async def setnotification(ctx: discord.ApplicationContext,
 		# 設定をリセット
 		GuildConfig.data.config[str(ctx.guild.id)]["server_status_notification"]["channel_id"] = 0
 		GuildConfig.data.config[str(ctx.guild.id)]["server_status_notification"]["role_id"] = 0
+		GuildConfig.data.config[str(ctx.guild.id)]["server_status_notification"]["auto_delete"] = 0
 		await GuildConfig.save()
 		logger.error(traceback.format_exc())
 		await ctx.send_followup(embed=embeds.Notification.internal_error())
