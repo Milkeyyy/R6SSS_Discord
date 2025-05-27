@@ -133,7 +133,7 @@
 		},
 		"status": {
 			"name": "status",
-			"description": "Sends the current server status. The server status sent with this command is not updated automatically."
+			"description": "Sends the current server status. This server status is not updated automatically."
 		},
 		"create": {
 			"name": "create",
