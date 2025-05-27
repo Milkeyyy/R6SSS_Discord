@@ -401,7 +401,7 @@ async def generate_serverstatus_embed(locale, sched: MaintenanceSchedule) -> lis
 			else: # TODO: プラットフォームごとに実施日時が異なる場合があるかもしれないのでそれに対応する？
 				for p in platform_list:
 					# プラットフォーム一覧テキストを生成
-					pf_list_text = pf_list_text + "・**" + localizations.translate(f'Platform_{p}', lang=locale) + "**\n"
+					pf_list_text = pf_list_text + "・**" + localizations.translate(f'Platform_{p.name}', lang=locale) + "**\n"
 
 		if create:
 			# 埋め込みメッセージを生成
@@ -428,9 +428,9 @@ async def generate_serverstatus_embed(locale, sched: MaintenanceSchedule) -> lis
 					)
 				]
 			)
-			# パッチノートのURLが指定されている場合はフィールドを追加する
+			# パッチノートのURLが指定されている場合は末尾にフィールドを追加する
 			if sched.patchnotes.startswith(("http://", "https://")):
-				embed.fields.insert(0, # パッチノート
+				embed.fields.append(
 					discord.EmbedField(
 						name="**:notepad_spiral: " + localizations.translate("MaintenanceSchedule_PatchNotes", lang=locale) + "**",
 						value=sched.patchnotes
