@@ -411,7 +411,7 @@ async def generate_serverstatus_embed(locale, sched: MaintenanceSchedule) -> lis
 		else: # TODO: プラットフォームごとに実施日時が異なる場合があるかもしれないのでそれに対応する？
 			for p in platform_list:
 				# プラットフォーム一覧テキストを生成
-				pf_list_text = pf_list_text + "- **" + localizations.translate(f'Platform_{p.name}', lang=locale) + "**\n"
+				pf_list_text = pf_list_text + "- **" + platform_icon.LIST[p.name] + " " + localizations.translate(f'Platform_{p.name}', lang=locale) + "**\n"
 
 		if create:
 			# 埋め込みメッセージを生成
