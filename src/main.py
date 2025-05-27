@@ -271,7 +271,7 @@ async def after_updateserverstatus() -> None:
 		update_serverstatus.start()
 
 # サーバーステータス埋め込みメッセージを更新
-async def generate_serverstatus_embed(locale, sched_list: list[MaintenanceSchedule]) -> list[discord.Embed]:
+async def generate_serverstatus_embed(locale, sched: MaintenanceSchedule) -> list[discord.Embed]:
 	embed_settings = {
 		"PC": [discord.Colour.from_rgb(255, 255, 255), 2], # 埋め込みの色, 埋め込みのスペーシング
 		"PS4": [discord.Colour.from_rgb(0, 67, 156), 0],
@@ -279,11 +279,6 @@ async def generate_serverstatus_embed(locale, sched_list: list[MaintenanceSchedu
 		"XB1": [discord.Colour.from_rgb(16, 124, 16), 0],
 		"XBSX": [discord.Colour.from_rgb(16, 124, 16), 1]
 	}
-
-	if sched_list:
-		sched = sched_list[0]
-	else:
-		sched = None
 
 	embeds = []
 
@@ -382,10 +377,9 @@ async def generate_serverstatus_embed(locale, sched_list: list[MaintenanceSchedu
 
 	embeds.append(embed)
 
-	create = True
-	#dt = "**:calendar: " + localizations.translate("MaintenanceSchedule_ScheduledDT", locale) + "**\n"
-	pf_list_text = ""
 	# スケジュール埋め込みを生成
+	create = True
+	pf_list_text = ""
 	if sched:
 		#platform_list = [p["Name"] for p in sched["Platforms"]]
 		platform_list = sched.platforms
