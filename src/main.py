@@ -681,7 +681,7 @@ async def test_notification(ctx: discord.ApplicationContext, comparison_target: 
 			raw_status = json.loads(comparison_target)["data"]
 			status_list = []
 			for _platform, _status in raw_status.items():
-				status_list.append(r6sss.functions.Status(r6sss.types.Platform(_platform), _status))
+				status_list.append(r6sss.functions.Status(r6sss.types.Platform[_platform], _status))
 
 			# 比較を実行
 			if ServerStatusManager.data is None:
