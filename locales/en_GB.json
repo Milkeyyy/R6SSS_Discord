@@ -1,8 +1,10 @@
 {
 	"info": {
-		"name": "English (GB)"
+		"name": "English (United Kingdom)"
 	},
 	"strings": {
+		"True": "Enabled",
+		"False": "Disabled",
 		"No Issues": "No Issues",
 		"Maintenance": "Maintenance",
 		"Unplanned Issues": "Unplanned Issues",
@@ -19,12 +21,12 @@
 		"Last Update": "Last Update",
 		"Unknown": "Unknown",
 		"TargetPlatform": "Target Platform",
-		"Platform_ALL": "All Platforms",
-		"Platform_PC": "🖥️ PC",
-		"Platform_PS5": "🔵 PS5",
-		"Platform_PS4": "🔵 PS4",
-		"Platform_XB1": "🟩 XB1",
-		"Platform_XBSX": "🟩 XBSX/S",
+		"Platform_ALL": "All Platform",
+		"Platform_PC": "PC",
+		"Platform_PS5": "PS5",
+		"Platform_PS4": "PS4",
+		"Platform_XB1": "XB1",
+		"Platform_XBSX": "XBSX/S",
 		"Status_Connectivity": "Connectivity",
 		"Status_Authentication": "Authentication",
 		"Status_Matchmaking": "Matchmaking",
@@ -41,24 +43,38 @@
 		"Detail_ImpactedFeatures": "🟥 Impacted Features",
 		"Detail_ImpactedFeatures_After": "☑️ Resolved Impacted Features",
 		"Embed_Unknown_Title": "Failed to retrieve server status",
-		"Embed_Unknown_Desc": "Failed to retrieve server status.\nFor more information about bot outages, please refer to [here](https://status.milkeyyy.com/).",
-		"Platform_All": "All Platforms",
+		"Embed_Unknown_Desc": "Failed to retrieve server status.\nFor more information about bot outages, please refer to [Here](https://status.milkeyyy.com/).",
+		"Platform_All": "All Platform",
 		"MaintenanceSchedule": "Maintenance Schedule",
 		"MaintenanceSchedule_Notes": "This information was extracted by Google Generative AI (Gemini).\nAccuracy of the information is not guaranteed.",
 		"MaintenanceSchedule_Downtime": "Downtime",
-		"MaintenanceSchedule_Downtime_Minute": "Minute",
+		"MaintenanceSchedule_Downtime_Minute": "mins",
 		"MaintenanceSchedule_PlannedMaintenance": "Planned Maintenance",
 		"MaintenanceSchedule_ScheduledDT": "Scheduled Date",
 		"MaintenanceSchedule_TargetPlatform": "Target Platform",
-		"MaintenanceSchedule_NoMaintenanceScheduled": "No maintenance scheduled.",
-		"NotAffiliatedWithOrRndorsedBy": "This bot is not affiliated with or endorsed by Ubisoft.\nThe accuracy of server status is not guaranteed.",
-		"Cmd_General_DontHavePermission": "You don't have permission to execute this command!",
-		"An error occurred when running the command": "An error occurred when running the command",
-		"DontHavePermission_SendMessage": "You do not have permission to send messages to text channel {0}!",
-		"Cmd_setlanguage_Success": "Server status message language set to `{0}`.",
-		"Cmd_setindicator_Success": "Server status indicator display set to `{0}`.",
-		"Cmd_create_Success": "Sent server status message to text channel {0}. \nThis message will be updated automatically from now on.",
-		"Cmd_create_Old messages you previously sent will no longer be updated.": "Old messages you previously sent will no longer be updated."
+		"MaintenanceSchedule_NoMaintenanceScheduled": "No scheduled maintenance.",
+		"MaintenanceSchedule_PatchNotes": "Patch Notes",
+		"NotAffiliatedWithOrRndorsedBy": "This bot is not affiliated with or endorsed by Ubisoft.\nAccuracy of server status cannot be guaranteed.",
+		"Notification_Server_Status_Updated": "Server status has been updated.",
+		"Notification_Show_Server_Status": "Show Server Status",
+		"CmdMsg_DontHavePermission_Execution": "You do not have permission to run this command!",
+		"CmdMsg_DontHavePermission_SendMessage": "The bot does not have permission to send messages to text channel {0}!",
+		"CmdMsg_TextChannelNotFound": "The specified text channel could not be found.",
+		"CmdMsg_Success": "Done",
+		"CmdMsg_Warning": "Warning",
+		"CmdMsg_ExcutionError": "An error occurred while executing the command",
+		"CmdMsg_InternalError": "Internal Error",
+		"CmdMsg_InternalError_Description": "An internal error occurred. Please try again.\n(If the problem persists, please report it to the developer.)",
+		"Cmd_setlanguage_Success": "Set server status message language to `{0}`.",
+		"Cmd_setindicator_Success": "Server status indicator display has been set to `{0}`.",
+		"Cmd_setnotification_Success": "Server status notification message set to `{0}`.",
+		"Cmd_setnotification_Channel": "Text Channel",
+		"Cmd_setnotification_Mention": "Mention",
+		"Cmd_setnotification_AutoDelete": "Auto Delete",
+		"Cmd_setnotification_AutoDelete_Seconds": "{0} seconds",
+		"Cmd_setnotification_RoleIsNotMentionable": "Mentioning the specified role is not allowed.",
+		"Cmd_create_Success": "A server status message has been sent to the text channel {0}.\nThis message will be updated automatically from now on.",
+		"Cmd_create_OldMessagesWillNoLongerBeUpdated": "Any old messages you have previously sent will no longer be updated."
 	},
 	"commands": {
 		"synccommands": {
@@ -67,7 +83,7 @@
 		},
 		"about": {
 			"name": "about",
-			"description": "Display information about this bot."
+			"description": "Displays information about this bot."
 		},
 		"ping": {
 			"name": "ping",
@@ -75,11 +91,11 @@
 		},
 		"setlanguage": {
 			"name": "setlanguage",
-			"description": "Set the display language for server status.",
+			"description": "Sets the language in which server status messages are displayed.",
 			"options": {
 				"locale": {
-					"name": "language",
-					"description" :"Language to set"
+					"name": "Languages",
+					"description": "Language to set"
 				}
 			}
 		},
@@ -88,22 +104,44 @@
 			"description": "Sets the display of the indicator that appears in the name of the text channel.",
 			"options": {
 				"enable": {
-					"name": "enable",
+					"name": "Enable",
 					"description": "True: Enable / False: Disable"
+				}
+			}
+		},
+		"setnotification": {
+			"name": "setnotification",
+			"description": "Configure notifications to be sent when server status changes.",
+			"options": {
+				"enable": {
+					"name": "Enable",
+					"description": "True: Enable / False: Disable"
+				},
+				"channel": {
+					"name": "Text Channel",
+					"description": "Sets the text channel to send notification messages to. If not specified, it will be set to the channel this command is executed on."
+				},
+				"role": {
+					"name": "Role",
+					"description": "[default: None] Sets the roles to mention when sending notification messages."
+				},
+				"auto_delete": {
+					"name": "Auto Delete",
+					"description": "[Default: 10 s] Sets whether notification messages are automatically deleted after a certain amount of time has passed since they were sent (0 disables)."
 				}
 			}
 		},
 		"status": {
 			"name": "status",
-			"description": "Send current server status. Server status sent with this command is not automatically updated."
+			"description": "Sends the current server status. The server status sent with this command is not updated automatically."
 		},
 		"create": {
 			"name": "create",
-			"description": "Create server status messages that are automatically updated.",
+			"description": "Create automatically updated server status messages.",
 			"options": {
 				"channel": {
-					"name": "channel",
-					"description": "Text channel to send server status. If not specified, it will be created in the current channel."
+					"name": "Text Channel",
+					"description": "The text channel to send the server status on. If not specified, one will be created on the channel this command is executed on."
 				}
 			}
 		}
