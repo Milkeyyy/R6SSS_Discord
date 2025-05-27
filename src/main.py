@@ -382,6 +382,10 @@ async def generate_serverstatus_embed(locale, sched) -> list[discord.Embed]:
 	# スケジュール埋め込みを生成
 	if sched is not None:
 		platform_list = [p["Name"] for p in sched["Platforms"]]
+
+		# タイムスタンプを整数へ変換
+		sched["Timestamp"] = int(sched["Timestamp"])
+
 		# 全プラットフォーム同一
 		if "All" in platform_list:
 			# スケジュールが範囲内か判定
