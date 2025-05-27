@@ -406,7 +406,7 @@ async def generate_serverstatus_embed(locale, sched) -> list[discord.Embed]:
 		if create:
 			# パッチノートのURLが指定されている場合は表示させる
 			if sched["PatchNotes"].startswith(("http://", "https://")):
-				patchnotes_text = f"\n[🗒️ {localizations.translate("MaintenanceSchedule_PatchNotes", lang=locale)}]({sched["PatchNotes"]})"
+				patchnotes_text = f"\n\n[🗒️ **{localizations.translate("MaintenanceSchedule_PatchNotes", lang=locale)}**]({sched["PatchNotes"]})\n"
 			else:
 				patchnotes_text = ""
 			# 埋め込みメッセージを生成
@@ -424,7 +424,7 @@ async def generate_serverstatus_embed(locale, sched) -> list[discord.Embed]:
 					# 予定日時
 					discord.EmbedField(
 						name="**:calendar: " + localizations.translate("MaintenanceSchedule_ScheduledDT", lang=locale) + "**",
-						value=f"**<t:{sched['Timestamp']}:f> (<t:{sched['Timestamp']}:R>)"
+						value=f"<t:{sched['Timestamp']}:f> (<t:{sched['Timestamp']}:R>)"
 					),
 					# 対象プラットフォーム一覧
 					discord.EmbedField(
