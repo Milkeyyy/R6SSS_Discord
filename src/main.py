@@ -612,6 +612,8 @@ async def setnotification(ctx: discord.ApplicationContext,
 			else:
 				mention_settings_text = _("False")
 			success_embed.add_field(name=_("Cmd_setnotification_Mention"), value=mention_settings_text)
+			# 自動削除の項目
+			success_embed.add_field(name=_("Cmd_setnotification_AutoDelete"), value=_("False") if auto_delete == 0 else _("Cmd_setnotification_AutoDelete", auto_delete))
 		await ctx.send_followup(embed=success_embed)
 	# 例外発生時
 	except Exception:
