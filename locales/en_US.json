@@ -1,64 +1,80 @@
 {
 	"info": {
-		"name": "English (US)"
+		"name": "日本語 / Japanese"
 	},
 	"strings": {
-		"No Issues": "No Issues",
-		"Maintenance": "Maintenance",
-		"Unplanned Issues": "Unplanned Issues",
-		"Unplanned Outage": "Unplanned Outage",
-		"Outage": "Outage",
-		"Connectivity": "Connectivity",
-		"Authentication": "Authentication",
-		"Leaderboard": "Leaderboard",
-		"Purchase": "Purchase",
-		"Matchmaking": "Matchmaking",
-		"Operational": "Operational",
-		"Interrupted": "Interrupted",
-		"Degraded": "Degraded",
-		"Last Update": "Last Update",
-		"Unknown": "Unknown",
-		"TargetPlatform": "Target Platform",
-		"Platform_ALL": "All Platforms",
-		"Platform_PC": "🖥️ PC",
-		"Platform_PS5": "🔵 PS5",
-		"Platform_PS4": "🔵 PS4",
-		"Platform_XB1": "🟩 XB1",
-		"Platform_XBSX": "🟩 XBSX/S",
-		"Status_Connectivity": "Connectivity",
-		"Status_Authentication": "Authentication",
-		"Status_Matchmaking": "Matchmaking",
-		"Status_Purchase": "Purchase",
-		"Title_AllFeaturesOperational": "✅ All features are operational.",
-		"Title_AllFeaturesOutageResolved": "✅ All features issues have been resolved.",
-		"Title_SomeFeaturesOutageResolved": "🟠 Some features issues have been resolved.",
-		"Title_AllFeaturesOutage": "⛔ All features are experiencing issues.",
-		"Title_SomeFeaturesOutage": "⚠️ Some features are experiencing issues.",
-		"Title_Maintenance_Start": "🔧▶️ Maintenance has started.",
-		"Title_Maintenance_End": "🔧✅ Maintenance has ended.",
-		"Title_ScheduledMaintenance_Start": "🔧▶️ Scheduled maintenance has started.",
-		"Title_ScheduledMaintenance_End": "🔧✅ Scheduled maintenance has ended.",
-		"Detail_ImpactedFeatures": "🟥 Impacted Features",
-		"Detail_ImpactedFeatures_After": "☑️ Resolved Impacted Features",
-		"Embed_Unknown_Title": "Failed to retrieve server status",
-		"Embed_Unknown_Desc": "Failed to retrieve server status.\nFor more information about bot outages, please refer to [here](https://status.milkeyyy.com/).",
-		"Platform_All": "All Platforms",
-		"MaintenanceSchedule": "Maintenance Schedule",
-		"MaintenanceSchedule_Notes": "This information was extracted by Google Generative AI (Gemini).\nAccuracy of the information is not guaranteed.",
-		"MaintenanceSchedule_Downtime": "Downtime",
-		"MaintenanceSchedule_Downtime_Minute": "Minute",
-		"MaintenanceSchedule_PlannedMaintenance": "Planned Maintenance",
-		"MaintenanceSchedule_ScheduledDT": "Scheduled Date",
-		"MaintenanceSchedule_TargetPlatform": "Target Platform",
-		"MaintenanceSchedule_NoMaintenanceScheduled": "No maintenance scheduled.",
-		"NotAffiliatedWithOrRndorsedBy": "This bot is not affiliated with or endorsed by Ubisoft.\nThe accuracy of server status is not guaranteed.",
-		"Cmd_General_DontHavePermission": "You don't have permission to execute this command!",
-		"An error occurred when running the command": "An error occurred when running the command",
-		"DontHavePermission_SendMessage": "You do not have permission to send messages to text channel {0}!",
-		"Cmd_setlanguage_Success": "Server status message language set to `{0}`.",
-		"Cmd_setindicator_Success": "Server status indicator display set to `{0}`.",
-		"Cmd_create_Success": "Sent server status message to text channel {0}. \nThis message will be updated automatically from now on.",
-		"Cmd_create_Old messages you previously sent will no longer be updated.": "Old messages you previously sent will no longer be updated."
+		"True": "有効",
+		"False": "無効",
+		"No Issues": "問題なし",
+		"Maintenance": "メンテナンス",
+		"Unplanned Issues": "想定外の問題",
+		"Unplanned Outage": "想定外の機能停止",
+		"Outage": "停止",
+		"Connectivity": "接続状況",
+		"Authentication": "認証システム",
+		"Leaderboard": "ランキング",
+		"Purchase": "ストア",
+		"Matchmaking": "マッチメイキング",
+		"Operational": "正常",
+		"Interrupted": "中断",
+		"Degraded": "想定外の停止",
+		"Last Update": "最終更新",
+		"Unknown": "不明",
+		"TargetPlatform": "対象プラットフォーム",
+		"Platform_ALL": "全プラットフォーム",
+		"Platform_PC": "PC",
+		"Platform_PS5": "PS5",
+		"Platform_PS4": "PS4",
+		"Platform_XB1": "XB1",
+		"Platform_XBSX": "XBSX/S",
+		"Status_Connectivity": "接続状況",
+		"Status_Authentication": "認証システム",
+		"Status_Matchmaking": "マッチメイキング",
+		"Status_Purchase": "ストア",
+		"Title_AllFeaturesOperational": "✅ すべての機能が正常に稼働しています。",
+		"Title_AllFeaturesOutageResolved": "✅ すべての機能の問題が解消されました。",
+		"Title_SomeFeaturesOutageResolved": "🟠 一部の機能の問題が解消されました。",
+		"Title_AllFeaturesOutage": "⛔ すべての機能で問題が発生しています。",
+		"Title_SomeFeaturesOutage": "⚠️ 一部の機能で問題が発生しています。",
+		"Title_Maintenance_Start": "🔧▶️ メンテナンスが開始されました。",
+		"Title_Maintenance_End": "🔧✅ メンテナンスが終了しました。",
+		"Title_ScheduledMaintenance_Start": "🔧▶️ 計画メンテナンスが開始されました。",
+		"Title_ScheduledMaintenance_End": "🔧✅ 計画メンテナンスが終了しました。",
+		"Detail_ImpactedFeatures": "🟥 問題が発生している機能",
+		"Detail_ImpactedFeatures_After": "☑️ 問題が解消された機能",
+		"Embed_Unknown_Title": "サーバーステータスの取得に失敗しました",
+		"Embed_Unknown_Desc": "サーバーステータスを取得できませんでした。\nボットの稼働状況については[こちら](https://status.milkeyyy.com/)を参照してください。",
+		"Platform_All": "全てのプラットフォーム",
+		"MaintenanceSchedule": "メンテナンススケジュール",
+		"MaintenanceSchedule_Notes": "この情報は Google Generative AI (Gemini) によって抽出されたものです。\n情報の正確性は保証されません。",
+		"MaintenanceSchedule_Downtime": "ダウンタイム",
+		"MaintenanceSchedule_Downtime_Minute": "分",
+		"MaintenanceSchedule_PlannedMaintenance": "予定されているメンテナンス",
+		"MaintenanceSchedule_ScheduledDT": "予定日時",
+		"MaintenanceSchedule_TargetPlatform": "対象プラットフォーム",
+		"MaintenanceSchedule_NoMaintenanceScheduled": "予定されているメンテナンスはありません。",
+		"MaintenanceSchedule_PatchNotes": "パッチノート",
+		"NotAffiliatedWithOrRndorsedBy": "この Bot は Ubisoft と提携または承認されていません。\nサーバーステータスの正確性は保証されません。",
+		"Notification_Server_Status_Updated": "サーバーステータスが更新されました。",
+		"Notification_Show_Server_Status": "サーバーステータスを表示",
+		"CmdMsg_DontHavePermission_Execution": "あなたにはこのコマンドを実行する権限がありません！",
+		"CmdMsg_DontHavePermission_SendMessage": "テキストチャンネル {0} へメッセージを送信する権限がありません！",
+		"CmdMsg_TextChannelNotFound": "指定されたテキストチャンネルが見つかりません。",
+		"CmdMsg_Success": "完了",
+		"CmdMsg_Warning": "警告",
+		"CmdMsg_ExcutionError": "コマンドの実行時にエラーが発生しました",
+		"CmdMsg_InternalError": "内部エラー",
+		"CmdMsg_InternalError_Description": "内部エラーが発生しました。もう一度お試しください。\n(この問題が解決しない場合は、開発者へ報告してください。)",
+		"Cmd_setlanguage_Success": "サーバーステータスメッセージの言語を `{0}` に設定しました。",
+		"Cmd_setindicator_Success": "サーバーステータスインジケーターの表示を `{0}` に設定しました。",
+		"Cmd_setnotification_Success": "サーバーステータスの通知メッセージを `{0}` に設定しました。",
+		"Cmd_setnotification_Channel": "テキストチャンネル",
+		"Cmd_setnotification_Mention": "メンション",
+		"Cmd_setnotification_AutoDelete": "自動削除",
+		"Cmd_setnotification_AutoDelete_Seconds": "{0} 秒",
+		"Cmd_setnotification_RoleIsNotMentionable": "指定されたロールへのメンションは許可されていません。",
+		"Cmd_create_Success": "テキストチャンネル {0} へサーバーステータスメッセージを送信しました。\n以後このメッセージは自動的に更新されます。",
+		"Cmd_create_OldMessagesWillNoLongerBeUpdated": "以前送信した古いメッセージは更新されなくなります。"
 	},
 	"commands": {
 		"synccommands": {
@@ -67,43 +83,65 @@
 		},
 		"about": {
 			"name": "about",
-			"description": "Display information about this bot."
+			"description": "このBotについての情報を表示します。"
 		},
 		"ping": {
 			"name": "ping",
-			"description": "Displays the latency of this bot."
+			"description": "このBotのレイテンシーを表示します。"
 		},
 		"setlanguage": {
 			"name": "setlanguage",
-			"description": "Set the display language for server status.",
+			"description": "サーバーステータスメッセージの表示言語を設定します。",
 			"options": {
 				"locale": {
-					"name": "language",
-					"description" :"Language to set"
+					"name": "言語",
+					"description": "設定する言語"
 				}
 			}
 		},
 		"setindicator": {
 			"name": "setindicator",
-			"description": "Sets the display of the indicator that appears in the name of the text channel.",
+			"description": "テキストチャンネルの名前に表示されるインジケーターの表示を設定します。",
 			"options": {
 				"enable": {
-					"name": "enable",
-					"description": "True: Enable / False: Disable"
+					"name": "有効",
+					"description": "True: 有効 / False: 無効"
+				}
+			}
+		},
+		"setnotification": {
+			"name": "setnotification",
+			"description": "サーバーステータスに変化があった際に送信される通知を設定します。",
+			"options": {
+				"enable": {
+					"name": "有効",
+					"description": "True: 有効 / False: 無効"
+				},
+				"channel": {
+					"name": "テキストチャンネル",
+					"description": "通知メッセージを送信するテキストチャンネルを設定します。指定しない場合はこのコマンドが実行されたチャンネルへ設定されます。"
+				},
+				"role": {
+					"name": "ロール",
+					"description": "[デフォルト: なし] 通知メッセージの送信時にメンションするロールを設定します。"
+				},
+				"auto_delete": {
+					"name": "自動削除",
+					"description": "[デフォルト: 10 秒] 通知メッセージが送信されてから一定時間経過後に自動削除するかどうかを設定します。 (0 で無効化)"
 				}
 			}
 		},
 		"status": {
 			"name": "status",
-			"description": "Send current server status. Server status sent with this command is not automatically updated."
+			"description": "現在のサーバーステータスを送信します。このコマンドで送信されたサーバーステータスは自動更新されません。"
 		},
 		"create": {
 			"name": "create",
-			"description": "Create server status messages that are automatically updated.",
+			"description": "自動更新されるサーバーステータスメッセージを作成します。",
 			"options": {
 				"channel": {
-					"name": "channel",
-					"description": "Text channel to send server status. If not specified, it will be created in the current channel."
+					"name": "テキストチャンネル",
+					"description": "サーバーステータスを送信するテキストチャンネル。指定しない場合はこのコマンドが実行されたチャンネルへ作成されます。"
 				}
 			}
 		}
