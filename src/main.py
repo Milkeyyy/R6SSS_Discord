@@ -388,20 +388,20 @@ async def generate_serverstatus_embed(locale, sched: MaintenanceSchedule) -> lis
 		date_timestamp = int(sched.date.timestamp())
 
 		# 全プラットフォーム同一
-		if "All" in platform_list:
-			# スケジュールが範囲内か判定
-			if datetime.datetime.now().timestamp() >= (date_timestamp + (sched.downtime * 60)):
-				create = False
-			# プラットフォーム一覧テキストを生成
-			pf_list_text = "・**" + localizations.translate('Platform_All', lang=locale) + "**\n"
-		else: # プラットフォーム別
-			# スケジュールが範囲内か判定
-			if datetime.datetime.now().timestamp() >= (date_timestamp + (sched.downtime * 60)):
-				create = False
-			else: # TODO: プラットフォームごとに実施日時が異なる場合があるかもしれないのでそれに対応する？
-				for p in platform_list:
-					# プラットフォーム一覧テキストを生成
-					pf_list_text = pf_list_text + "・**" + localizations.translate(f'Platform_{p.name}', lang=locale) + "**\n"
+		# if "All" in platform_list:
+		# 	# スケジュールが範囲内か判定
+		# 	if datetime.datetime.now().timestamp() >= (date_timestamp + (sched.downtime * 60)):
+		# 		create = False
+		# 	# プラットフォーム一覧テキストを生成
+		# 	pf_list_text = "・**" + localizations.translate('Platform_All', lang=locale) + "**\n"
+		# else: # プラットフォーム別
+		# スケジュールが範囲内か判定
+		if datetime.datetime.now().timestamp() >= (date_timestamp + (sched.downtime * 60)):
+			create = False
+		else: # TODO: プラットフォームごとに実施日時が異なる場合があるかもしれないのでそれに対応する？
+			for p in platform_list:
+				# プラットフォーム一覧テキストを生成
+				pf_list_text = pf_list_text + "・**" + localizations.translate(f'Platform_{p.name}', lang=locale) + "**\n"
 
 		if create:
 			# 埋め込みメッセージを生成
