@@ -392,7 +392,7 @@ async def generate_serverstatus_embed(locale, sched) -> list[discord.Embed]:
 			if datetime.datetime.now().timestamp() >= (sched["Timestamp"] + (sched["Downtime"] * 60)):
 				create = False
 			# プラットフォーム一覧テキストを生成
-			pf_list_text = "・**" + localizations.translate('Platform_All', lang=locale) + "\n"
+			pf_list_text = "・**" + localizations.translate('Platform_All', lang=locale) + "**\n"
 		else: # プラットフォーム別
 			# スケジュールが範囲内か判定
 			if datetime.datetime.now().timestamp() >= (sched["Timestamp"] + (sched["Downtime"] * 60)):
@@ -401,7 +401,7 @@ async def generate_serverstatus_embed(locale, sched) -> list[discord.Embed]:
 				for p in platform_list:
 					# プラットフォーム一覧テキストを生成
 					# TODO: プラットフォームごとに実施日時が異なる場合があるかもしれないのでそれに対応する？
-					pf_list_text = pf_list_text + "・**" + localizations.translate(f'Platform_{p}', lang=locale) + "\n"
+					pf_list_text = pf_list_text + "・**" + localizations.translate(f'Platform_{p}', lang=locale) + "**\n"
 
 		if create:
 			# パッチノートのURLが指定されている場合は表示させる
