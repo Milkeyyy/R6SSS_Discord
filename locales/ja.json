@@ -53,6 +53,7 @@
 		"MaintenanceSchedule_ScheduledDT": "予定日時",
 		"MaintenanceSchedule_TargetPlatform": "対象プラットフォーム",
 		"MaintenanceSchedule_NoMaintenanceScheduled": "予定されているメンテナンスはありません。",
+		"MaintenanceSchedule_PatchNotes": "パッチノート",
 		"NotAffiliatedWithOrRndorsedBy": "この Bot は Ubisoft と提携または承認されていません。\nサーバーステータスの正確性は保証されません。",
 		"Notification_Server_Status_Updated": "サーバーステータスが更新されました。",
 		"Notification_Show_Server_Status": "サーバーステータスを表示",

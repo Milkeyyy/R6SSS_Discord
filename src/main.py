@@ -378,7 +378,7 @@ async def generate_serverstatus_embed(locale, sched) -> list[discord.Embed]:
 
 	create = True
 	#dt = "**:calendar: " + localizations.translate("MaintenanceSchedule_ScheduledDT", locale) + "**\n"
-	dt = ""
+	pf_list_text = ""
 	# スケジュール埋め込みを生成
 	if sched is not None:
 		platform_list = [p["Name"] for p in sched["Platforms"]]
@@ -391,22 +391,29 @@ async def generate_serverstatus_embed(locale, sched) -> list[discord.Embed]:
 			# スケジュールが範囲内か判定
 			if datetime.datetime.now().timestamp() >= (sched["Timestamp"] + (sched["Downtime"] * 60)):
 				create = False
-			# 予定日時一覧を生成
-			dt = "・**" + localizations.translate('Platform_All', lang=locale) + f"**: <t:{sched['Timestamp']}:f> (<t:{sched['Timestamp']}:R>)" + "\n"
+			# プラットフォーム一覧テキストを生成
+			pf_list_text = "・**" + localizations.translate('Platform_All', lang=locale) + "\n"
 		else: # プラットフォーム別
 			# スケジュールが範囲内か判定
 			if datetime.datetime.now().timestamp() >= (sched["Timestamp"] + (sched["Downtime"] * 60)):
 				create = False
 			else:
 				for p in platform_list:
-					# 予定日時一覧を生成
-					dt = dt + "・**" + localizations.translate(f'Platform_{p}', lang=locale) + f"**: <t:{sched['Timestamp']}:f> (<t:{sched['Timestamp']}:R>)" + "\n"
+					# プラットフォーム一覧テキストを生成
+					# TODO: プラットフォームごとに実施日時が異なる場合があるかもしれないのでそれに対応する？
+					pf_list_text = pf_list_text + "・**" + localizations.translate(f'Platform_{p}', lang=locale) + "\n"
 
 		if create:
+			# パッチノートのURLが指定されている場合は表示させる
+			if sched["PatchNotes"].startswith(("http://", "https://")):
+				patchnotes_text = f"\n[🗒️ {localizations.translate("MaintenanceSchedule_PatchNotes", lang=locale)}]({sched["PatchNotes"]})"
+			else:
+				patchnotes_text = ""
+			# 埋め込みメッセージを生成
 			embed = discord.Embed(
 				colour=discord.colour.Colour.nitro_pink(),
 				title=":wrench::calendar: " + localizations.translate("MaintenanceSchedule", lang=locale),
-				description="**" + sched["Title"] + "**\n" + sched["Detail"],
+				description="**" + sched["Title"] + "**\n" + sched["Detail"] + patchnotes_text,
 				footer=discord.EmbedFooter("⚠️\n" + localizations.translate("MaintenanceSchedule_Notes", lang=locale)),
 				fields=[
 					# ダウンタイム
@@ -414,10 +421,15 @@ async def generate_serverstatus_embed(locale, sched) -> list[discord.Embed]:
 						name="**:clock3: " + localizations.translate("MaintenanceSchedule_Downtime", lang=locale) + "**",
 						value="・" + str(sched["Downtime"]) + " " + localizations.translate("MaintenanceSchedule_Downtime_Minute", lang=locale)
 					),
-					# 各プラットフォームの予定日時
+					# 予定日時
+					discord.EmbedField(
+						name="**:calendar: " + localizations.translate("MaintenanceSchedule_ScheduledDT", lang=locale) + "**",
+						value=f"**<t:{sched['Timestamp']}:f> (<t:{sched['Timestamp']}:R>)"
+					),
+					# 対象プラットフォーム一覧
 					discord.EmbedField(
 						name="**:video_game: " + localizations.translate("MaintenanceSchedule_TargetPlatform", lang=locale) + "**",
-						value=dt
+						value=pf_list_text
 					)
 				]
 			)
