@@ -118,16 +118,16 @@
 					"description": "True: Enable / False: Disable"
 				},
 				"channel": {
-					"name": "Text Channel",
-					"description": "Sets the text channel to send notification messages to. If not specified, it will be set to the channel this command is executed on."
+					"name": "channel",
+					"description": "通知メッセージを送信するテキストチャンネルを設定します。"
 				},
 				"role": {
 					"name": "role",
-					"description": "[default: None] Sets the roles to mention when sending notification messages."
+					"description": "通知メッセージの送信時にメンションするロールを設定します。"
 				},
 				"auto_delete": {
 					"name": "autodelete",
-					"description": "[Default: 10 s] Sets whether notification messages are automatically deleted after a certain amount of time has passed since they were sent (0 disables)."
+					"description": "通知メッセージが送信されてから一定時間経過後に自動削除するかどうかを設定します。 (0 で無効化"
 				}
 			}
 		},
@@ -140,8 +140,8 @@
 			"description": "Create automatically updated server status messages.",
 			"options": {
 				"channel": {
-					"name": "textchannel",
-					"description": "The text channel to send the server status on. If not specified, one will be created on the channel this command is executed on."
+					"name": "channel",
+					"description": "サーバーステータスを送信するテキストチャンネルを設定します。"
 				}
 			}
 		}
