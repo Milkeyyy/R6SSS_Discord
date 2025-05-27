@@ -65,7 +65,7 @@ async def on_ready() -> None:
 
 	# コマンドのローカライズ
 	i18n.localize_commands()
-	#await client.sync_commands()
+	await client.sync_commands()
 
 	# ギルドデータの確認を開始
 	await GuildConfig.load()
