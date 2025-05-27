@@ -79,7 +79,7 @@ class Notification:
 		if {p.platform for p in ServerStatusManager.data}.issubset(set(result.platforms)):
 			target_platforms_text = localizations.translate("Platform_All", lang=lang)
 		else:
-			target_platforms_text = " | ".join([platform_icon.LIST[p.value] + " " + p.name for p in result.platforms])
+			target_platforms_text = " | ".join([platform_icon.LIST[p.name] + " " + p.name for p in result.platforms])
 
 		# メンテナンス開始
 		if result.detail == r6sss.ComparisonDetail.START_MAINTENANCE:
