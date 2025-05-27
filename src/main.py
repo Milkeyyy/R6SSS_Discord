@@ -609,7 +609,7 @@ async def create(ctx: discord.ApplicationContext,
 			additional_msg = f"\n({_('Cmd_create_OldMessagesWillNoLongerBeUpdated')})"
 
 		if channel is None:
-			ch_id = ctx.channel_id
+			ch_id = ctx.channel_id()
 		else:
 			ch_id = channel.id
 		ch = client.get_channel(ch_id)
