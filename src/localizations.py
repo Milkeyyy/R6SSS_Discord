@@ -1,16 +1,14 @@
-from glob import glob
 import json
-from os import getcwd, path
+from os import path
+from typing import get_args
 
-from pycord.i18n import I18n
+from pycord.i18n import I18n, Locale
 
 from client import client
 from logger import logger
 
 
 locale = "ja-JP"
-#LOCALES: list
-
 
 def load_localedata() -> None:
 	global i18n
@@ -21,21 +19,24 @@ def load_localedata() -> None:
 
 	# 言語ファイルを読み込む
 	logger.info("言語ファイルを読み込み")
-	for f in glob("./locales/*.json"):
-		lang = path.splitext(path.basename(f))[0]
-		logger.info("- " + lang)
-		# 翻訳データを読み込み
-		with open(f, mode="r", encoding="utf-8") as f:
-			LOCALE_DATA[lang] = json.loads(f.read())
-			#i18n.translations[lang] = f.read()
-			#i18n.localizations[lang] = f.read()
+	for lang in get_args(Locale):
+		lang_file_path = f"./locales/{lang}.json"
+		# 対象の言語ファイルが存在するかチェック
+		if not path.exists(lang_file_path):
+			# ファイルが存在しない場合は英語 (en_GB) のファイルを読み込むようにする (フォールバック
+			logger.info("- %s -> en_GB (フォールバック)", lang)
+			lang_file_path = "./locales/en_GB.json"
+		else:
+			logger.info("- %s", lang)
+		# 翻訳データを読み込む
+		with open(lang_file_path, mode="r", encoding="utf-8") as lang_file:
+			LOCALE_DATA[lang] = json.loads(lang_file.read())
 
 	i18n = I18n(
 		client,
 		consider_user_locale=True,
 		**LOCALE_DATA
 	)
-	#print(i18n.current_locale)
 
 def translate(text: str, values: list = [], lang: str="en_GB") -> str:
 	global LOCALE_DATA
