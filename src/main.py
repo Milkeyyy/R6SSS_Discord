@@ -6,7 +6,7 @@ from sys import exit
 import traceback
 
 import discord
-from discord.commands import Option
+from discord.commands import Option, OptionChoice
 from discord.ext import commands, tasks
 try:
 	from dotenv import load_dotenv
@@ -475,7 +475,7 @@ async def generate_serverstatus_embed(locale, sched: MaintenanceSchedule) -> lis
 async def setlanguage(ctx: discord.ApplicationContext,
 	locale: Option(
 		str,
-		choices=EXISTS_LOCALE_LIST[0:25]
+		choices=[OptionChoice(_n, _l) for _l, _n in EXISTS_LOCALE_LIST.items()] # 選択可能言語リストから選択肢のリストを生成
 	)
 ) -> None:
 	await ctx.defer(ephemeral=True)

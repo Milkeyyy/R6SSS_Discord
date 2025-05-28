@@ -17,7 +17,7 @@ def load_localedata() -> None:
 
 	# 言語一覧
 	LOCALE_DATA = {}
-	EXISTS_LOCALE_LIST = []
+	EXISTS_LOCALE_LIST = {}
 
 	# 言語ファイルを読み込む
 	logger.info("言語ファイルを読み込み")
@@ -35,10 +35,16 @@ def load_localedata() -> None:
 			lang_file_path = path.join(lang_file_base_path, "en_GB.json")
 		else:
 			logger.info("- %s", lang)
-			EXISTS_LOCALE_LIST.append(lang)
+			# 有効な言語一覧へ追加
+			EXISTS_LOCALE_LIST[lang] = lang
+
 		# 翻訳データを読み込む
 		with open(lang_file_path, mode="r", encoding="utf-8") as lang_file:
 			LOCALE_DATA[lang] = json.loads(lang_file.read())
+
+		# 有効な言語一覧の名称を設定する
+		if lang in EXISTS_LOCALE_LIST:
+			EXISTS_LOCALE_LIST[lang] = LOCALE_DATA[lang]["info"]["name"]
 
 	i18n = I18n(
 		client,
