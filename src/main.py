@@ -493,7 +493,12 @@ async def setlanguage(ctx: discord.ApplicationContext,
 		# ギルドデータを保存
 		await GuildConfig.save()
 
-		await ctx.send_followup(embed=embeds.Notification.success(description=_("Cmd_setlanguage_Success", GuildConfig.data.config[str(ctx.guild.id)]["server_status_message"]["language"])))
+		await ctx.send_followup(embed=embeds.Notification.success(
+			description=_("Cmd_setlanguage_Success",
+						EXISTS_LOCALE_LIST.get(GuildConfig.data.config[str(ctx.guild.id)]["server_status_message"]["language"]),
+						GuildConfig.data.config[str(ctx.guild.id)]["server_status_message"]["language"]
+			)
+		))
 	except Exception:
 		# 設定をリセット
 		GuildConfig.data.config[str(ctx.guild.id)]["server_status_message"]["language"] = "en_GB"
@@ -669,7 +674,7 @@ async def viewsettings(ctx: discord.ApplicationContext):
 		# 言語
 		embed.add_field(
 			name=f":globe_with_meridians: {_("Cmd_showsettings_Language")}",
-			value=f"`{_(gs["server_status_message"]["language"])}`"
+			value=f"`{EXISTS_LOCALE_LIST.get(gs["server_status_message"]["language"])}` (`{gs["server_status_message"]["language"]}`)"
 		)
 		# 通知
 		notif_ch = client.get_channel(gs["server_status_notification"]["channel_id"])
