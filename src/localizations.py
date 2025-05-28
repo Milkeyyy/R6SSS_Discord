@@ -22,12 +22,17 @@ def load_localedata() -> None:
 	# 言語ファイルを読み込む
 	logger.info("言語ファイルを読み込み")
 	for lang in get_args(Locale):
-		lang_file_path = f"./locales/{lang}.json"
+		# 言語ファイルのフォルダー
+		lang_file_base_path = "./locales"
+		# - を _ へ置き換える
+		lang = lang.replace("-", "_")
+		# 言語ファイルのパス
+		lang_file_path = path.join(lang_file_base_path, lang + ".json")
 		# 対象の言語ファイルが存在するかチェック
 		if not path.exists(lang_file_path):
 			# ファイルが存在しない場合は英語 (en_GB) のファイルを読み込むようにする (フォールバック
 			logger.info("- %s -> en_GB (フォールバック)", lang)
-			lang_file_path = "./locales/en_GB.json"
+			lang_file_path = path.join(lang_file_base_path, "en_GB.json")
 		else:
 			logger.info("- %s", lang)
 			EXISTS_LOCALE_LIST.append(lang)
