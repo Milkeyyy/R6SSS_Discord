@@ -475,7 +475,7 @@ async def generate_serverstatus_embed(locale, sched: MaintenanceSchedule) -> lis
 async def setlanguage(ctx: discord.ApplicationContext,
 	locale: Option(
 		str,
-		choices=EXISTS_LOCALE_LIST.keys()[0:25]
+		choices=EXISTS_LOCALE_LIST[0:25]
 	)
 ) -> None:
 	await ctx.defer(ephemeral=True)
