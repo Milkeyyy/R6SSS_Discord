@@ -3,6 +3,7 @@ Discordのテキストチャンネルにレインボーシックス シージの
 
 
 <img src="https://github.com/user-attachments/assets/f65b79d4-a494-426d-a969-79df679309f8" width="40%" />
+<img src="https://github.com/user-attachments/assets/e09cd902-1807-4781-8c83-96613592938b" width="40%" />
 
 
 [**[Botをサーバーへ招待する]**](https://discord.com/oauth2/authorize?client_id=990497421488451615)
