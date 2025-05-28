@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import discord
 from pycord.i18n import _
 import r6sss
@@ -74,19 +76,22 @@ class Notification:
 		else:
 			embed_author = None
 
+		# 影響を受ける機能の名称を翻訳する
+		impacted_features_list = [localizations.translate("Status_" + f, lang=lang) for f in result.impacted_features]
+
 		# 対象プラットフォームの一覧テキストを生成
 		# 全プラットフォームの場合は専用のテキストにする
 		if {p.platform for p in ServerStatusManager.data}.issubset(set(result.platforms)):
 			target_platforms_text = localizations.translate("Platform_All", lang=lang)
 		else:
-			target_platforms_text = " | ".join([platform_icon.LIST[p.name] + " " + p.name for p in result.platforms])
+			target_platforms_text = "- " + "\n- ".join([platform_icon.LIST[p.name] + " " + p.name for p in result.platforms])
 
 		# メンテナンス開始
 		if result.detail == r6sss.ComparisonDetail.START_MAINTENANCE:
 			embed = discord.Embed(
 				color=discord.Colour.light_grey(),
 				title=localizations.translate("Title_Maintenance_Start", lang=lang),
-				description="**" + localizations.translate("TargetPlatform", lang=lang) + ": " + target_platforms_text + "**",
+				#description="**" + localizations.translate("TargetPlatform", lang=lang) + ": " + target_platforms_text + "**",
 				author=embed_author,
 			)
 		# メンテナンス終了
@@ -94,7 +99,7 @@ class Notification:
 			embed = discord.Embed(
 				color=discord.Colour.light_grey(),
 				title=localizations.translate("Title_Maintenance_End", lang=lang),
-				description="**" + localizations.translate("TargetPlatform", lang=lang) + ": " + target_platforms_text + "**",
+				#description="**" + localizations.translate("TargetPlatform", lang=lang) + ": " + target_platforms_text + "**",
 				author=embed_author,
 			)
 
@@ -105,7 +110,7 @@ class Notification:
 			embed = discord.Embed(
 				color=discord.Colour.green(),
 				title=localizations.translate("Title_AllFeaturesOutageResolved", lang=lang),
-				description="**" + localizations.translate("TargetPlatform", lang=lang) + ": " + target_platforms_text + "**",
+				#description="**" + localizations.translate("TargetPlatform", lang=lang) + ": " + target_platforms_text + "**",
 				author=embed_author,
 			)
 			embed.add_field(
@@ -117,31 +122,31 @@ class Notification:
 			embed = discord.Embed(
 				color=discord.Colour.red(),
 				title=localizations.translate("Title_AllFeaturesOutage", lang=lang),
-				description="**" + localizations.translate("TargetPlatform", lang=lang) + ": " + target_platforms_text + "**",
+				#description="**" + localizations.translate("TargetPlatform", lang=lang) + ": " + target_platforms_text + "**",
 				author=embed_author,
 			)
 			embed.add_field(
 				name=localizations.translate("Detail_ImpactedFeatures", lang=lang),
-				value="- " + "\n- ".join(result.impacted_features)
+				value="- " + "\n- ".join(impacted_features_list)
 			)
 		# 一部の機能で問題が発生中
 		elif result.detail == r6sss.ComparisonDetail.SOME_FEATURES_OUTAGE:
 			embed = discord.Embed(
-				color=discord.Colour.red(),
+				color=discord.Colour.yellow(),
 				title=localizations.translate("Title_SomeFeaturesOutage", lang=lang),
-				description="**" + localizations.translate("TargetPlatform", lang=lang) + ": " + target_platforms_text + "**",
+				#description="**" + localizations.translate("TargetPlatform", lang=lang) + ": " + target_platforms_text + "**",
 				author=embed_author,
 			)
 			embed.add_field(
 				name=localizations.translate("Detail_ImpactedFeatures", lang=lang),
-				value="- " + "\n- ".join(result.impacted_features)
+				value="- " + "\n- ".join(impacted_features_list)
 			)
 		# 一部の機能で問題が解消 (影響を受ける機能が変わった)
 		elif result.detail == r6sss.ComparisonDetail.SOME_FEATURES_OUTAGE_RESOLVED:
 			embed = discord.Embed(
-				color=discord.Colour.red(),
+				color=discord.Colour.yellow(),
 				title=localizations.translate("Title_SomeFeaturesOutageResolved", lang=lang),
-				description="**" + localizations.translate("TargetPlatform", lang=lang) + ": " + target_platforms_text + "**",
+				#description="**" + localizations.translate("TargetPlatform", lang=lang) + ": " + target_platforms_text + "**",
 				author=embed_author,
 			)
 			embed.add_field(
@@ -150,9 +155,16 @@ class Notification:
 			)
 			embed.add_field(
 				name=localizations.translate("Detail_ImpactedFeatures_After", lang=lang),
-				value="- " + "\n- ".join(result.impacted_features)
+				value="- " + "\n- ".join(impacted_features_list)
 			)
 		else:
 			embed = None
+
+		# 対象プラットフォームのフィールドを先頭へ挿入
+		if embed:
+			embed.fields.insert(0, discord.EmbedField(
+				name=":video_game: " + localizations.translate("TargetPlatform", lang=lang),
+				value=target_platforms_text
+			))
 
 		return embed
