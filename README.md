@@ -2,26 +2,26 @@
 Discordのテキストチャンネルにレインボーシックス シージのサーバーステータスを送信してくれるBotです。
 
 
+<img src="https://github.com/user-attachments/assets/f65b79d4-a494-426d-a969-79df679309f8" width="40%" />
+
+
 [**[Botをサーバーへ招待する]**](https://discord.com/oauth2/authorize?client_id=990497421488451615)
 
 ### 稼働状況
 [![Status](http://status.milkeyyy.com/api/badge/13/status?style=for-the-badge)](https://status.milkeyyy.com/)
 
-
-![Preview](https://github.com/Milkeyyy/R6SServerStatusBot/assets/59532514/2c1ee137-133c-470d-be9d-592b96b8602f)
-
+### サポート Discord サーバー
+[![Discord](https://img.shields.io/discord/889239399550844978?style=for-the-badge&label=Discord&logo=discord&logoColor=white)](https://discord.gg/bMf9dDjndC)
 
 ### Discord 以外の Bot はこちら
 [![Bluesky](https://badgen.org/img/bluesky/r6sss.milkeyyy.com/followers?style=for-the-badge&label=Bluesky)](https://bsky.app/profile/r6sss.milkeyyy.com)
 
-### サポート
-[![Discord](https://img.shields.io/discord/889239399550844978?style=for-the-badge&label=Discord&logo=discord&logoColor=white)](https://discord.gg/bMf9dDjndC)
 
 ## コマンド
 - `create [テキストチャンネル]`
   - 指定したテキストチャンネルへ**5分ごとに自動更新される**サーバーステータスを作成します。
     - 送信されたサーバーステータスは、**メッセージが削除**されるか、**`create` コマンドで新しいサーバーステータスが作成**されるまで更新され続けます。
-    - テキストチャンネルを指定しなかった場合は、コマンドを実行したチャンネルへ送信されます。
+    - `テキストチャンネル` を設定しなかった場合は、コマンドを実行したチャンネルへ作成されます。
 - `status`
   - 現在のサーバーステータスを送信します。(自動更新はされません)
 - `setindicator <有効/無効>`
@@ -29,11 +29,20 @@ Discordのテキストチャンネルにレインボーシックス シージの
 - `setlanguage <言語>`
   - サーバーステータスの表示言語を設定します。
   - 指定できる言語
-    - `en-GB` / `en-US` (English / 英語)
-    - `ja` (日本語 / Japanese)
-- `setnotification <有効/無効> [テキストチャンネル] [ロール]`
+    - 日本語 / Japanese
+    - 英語 / English
+- `setnotification <有効/無効> [テキストチャンネル] [ロール] [自動削除]`
   - サーバーステータスに変化があった際に送信される通知を設定します。
-    - テキストチャンネルを指定しなかった場合は、コマンドを実行したチャンネルへ送信されます。
+    - `テキストチャンネル` を設定しなかった場合は、コマンドを実行したチャンネルへ送信されるように設定されます。
+    - `ロール` を設定すると、通知メッセージの送信時に指定されたロールへメンションを行います。
+    - `自動削除` を設定すると、指定された時間が経過すると通知メッセージが自動的に削除されるようになります。
+      - `自動削除` は `0` 秒に設定すると無効になります。 (初期値は `10` 秒です。)
+  > 通知の例
+  >
+  > <img src="https://github.com/user-attachments/assets/baf3e13d-647b-4feb-a77d-88f28f074d32" width="40%" />
+
+- `viewsettings`
+  - 現在の設定内容を表示します。
 - `ping`
   - このBotのレイテンシーを送信します。
 - `about`
