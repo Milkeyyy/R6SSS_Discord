@@ -634,6 +634,7 @@ async def setnotification(ctx: discord.ApplicationContext,
 		logger.error(traceback.format_exc())
 		await ctx.send_followup(embed=embeds.Notification.internal_error())
 
+
 @client.slash_command()
 @discord.guild_only()
 @discord.default_permissions(send_messages=True)
@@ -783,9 +784,6 @@ try:
 			load_dotenv(env_path)
 		except NameError:
 			pass
-
-	# 言語データを読み込む
-	#localizations.load_localedata()
 
 	# ログイン
 	client.run(os.getenv("CLIENT_TOKEN"))
