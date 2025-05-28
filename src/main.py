@@ -1,3 +1,4 @@
+import argparse
 import datetime
 import json
 import os
@@ -47,6 +48,12 @@ import localizations
 from localizations import i18n, LOCALE_DATA
 
 
+# コマンドライン引数
+parser = argparse.ArgumentParser()
+parser.add_argument("--dev", action="store_true") # 開発モード
+args = parser.parse_args()
+
+
 # Bot起動時のイベント
 @client.event
 async def on_ready() -> None:
@@ -63,9 +70,11 @@ async def on_ready() -> None:
 	)
 	logger.info("%s へログインしました！ (ID: %s)", client.user.display_name, str(client.user.id))
 
-	# コマンドのローカライズ
-	i18n.localize_commands()
-	await client.sync_commands()
+	# コマンドの同期とローカライズ
+	if not args.dev: # 開発モードの場合は実行しない
+		logger.info("コマンドを同期")
+		i18n.localize_commands()
+		await client.sync_commands()
 
 	# ギルドデータの確認を開始
 	await GuildConfig.load()
@@ -737,13 +746,14 @@ async def test_notification(ctx: discord.ApplicationContext, comparison_target: 
 			compare_result = r6sss.compare_server_status(ServerStatusManager.data, status_list)
 
 			# 通知メッセージを送信
+			await ctx.respond(f"テスト通知 ({len(compare_result)})")
 			for result in compare_result:
-				await ctx.respond(
+				await ctx.channel.send(
 					content=f"Test notification message\nType: `{result.detail}`",
 					embed=embeds.Notification.get_by_comparison_result(result, "ja")
 				)
 		else:
-			await ctx.respond(content=_("CmdMsg_DontHavePermission_Execution"), ephemeral=True)
+			await ctx.respond(content=_("CmdMsg_DontHavePermission_Execution"))
 	except Exception:
 		logger.error(traceback.format_exc())
 		await ctx.send_followup(embed=embeds.Notification.internal_error())
