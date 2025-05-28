@@ -250,7 +250,7 @@ async def update_serverstatus() -> None:
 											notif_embed.description = f"[**💬 {localizations.translate('Notification_Show_Server_Status', lang=lang)}**]({msg.jump_url})\n{notif_embed.description}"
 									if notif_embeds:
 										# 自動削除が有効の場合は削除までの時間を指定する
-										notif_delete_after_seconds = int(GuildConfig.data.config[str(guild.id)]["server_status_notification"]["delete_after"])
+										notif_delete_after_seconds = int(GuildConfig.data.config[str(guild.id)]["server_status_notification"]["auto_delete"])
 										if notif_delete_after_seconds > 0:
 											await notif_ch.send(
 												content=localizations.translate("Notification_Server_Status_Updated", lang=lang) + "\n" + notif_role_mention,

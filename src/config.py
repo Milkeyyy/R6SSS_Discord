@@ -25,7 +25,7 @@ class GuildConfig:
 		"server_status_notification": {
 			"channel_id": 0,
 			"role_id": 0,
-			"delete_after": 10
+			"auto_delete": 10
 		}
 	}
 
