@@ -471,7 +471,7 @@ async def generate_serverstatus_embed(locale, sched: MaintenanceSchedule) -> lis
 @client.slash_command()
 @discord.guild_only()
 @discord.default_permissions(administrator=True)
-@commands.cooldown(5, 2)
+@commands.cooldown(2, 5)
 async def setlanguage(ctx: discord.ApplicationContext,
 	locale: Option(
 		str,
@@ -504,7 +504,7 @@ async def setlanguage(ctx: discord.ApplicationContext,
 @client.slash_command()
 @discord.guild_only()
 @discord.default_permissions(administrator=True)
-@commands.cooldown(5, 2)
+@commands.cooldown(2, 5)
 async def setindicator(ctx: discord.ApplicationContext,
 	enable: Option(
 		bool
@@ -532,7 +532,7 @@ async def setindicator(ctx: discord.ApplicationContext,
 @client.slash_command()
 @discord.guild_only()
 @discord.default_permissions(administrator=True)
-@commands.cooldown(5, 2)
+@commands.cooldown(2, 5)
 async def setnotification(ctx: discord.ApplicationContext,
 	enable: Option(
 		bool,
@@ -640,7 +640,7 @@ async def setnotification(ctx: discord.ApplicationContext,
 @client.slash_command()
 @discord.guild_only()
 @discord.default_permissions(administrator=True)
-@commands.cooldown(5, 2)
+@commands.cooldown(2, 5)
 async def viewsettings(ctx: discord.ApplicationContext):
 	await ctx.defer(ephemeral=True)
 
@@ -708,7 +708,7 @@ async def viewsettings(ctx: discord.ApplicationContext):
 @client.slash_command()
 @discord.guild_only()
 @discord.default_permissions(send_messages=True)
-@commands.cooldown(5, 2)
+@commands.cooldown(2, 5)
 async def status(ctx: discord.ApplicationContext) -> None:
 	await ctx.defer(ephemeral=False)
 	try:
@@ -721,7 +721,7 @@ async def status(ctx: discord.ApplicationContext) -> None:
 @client.slash_command()
 @discord.guild_only()
 @discord.default_permissions(administrator=True)
-@commands.cooldown(5, 2)
+@commands.cooldown(2, 5)
 async def create(ctx: discord.ApplicationContext,
 	channel: Option(
 		discord.TextChannel,
@@ -776,7 +776,7 @@ async def create(ctx: discord.ApplicationContext,
 
 @client.slash_command()
 @discord.default_permissions(send_messages=True)
-@commands.cooldown(5, 2)
+@commands.cooldown(2, 5)
 async def ping(ctx: discord.ApplicationContext) -> None:
 	try:
 		raw_ping = client.latency
@@ -789,7 +789,7 @@ async def ping(ctx: discord.ApplicationContext) -> None:
 
 @client.slash_command()
 @discord.default_permissions(send_messages=True)
-@commands.cooldown(5, 2)
+@commands.cooldown(2, 5)
 async def about(ctx: discord.ApplicationContext) -> None:
 	try:
 		embed = discord.Embed(color=discord.Colour.blue())
@@ -805,7 +805,7 @@ async def about(ctx: discord.ApplicationContext) -> None:
 
 @client.slash_command()
 @discord.guild_only()
-@commands.cooldown(5, 2)
+@commands.cooldown(2, 5)
 async def test_notification(ctx: discord.ApplicationContext, comparison_target: str) -> None:
 	try:
 		if await client.is_owner(ctx.user):
@@ -836,7 +836,7 @@ async def test_notification(ctx: discord.ApplicationContext, comparison_target: 
 
 @client.slash_command()
 @discord.guild_only()
-@commands.cooldown(5, 2)
+@commands.cooldown(2, 5)
 async def synccommands(ctx: discord.ApplicationContext) -> None:
 	try:
 		if await client.is_owner(ctx.user):
