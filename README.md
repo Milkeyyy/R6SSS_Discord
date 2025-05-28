@@ -15,8 +15,7 @@ Discordのテキストチャンネルにレインボーシックス シージの
 [![Bluesky](https://badgen.org/img/bluesky/r6sss.milkeyyy.com/followers?style=for-the-badge&label=Bluesky)](https://bsky.app/profile/r6sss.milkeyyy.com)
 
 ### サポート
-[![Discord](https://img.shields.io/discord/889239399550844978?style=for-the-badge&label=Discord)](https://discord.gg/bMf9dDjndC)
-
+[![Discord](https://img.shields.io/discord/889239399550844978?style=for-the-badge&label=Discord&logo=discord&logoColor=white)](https://discord.gg/bMf9dDjndC)
 
 ## コマンド
 - `create [テキストチャンネル]`
