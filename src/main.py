@@ -7,7 +7,7 @@ import traceback
 
 import discord
 from discord.commands import Option
-from discord.ext import tasks
+from discord.ext import commands, tasks
 try:
 	from dotenv import load_dotenv
 except ImportError:
@@ -471,6 +471,7 @@ async def generate_serverstatus_embed(locale, sched: MaintenanceSchedule) -> lis
 @client.slash_command()
 @discord.guild_only()
 @discord.default_permissions(administrator=True)
+@commands.cooldown(5, 2)
 async def setlanguage(ctx: discord.ApplicationContext,
 	locale: Option(
 		str,
@@ -503,6 +504,7 @@ async def setlanguage(ctx: discord.ApplicationContext,
 @client.slash_command()
 @discord.guild_only()
 @discord.default_permissions(administrator=True)
+@commands.cooldown(5, 2)
 async def setindicator(ctx: discord.ApplicationContext,
 	enable: Option(
 		bool
@@ -530,6 +532,7 @@ async def setindicator(ctx: discord.ApplicationContext,
 @client.slash_command()
 @discord.guild_only()
 @discord.default_permissions(administrator=True)
+@commands.cooldown(5, 2)
 async def setnotification(ctx: discord.ApplicationContext,
 	enable: Option(
 		bool,
@@ -634,10 +637,78 @@ async def setnotification(ctx: discord.ApplicationContext,
 		logger.error(traceback.format_exc())
 		await ctx.send_followup(embed=embeds.Notification.internal_error())
 
+@client.slash_command()
+@discord.guild_only()
+@discord.default_permissions(administrator=True)
+@commands.cooldown(5, 2)
+async def viewsettings(ctx: discord.ApplicationContext):
+	await ctx.defer(ephemeral=True)
+
+	try:
+		# ギルドデータをチェック
+		await GuildConfig.check_guild(ctx.guild.id)
+		# ギルドの設定を取得する
+		gs = GuildConfig.data.config[str(ctx.guild_id)]
+
+		# 埋め込みメッセージを生成
+		embed = discord.Embed(
+			title=":gear: " + _("Cmd_showsettings_CurrentSettings")
+		)
+		# 作成されたサーバーステータスメッセージ
+		status_msg_ch = client.get_channel(gs["server_status_message"]["channel_id"])
+		status_msg = await status_msg_ch.fetch_message(gs["server_status_message"]["message_id"])
+		embed.add_field(
+			name=f":envelope: {_("Cmd_showsettings_ServerStatusMessage")}",
+			value=f"[**{_("Cmd_showsettings_ServerStatusMessage_Created")}**]({status_msg.jump_url})" if status_msg else f"**{_("Cmd_showsettings_ServerStatusMessage_None")}**"
+		)
+		# インジケーター
+		embed.add_field(
+			name=f":radio_button: {_("Cmd_showsettings_Indicator")}",
+			value=f"`{_(str(gs["server_status_message"]["status_indicator"]))}`"
+		)
+		# 言語
+		embed.add_field(
+			name=f":globe_with_meridians: {_("Cmd_showsettings_Language")}",
+			value=f"`{_(gs["server_status_message"]["language"])}`"
+		)
+		# 通知
+		notif_ch = client.get_channel(gs["server_status_notification"]["channel_id"])
+		if notif_ch:
+			# 有効
+			notif_settings_text = f"`{_("True")}`"
+			# チャンネル
+			notif_settings_text += f"\n> `{_("Cmd_setnotification_Channel")}`: {notif_ch.mention}"
+			# ロール
+			if gs["server_status_notification"]["role_id"] != 0:
+				notif_role_text = f"<@&{gs["server_status_notification"]["role_id"]}>"
+			else:
+				notif_role_text = F"`{_("False")}`"
+			notif_settings_text += f"\n> `{_("Cmd_setnotification_Mention")}`: {notif_role_text}"
+			# 自動削除
+			if gs["server_status_notification"]["auto_delete"] != 0:
+				notif_ad_text = _("Cmd_setnotification_AutoDelete_Seconds", gs["server_status_notification"]["auto_delete"])
+			else:
+				notif_ad_text = f"`{_("False")}`"
+			notif_settings_text += f"\n> `{_("Cmd_setnotification_AutoDelete")}`: {notif_ad_text}"
+		else:
+			# 無効
+			notif_settings_text = f"`{_("False")}`"
+		embed.add_field(
+			name=f":bell: {_("Cmd_showsettings_Notification")}",
+			value=notif_settings_text,
+			inline=False
+		)
+		# 生成した埋め込みメッセージを送信
+		await ctx.send_followup(embed=embed)
+	except Exception:
+		logger.error(traceback.format_exc())
+		await ctx.send_followup(embed=embeds.Notification.internal_error())
+
 
 @client.slash_command()
 @discord.guild_only()
 @discord.default_permissions(send_messages=True)
+@commands.cooldown(5, 2)
 async def status(ctx: discord.ApplicationContext) -> None:
 	await ctx.defer(ephemeral=False)
 	try:
@@ -650,6 +721,7 @@ async def status(ctx: discord.ApplicationContext) -> None:
 @client.slash_command()
 @discord.guild_only()
 @discord.default_permissions(administrator=True)
+@commands.cooldown(5, 2)
 async def create(ctx: discord.ApplicationContext,
 	channel: Option(
 		discord.TextChannel,
@@ -704,6 +776,7 @@ async def create(ctx: discord.ApplicationContext,
 
 @client.slash_command()
 @discord.default_permissions(send_messages=True)
+@commands.cooldown(5, 2)
 async def ping(ctx: discord.ApplicationContext) -> None:
 	try:
 		raw_ping = client.latency
@@ -716,6 +789,7 @@ async def ping(ctx: discord.ApplicationContext) -> None:
 
 @client.slash_command()
 @discord.default_permissions(send_messages=True)
+@commands.cooldown(5, 2)
 async def about(ctx: discord.ApplicationContext) -> None:
 	try:
 		embed = discord.Embed(color=discord.Colour.blue())
@@ -731,6 +805,7 @@ async def about(ctx: discord.ApplicationContext) -> None:
 
 @client.slash_command()
 @discord.guild_only()
+@commands.cooldown(5, 2)
 async def test_notification(ctx: discord.ApplicationContext, comparison_target: str) -> None:
 	try:
 		if await client.is_owner(ctx.user):
@@ -761,6 +836,7 @@ async def test_notification(ctx: discord.ApplicationContext, comparison_target: 
 
 @client.slash_command()
 @discord.guild_only()
+@commands.cooldown(5, 2)
 async def synccommands(ctx: discord.ApplicationContext) -> None:
 	try:
 		if await client.is_owner(ctx.user):

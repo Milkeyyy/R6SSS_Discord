@@ -73,6 +73,13 @@
 		"Cmd_setnotification_AutoDelete": "自動削除",
 		"Cmd_setnotification_AutoDelete_Seconds": "{0} 秒",
 		"Cmd_setnotification_RoleIsNotMentionable": "指定されたロールへのメンションは許可されていません。",
+		"Cmd_showsettings_CurrentSettings": "現在の設定",
+		"Cmd_showsettings_ServerStatusMessage": "サーバーステータスメッセージ",
+		"Cmd_showsettings_ServerStatusMessage_Created": "作成済み",
+		"Cmd_showsettings_ServerStatusMessage_None": "なし",
+		"Cmd_showsettings_Indicator": "インジケーター",
+		"Cmd_showsettings_Notification": "通知",
+		"Cmd_showsettings_Language": "言語",
 		"Cmd_create_Success": "テキストチャンネル {0} へサーバーステータスメッセージを送信しました。\n以後このメッセージは自動的に更新されます。",
 		"Cmd_create_OldMessagesWillNoLongerBeUpdated": "以前送信した古いメッセージは更新されなくなります。"
 	},
@@ -130,6 +137,10 @@
 					"description": "通知メッセージが送信されてから一定時間経過後に自動削除するかどうかを設定します。 (0 で無効化"
 				}
 			}
+		},
+		"viewsettings": {
+			"name": "viewsettings",
+			"description": "現在の設定内容を表示します。"
 		},
 		"status": {
 			"name": "status",
