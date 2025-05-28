@@ -71,10 +71,11 @@ class Notification:
 		if ServerStatusManager.data is None or client.user is None:
 			return None
 
-		if client.user is not None:
-			embed_author = discord.EmbedAuthor(client.user.display_name, icon_url=client.user.display_avatar.url)
-		else:
-			embed_author = None
+		# if client.user is not None:
+		# 	embed_author = discord.EmbedAuthor(client.user.display_name, icon_url=client.user.display_avatar.url)
+		# else:
+		# 	embed_author = None
+		embed_author = None
 
 		# 影響を受ける機能の名称を翻訳する
 		impacted_features_list = [localizations.translate("Status_" + f, lang=lang) for f in result.impacted_features]
