@@ -73,6 +73,13 @@
 		"Cmd_setnotification_AutoDelete": "Auto Delete",
 		"Cmd_setnotification_AutoDelete_Seconds": "{0} seconds",
 		"Cmd_setnotification_RoleIsNotMentionable": "Mentioning the specified role is not allowed.",
+		"Cmd_showsettings_CurrentSettings": "現在の設定",
+		"Cmd_showsettings_ServerStatusMessage": "サーバーステータスメッセージ",
+		"Cmd_showsettings_ServerStatusMessage_Created": "作成済み",
+		"Cmd_showsettings_ServerStatusMessage_None": "なし",
+		"Cmd_showsettings_Indicator": "インジケーター",
+		"Cmd_showsettings_Notification": "通知",
+		"Cmd_showsettings_Language": "言語",
 		"Cmd_create_Success": "A server status message has been sent to the text channel {0}.\nThis message will be updated automatically from now on.",
 		"Cmd_create_OldMessagesWillNoLongerBeUpdated": "Any old messages you have previously sent will no longer be updated."
 	},
@@ -130,6 +137,10 @@
 					"description": "Set whether to automatically delete after a certain period of time. (0 disables)"
 				}
 			}
+		},
+		"viewsettings": {
+			"name": "viewsettings",
+			"description": "現在の設定内容を表示します。"
 		},
 		"status": {
 			"name": "status",
