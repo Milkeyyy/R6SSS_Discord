@@ -13,9 +13,11 @@ locale = "ja-JP"
 def load_localedata() -> None:
 	global i18n
 	global LOCALE_DATA
+	global EXISTS_LOCALE_LIST
 
 	# 言語一覧
 	LOCALE_DATA = {}
+	EXISTS_LOCALE_LIST = []
 
 	# 言語ファイルを読み込む
 	logger.info("言語ファイルを読み込み")
@@ -28,6 +30,7 @@ def load_localedata() -> None:
 			lang_file_path = "./locales/en_GB.json"
 		else:
 			logger.info("- %s", lang)
+			EXISTS_LOCALE_LIST.append(lang)
 		# 翻訳データを読み込む
 		with open(lang_file_path, mode="r", encoding="utf-8") as lang_file:
 			LOCALE_DATA[lang] = json.loads(lang_file.read())

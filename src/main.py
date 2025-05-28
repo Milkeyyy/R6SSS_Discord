@@ -45,7 +45,7 @@ import status_indicator
 
 # ローカライズ
 import localizations
-from localizations import i18n, LOCALE_DATA
+from localizations import i18n, EXISTS_LOCALE_LIST
 
 
 # コマンドライン引数
@@ -475,7 +475,7 @@ async def generate_serverstatus_embed(locale, sched: MaintenanceSchedule) -> lis
 async def setlanguage(ctx: discord.ApplicationContext,
 	locale: Option(
 		str,
-		choices=LOCALE_DATA.keys()
+		choices=EXISTS_LOCALE_LIST.keys()[0:25]
 	)
 ) -> None:
 	await ctx.defer(ephemeral=True)
