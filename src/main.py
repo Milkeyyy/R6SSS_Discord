@@ -45,7 +45,7 @@ import status_indicator
 
 # ローカライズ
 import localizations
-from localizations import i18n, EXISTS_LOCALE_LIST
+from localizations import i18n
 
 
 # コマンドライン引数
