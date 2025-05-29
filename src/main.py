@@ -116,7 +116,7 @@ async def update_serverstatus() -> None:
 	serverstatus_loop_isrunning = True
 
 	# Heartbeatイベントを送信 (サーバーステータスの更新が開始されたことを報告)
-	KumaSan.ping(state="up", message="サーバーステータスの更新開始")
+	await KumaSan.ping(state="up", message="サーバーステータスの更新開始")
 
 	logger.info("サーバーステータスの更新開始")
 
@@ -277,11 +277,11 @@ async def update_serverstatus() -> None:
 
 	except Exception as e:
 		logger.error(traceback.format_exc())
-		KumaSan.ping(state="pending", message="サーバーステータスの更新エラー: " + str(e))
+		await KumaSan.ping(state="pending", message="サーバーステータスの更新エラー: " + str(e))
 
 	logger.info("サーバーステータスの更新完了")
 
-	KumaSan.ping(state="up", message="サーバーステータスの更新完了")
+	await KumaSan.ping(state="up", message="サーバーステータスの更新完了")
 
 @update_serverstatus.after_loop
 async def after_updateserverstatus() -> None:
