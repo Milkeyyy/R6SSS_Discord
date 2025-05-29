@@ -65,6 +65,7 @@
 		"CmdMsg_ExcutionError": "An error occurred while executing the command",
 		"CmdMsg_InternalError": "Internal Error",
 		"CmdMsg_InternalError_Description": "An internal error occurred. Please try again.\n(If the problem persists, please report it to the developer.)",
+		"CmdMsg_CooldownWarning": "コマンドを実行する間隔が短すぎます。\nしばらく待ってからもう一度お試しください。",
 		"Cmd_setlanguage_Success": "Set server status message language to `{0}` (`{1}`).",
 		"Cmd_setindicator_Success": "Server status indicator display has been set to `{0}`.",
 		"Cmd_setnotification_Success": "Server status notification message set to `{0}`.",
