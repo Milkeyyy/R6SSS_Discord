@@ -25,4 +25,10 @@ def get_git_commit_hash() -> str:
 		_git_commit_hash = out.strip().decode('ascii')
 		return _git_commit_hash
 	except Exception:
-		return "Unknown"
+		# Coolify
+		hash = os.getenv("SOURCE_COMMIT")
+		if hash:
+			_git_commit_hash = hash
+			return _git_commit_hash
+		_git_commit_hash = "Unknown"
+	return _git_commit_hash
