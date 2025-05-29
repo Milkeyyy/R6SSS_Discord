@@ -105,6 +105,9 @@ async def on_application_command_completion(ctx: discord.ApplicationContext) -> 
 async def on_application_command_error(ctx: discord.ApplicationContext, ex: discord.DiscordException) -> None:
 	logger.error("アプリケーションコマンド実行エラー")
 	logger.error(ex)
+	# クールダウン
+	if str(ex).startswith("You are on cooldown"):
+		await ctx.respond(embed=embeds.Notification.warning(description=_("CmdMsg_CooldownWarning")))
 
 
 # 1分毎にサーバーステータスを更新する
