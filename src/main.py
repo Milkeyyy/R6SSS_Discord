@@ -54,6 +54,18 @@ parser.add_argument("--dev", action="store_true") # 開発モード
 args = parser.parse_args()
 
 
+# Bot接続時のイベント
+@client.event
+async def on_connect() -> None:
+	# Cog (コマンド) の読み込み
+	client.load_extension("cogs.settings")
+	# コマンドの同期とローカライズ
+	if client.auto_sync_commands:
+		logger.info("コマンドを同期")
+		i18n.localize_commands()
+		await client.sync_commands()
+	logger.info("接続完了")
+
 # Bot起動時のイベント
 @client.event
 async def on_ready() -> None:
@@ -63,21 +75,14 @@ async def on_ready() -> None:
 	print(" Developed by Milkeyyy")
 	print("---------------------------------------")
 	print("")
+
+	# ステータス表示を更新
 	await client.change_presence(
 		activity=discord.Game(
 			name=f"Type /create | v{app.VERSION}"
 		)
 	)
 	logger.info("%s へログインしました！ (ID: %s)", client.user.display_name, str(client.user.id))
-
-	# コマンドの同期とローカライズ
-	# if not args.dev: # 開発モードの場合は実行しない
-	# 	logger.info("コマンドを同期")
-	# 	i18n.localize_commands()
-	# 	await client.sync_commands()
-
-	# Cog (コマンド) の読み込み
-	client.load_extension("cogs.settings")
 
 	# ギルドデータの確認を開始
 	await GuildConfig.load()
