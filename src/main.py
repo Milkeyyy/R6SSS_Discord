@@ -71,10 +71,10 @@ async def on_ready() -> None:
 	logger.info("%s へログインしました！ (ID: %s)", client.user.display_name, str(client.user.id))
 
 	# コマンドの同期とローカライズ
-	if not args.dev: # 開発モードの場合は実行しない
-		logger.info("コマンドを同期")
-		i18n.localize_commands()
-		await client.sync_commands()
+	# if not args.dev: # 開発モードの場合は実行しない
+	# 	logger.info("コマンドを同期")
+	# 	i18n.localize_commands()
+	# 	await client.sync_commands()
 
 	# ギルドデータの確認を開始
 	await GuildConfig.load()
