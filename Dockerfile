@@ -12,6 +12,7 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
 # 
 COPY src/*.py /code/src/
+COPY src/attrdict/*.py /code/src/attrdict/
 COPY src/cogs/*.py /code/src/cogs/
 COPY locales/*.json /code/locales/
 
