@@ -89,18 +89,6 @@ wheels = [
 ]
 
 [[package]]
-name = "attrdict"
-version = "2.0.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "six" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/3f/72/614aae677d28e81a5bf830fadcf580803876ef76e0306902d3ca5790cd9a/attrdict-2.0.1.tar.gz", hash = "sha256:35c90698b55c683946091177177a9e9c0713a0860f0e049febd72649ccd77b70", size = 9593, upload-time = "2019-02-01T22:33:58.493Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/ef/97/28fe7e68bc7adfce67d4339756e85e9fcf3c6fd7f0c0781695352b70472c/attrdict-2.0.1-py2.py3-none-any.whl", hash = "sha256:9432e3498c74ff7e1b20b3d93b45d766b71cbffa90923496f82c4ae38b92be34", size = 9946, upload-time = "2019-02-01T22:33:56.508Z" },
-]
-
-[[package]]
 name = "attrs"
 version = "25.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -426,22 +414,22 @@ name = "r6sss-discord"
 version = "2.0.0"
 source = { virtual = "." }
 dependencies = [
-    { name = "attrdict" },
     { name = "httpx" },
     { name = "py-cord" },
     { name = "pycord-i18n" },
     { name = "pymongo" },
     { name = "r6sss" },
+    { name = "six" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "attrdict", specifier = ">=2.0.1" },
     { name = "httpx", specifier = "==0.27.*" },
     { name = "py-cord", specifier = "==2.6.*" },
     { name = "pycord-i18n", specifier = "==1.2.*" },
     { name = "pymongo", specifier = ">=4.13.0" },
     { name = "r6sss", git = "https://github.com/Milkeyyy/R6SSS_Python" },
+    { name = "six", specifier = ">=1.17.0" },
 ]
 
 [[package]]

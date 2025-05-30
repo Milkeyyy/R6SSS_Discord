@@ -8,8 +8,6 @@ aiosignal==1.3.2
     # via aiohttp
 anyio==4.9.0
     # via httpx
-attrdict==2.0.1
-    # via r6sss-discord
 attrs==25.3.0
     # via aiohttp
 certifi==2025.4.26
@@ -54,7 +52,7 @@ pymongo==4.13.0
 r6sss @ git+https://github.com/Milkeyyy/R6SSS_Python@93e0f6c525274343f1b3d771d31c123d3d4ba24e
     # via r6sss-discord
 six==1.17.0
-    # via attrdict
+    # via r6sss-discord
 sniffio==1.3.1
     # via
     #   anyio
