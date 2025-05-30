@@ -64,23 +64,25 @@ class GuildConfig:
 
 		logger.info("ギルドコンフィグを読み込み")
 
-		# 今までのコンフィグファイルが存在する場合は読み込んでデータベースへ移行する
 		try:
+			# 以前のコンフィグファイルが存在する場合は読み込んでデータベースへ移行する
 			if os.path.exists("./guilds.json"):
-				logger.info("ギルドコンフィグをファイルから移行")
-				with open("./guilds.json", "r", encoding="utf-8") as f:
-					old_gc = json.loads(f.read())
-				for gid, conf in old_gc["config"].items():
-					logger.info("- ギルド: %s", str(gid))
-					# データベースへ保存
-					await cls.create(gid)
-					await cls.set(int(gid), conf)
-				# ファイルをリネームする
-				try:
-					os.rename("./guilds.json", "./guilds_migrated.json")
-				except OSError:
-					logger.warning(" - リネームエラー")
-					logger.warning(traceback.format_exc())	
+				# コレクション内のドキュメント数を取得して、0の場合のみ移行を行う
+				if await GuildDB.col.count_documents({}) == 0:
+					logger.info("ギルドコンフィグをファイルから移行")
+					with open("./guilds.json", "r", encoding="utf-8") as f:
+						old_gc = json.loads(f.read())
+					for gid, conf in old_gc["config"].items():
+						logger.info("- ギルド: %s", str(gid))
+						# データベースへ保存
+						await cls.create(gid)
+						await cls.set(int(gid), conf)
+					# ファイルをリネームする
+					try:
+						os.rename("./guilds.json", "./guilds_migrated.json")
+					except OSError:
+						logger.warning(" - リネームエラー")
+						logger.warning(traceback.format_exc())	
 		except Exception:
 			logger.warning("ギルドコンフィグ移行エラー")
 			logger.warning(traceback.format_exc())
