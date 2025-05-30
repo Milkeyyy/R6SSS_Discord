@@ -76,7 +76,11 @@ class GuildConfig:
 					await cls.create(gid)
 					await cls.set(int(gid), conf)
 				# ファイルをリネームする
-				os.rename("./guilds.json", "./guilds_migrated.json")
+				try:
+					os.rename("./guilds.json", "./guilds_migrated.json")
+				except OSError:
+					logger.warning(" - リネームエラー")
+					logger.warning(traceback.format_exc())
 		except Exception:
 			logger.warning("ギルドコンフィグ移行エラー")
 			logger.warning(traceback.format_exc())
