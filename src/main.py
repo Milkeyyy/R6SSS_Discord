@@ -6,7 +6,7 @@ from sys import exit
 import traceback
 
 import discord
-from discord.commands import Option, OptionChoice
+from discord.commands import Option
 from discord.ext import commands, tasks
 try:
 	from dotenv import load_dotenv
@@ -23,8 +23,9 @@ from logger import logger
 import client as app
 from client import client
 
-# コンフィグ
+# コンフィグ/DB
 from config import GuildConfig
+from db import GuildDB
 
 # 埋め込み
 import embeds
@@ -84,9 +85,11 @@ async def on_ready() -> None:
 	)
 	logger.info("%s へログインしました！ (ID: %s)", client.user.display_name, str(client.user.id))
 
-	# ギルドデータの確認を開始
+	# データベースへ接続する
+	await GuildDB.connect()
+
+	# ギルドデータのチェックを実行
 	await GuildConfig.load()
-	await GuildConfig.check()
 
 	logger.info("サーバーステータスの定期更新開始")
 	update_serverstatus.start()
@@ -129,8 +132,6 @@ async def update_serverstatus() -> None:
 	logger.info("サーバーステータスの更新開始")
 
 	try:
-		await GuildConfig.save()
-
 		# メンテナンススケジュール情報を取得
 		sched = await MaintenanceScheduleManager.get()
 
@@ -143,11 +144,17 @@ async def update_serverstatus() -> None:
 		for guild in client.guilds:
 			logger.info("ギルド: %s", guild.name)
 			try:
-				ch_id = int(GuildConfig.data.config[str(guild.id)]["server_status_message"]["channel_id"])
-				msg_id = int(GuildConfig.data.config[str(guild.id)]["server_status_message"]["message_id"])
-				notif_ch_id = int(GuildConfig.data.config[str(guild.id)]["server_status_notification"]["channel_id"])
-				notif_role_id = int(GuildConfig.data.config[str(guild.id)]["server_status_notification"]["role_id"])
-				lang = GuildConfig.data.config[str(guild.id)]["server_status_message"]["language"]
+				# データベースからギルドコンフィグを取得する
+				gc = await GuildConfig.get(guild.id)
+				# 取得できなかった場合はスキップする
+				if not gc:
+					logger.warning("ギルドデータ (%s) の取得失敗", guild.name)
+					continue
+				ch_id = int(gc.server_status_message.channel_id)
+				msg_id = int(gc.server_status_message.message_id)
+				notif_ch_id = int(gc.server_status_notification.channel_id)
+				notif_role_id = int(gc.server_status_notification.role_id)
+				lang = gc.server_status_message.language
 			except Exception:
 				logger.warning("ギルドデータ (%s) の読み込み失敗", guild.name)
 				logger.error(traceback.format_exc())
@@ -159,10 +166,10 @@ async def update_serverstatus() -> None:
 					ch = guild.get_channel(ch_id)
 					# チャンネルが存在しない場合はギルドデータのチャンネルIDとメッセージIDをリセットする
 					if ch is None:
-						GuildConfig.data.config[str(guild.id)]["server_status_message"]["channel_id"] = 0
-						GuildConfig.data.config[str(guild.id)]["server_status_message"]["message_id"] = 0
-						# ギルドデータを保存
-						await GuildConfig.save()
+						gc.server_status_message.channel_id = 0
+						gc.server_status_message.message_id = 0
+						# ギルドコンフィグを保存
+						await GuildConfig.set(guild.id, gc)
 						continue # ループを続ける
 
 					ch_name = ch.name
@@ -180,16 +187,16 @@ async def update_serverstatus() -> None:
 						logger.warning("ギルド %s のメッセージ(%s)の取得に失敗", guild.name, str(msg_id))
 						logger.warning(str(e))
 						# メッセージが存在しない(削除されている)場合はギルドデータのチャンネルIDとメッセージIDをリセットする
-						GuildConfig.data.config[str(guild.id)]["server_status_message"]["channel_id"] = 0
-						GuildConfig.data.config[str(guild.id)]["server_status_message"]["message_id"] = 0
+						gc.server_status_message.channel_id = 0
+						gc.server_status_message.message_id = 0
 						# ギルドデータを保存
-						await GuildConfig.save()
+						await GuildConfig.set(guild.id, gc)
 					else:
 						# テキストチャンネルの名前にステータスインジケーターを設定
 						try:
 							if ch_name[0] in status_indicator.List:
 								ch_name = ch_name[1:]
-							if GuildConfig.data.config[str(guild.id)]["server_status_message"]["status_indicator"]:
+							if gc.server_status_message.status_indicator:
 								await msg.channel.edit(name=ServerStatusManager.indicator + ch_name)
 						except Exception as e:
 							logger.error(traceback.format_exc())
@@ -261,7 +268,7 @@ async def update_serverstatus() -> None:
 											notif_embed.description = f"[**💬 {localizations.translate('Notification_Show_Server_Status', lang=lang)}**]({msg.jump_url})\n{notif_embed.description}"
 									if notif_embeds:
 										# 自動削除が有効の場合は削除までの時間を指定する
-										notif_delete_after_seconds = int(GuildConfig.data.config[str(guild.id)]["server_status_notification"]["auto_delete"])
+										notif_delete_after_seconds = int(gc.server_status_notification.auto_delete)
 										if notif_delete_after_seconds > 0:
 											await notif_ch.send(
 												content=localizations.translate("Notification_Server_Status_Updated", lang=lang) + "\n" + notif_role_mention,
@@ -486,8 +493,17 @@ async def generate_serverstatus_embed(locale, sched: MaintenanceSchedule) -> lis
 async def status(ctx: discord.ApplicationContext) -> None:
 	await ctx.defer(ephemeral=False)
 	try:
+		# ギルドコンフィグを取得する
+		gc = await GuildConfig.get(ctx.guild.id)
+		if not gc:
+			await ctx.send_followup(embed=embeds.Notification.internal_error(description=_("CmdMsg_FailedToGetConfig")))
+			return
+		# メンテナンススケジュールを取得する
 		sched = MaintenanceScheduleManager.schedule
-		await ctx.send_followup(embeds=await generate_serverstatus_embed(GuildConfig.data.config[str(ctx.guild_id)]["server_status_message"]["language"], sched))
+		if not sched:
+			await ctx.send_followup(embed=embeds.Notification.internal_error(description=_("CmdMsg_FailedToGetMaintenanceSchedule")))
+		# 埋め込みメッセージを生成して送信する
+		await ctx.send_followup(embeds=await generate_serverstatus_embed(gc.server_status_message.language, sched))
 	except Exception:
 		logger.error(traceback.format_exc())
 		await ctx.send_followup(embed=embeds.Notification.internal_error())
@@ -504,12 +520,16 @@ async def create(ctx: discord.ApplicationContext,
 ) -> None:
 	await ctx.defer(ephemeral=True)
 
+	gc = None
 	try:
-		# ギルドデータをチェック
-		await GuildConfig.check_guild(ctx.guild.id)
+		# ギルドコンフィグを取得する
+		gc = await GuildConfig.get(ctx.guild.id)
+		if not gc:
+			await ctx.send_followup(embed=embeds.Notification.internal_error(description=_("CmdMsg_FailedToGetConfig")))
+			return
 
 		additional_msg = ""
-		if GuildConfig.data.config[str(ctx.guild_id)]["server_status_message"]["message_id"] != 0:
+		if gc.server_status_message.message_id != 0:
 			additional_msg = f"\n({_('Cmd_create_OldMessagesWillNoLongerBeUpdated')})"
 
 		if channel is None:
@@ -521,7 +541,7 @@ async def create(ctx: discord.ApplicationContext,
 		# サーバーステータス埋め込みメッセージを送信
 		try:
 			sched = MaintenanceScheduleManager.schedule
-			msg = await ch.send(embeds=await generate_serverstatus_embed(GuildConfig.data.config[str(ctx.guild_id)]["server_status_message"]["language"], sched))
+			msg = await ch.send(embeds=await generate_serverstatus_embed(gc.server_status_message.language, sched))
 		except Exception as e:
 			# 権限エラー
 			if isinstance(e, discord.errors.ApplicationCommandInvokeError) and str(e).endswith("Missing Permissions"):
@@ -533,18 +553,19 @@ async def create(ctx: discord.ApplicationContext,
 			return
 
 		# 送信したチャンネルとメッセージのIDをギルドデータへ保存する
-		GuildConfig.data.config[str(ctx.guild_id)]["server_status_message"]["channel_id"] = ch_id
-		GuildConfig.data.config[str(ctx.guild_id)]["server_status_message"]["message_id"] = msg.id
+		gc.server_status_message.channel_id = ch_id
+		gc.server_status_message.message_id = msg.id
 
-		# ギルドデータを保存
-		await GuildConfig.save()
+		# ギルドコンフィグを保存
+		await GuildConfig.set(ctx.guild.id, gc)
 
 		await ctx.send_followup(embed=embeds.Notification.success(description=_("Cmd_create_Success", ch.mention) + additional_msg))
 	except Exception:
 		# 設定をリセット
-		GuildConfig.data.config[str(ctx.guild_id)]["server_status_message"]["channel_id"] = 0
-		GuildConfig.data.config[str(ctx.guild_id)]["server_status_message"]["message_id"] = 0
-		await GuildConfig.save()
+		if gc:
+			gc.server_status_message.channel_id = 0
+			gc.server_status_message.message_id = 0
+			await GuildConfig.set(ctx.guild.id, gc)
 		logger.error(traceback.format_exc())
 		await ctx.send_followup(embed=embeds.Notification.internal_error())
 

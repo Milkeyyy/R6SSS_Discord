@@ -54,12 +54,12 @@ class Notification:
 		return embed
 
 	@classmethod
-	def internal_error(cls):
+	def internal_error(cls, description: str | None = None):
 		"""内部エラー発生時用埋め込みメッセージ"""
 
 		embed = discord.Embed(
 			title=":closed_book: " + _("CmdMsg_InternalError"),
-			description = _("CmdMsg_InternalError_Description"),
+			description = description if description else _("CmdMsg_InternalError_Description"),
 			colour=discord.Colour.from_rgb(205, 61, 66)
 		)
 		return embed

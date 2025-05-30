@@ -66,6 +66,8 @@
 		"CmdMsg_InternalError": "内部エラー",
 		"CmdMsg_InternalError_Description": "内部エラーが発生しました。もう一度お試しください。\n(この問題が解決しない場合は、開発者へ報告してください。)",
 		"CmdMsg_CooldownWarning": "コマンドを実行する間隔が短すぎます。\nしばらく待ってからもう一度お試しください。",
+		"CmdMsg_FailedToGetConfig": "コンフィグを取得できませんでした。\nしばらく待ってからもう一度お試しください。\n(この問題が解決しない場合は、開発者へ報告してください。)",
+		"CmdMsg_FailedToGetMaintenanceSchedule": "メンテナンススケジュールを取得できませんでした、\nしばらく待ってからもう一度お試しください。\n(この問題が解決しない場合は、開発者へ報告してください。)",
 		"Cmd_setlanguage_Success": "サーバーステータスメッセージの言語を `{0}` (`{1}`) に設定しました。",
 		"Cmd_setindicator_Success": "サーバーステータスインジケーターの表示を `{0}` に設定しました。",
 		"Cmd_setnotification_Success": "サーバーステータスの通知メッセージを `{0}` に設定しました。",
