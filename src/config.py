@@ -68,7 +68,7 @@ class GuildConfig:
 			# 以前のコンフィグファイルが存在する場合は読み込んでデータベースへ移行する
 			if os.path.exists("./guilds.json"):
 				# コレクション内のドキュメント数を取得して、0の場合のみ移行を行う
-				if await GuildDB.col.count_documents({}) == 0:
+				if (await GuildDB.col.count_documents({})) <= 0:
 					logger.info("ギルドコンフィグをファイルから移行")
 					with open("./guilds.json", "r", encoding="utf-8") as f:
 						old_gc = json.loads(f.read())
