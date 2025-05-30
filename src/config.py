@@ -17,14 +17,14 @@ class GuildConfig:
 	}
 	DEFAULT_GUILD_DATA: dict = {
 		"server_status_message": {
-			"channel_id": 0,
-			"message_id": 0,
+			"channel_id": "0",
+			"message_id": "0",
 			"language": "en_GB",
 			"status_indicator": True
 		},
 		"server_status_notification": {
-			"channel_id": 0,
-			"role_id": 0,
+			"channel_id": "0",
+			"role_id": "0",
 			"auto_delete": 10
 		}
 	}
@@ -98,18 +98,18 @@ class GuildConfig:
 		await GuildDB.col.insert_one(cls.generate_default_guild_data(guild_id))
 
 	@classmethod
-	async def get(cls, guild_id: int) -> AttrDict | None:
+	async def get(cls, guild_id: str) -> AttrDict | None:
 		"""指定されたギルドIDのコンフィグを取得して返す"""
 
-		logger.info("ギルドコンフィグを取得 - ID: %s", str(guild_id))
+		logger.info("ギルドコンフィグを取得 - ID: %s", guild_id)
 
 		# データベースから指定されたギルドIDに一致するコンフィグを取得する
-		obj = await GuildDB.col.find_one({"guild_id": str(guild_id)})
+		obj = await GuildDB.col.find_one({"guild_id": guild_id})
 
 		# 見つからない場合は初期値を新たに作成する
 		if obj is None:
-			await GuildDB.col.insert_one(cls.generate_default_guild_data(str(guild_id)))
-			obj = await GuildDB.col.find_one({"guild_id": str(guild_id)})
+			await GuildDB.col.insert_one(cls.generate_default_guild_data(guild_id))
+			obj = await GuildDB.col.find_one({"guild_id": guild_id})
 			if obj is None:
 				logger.warning("ギルドコンフィグの取得失敗: obj is None")
 				return None
@@ -117,11 +117,11 @@ class GuildConfig:
 		return AttrDict(obj["config"])
 
 	@classmethod
-	async def set(cls, guild_id: int, value: dict) -> None:
+	async def set(cls, guild_id: str, value: dict) -> None:
 		"""指定されたギルドIDのコンフィグを更新する"""
 
 		result = await GuildDB.col.update_one(
-			{"guild_id": str(guild_id)},
+			{"guild_id": guild_id},
 			{"$set": {"config": value}}
 		)
-		logger.info("ギルドコンフィグを更新 - ID: %s | Matched Count: %d", str(guild_id), result.matched_count)
+		logger.info("ギルドコンフィグを更新 - ID: %s | Matched Count: %d", guild_id, result.matched_count)

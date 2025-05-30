@@ -166,8 +166,8 @@ async def update_serverstatus() -> None:
 					ch = guild.get_channel(ch_id)
 					# チャンネルが存在しない場合はギルドデータのチャンネルIDとメッセージIDをリセットする
 					if ch is None:
-						gc.server_status_message.channel_id = 0
-						gc.server_status_message.message_id = 0
+						gc.server_status_message.channel_id = "0"
+						gc.server_status_message.message_id = "0"
 						# ギルドコンフィグを保存
 						await GuildConfig.set(guild.id, gc)
 						continue # ループを続ける
@@ -187,8 +187,8 @@ async def update_serverstatus() -> None:
 						logger.warning("ギルド %s のメッセージ(%s)の取得に失敗", guild.name, str(msg_id))
 						logger.warning(str(e))
 						# メッセージが存在しない(削除されている)場合はギルドデータのチャンネルIDとメッセージIDをリセットする
-						gc.server_status_message.channel_id = 0
-						gc.server_status_message.message_id = 0
+						gc.server_status_message.channel_id = "0"
+						gc.server_status_message.message_id = "0"
 						# ギルドデータを保存
 						await GuildConfig.set(guild.id, gc)
 					else:
@@ -529,7 +529,7 @@ async def create(ctx: discord.ApplicationContext,
 			return
 
 		additional_msg = ""
-		if gc.server_status_message.message_id != 0:
+		if gc.server_status_message.message_id != "0":
 			additional_msg = f"\n({_('Cmd_create_OldMessagesWillNoLongerBeUpdated')})"
 
 		if channel is None:
@@ -553,8 +553,8 @@ async def create(ctx: discord.ApplicationContext,
 			return
 
 		# 送信したチャンネルとメッセージのIDをギルドデータへ保存する
-		gc.server_status_message.channel_id = ch_id
-		gc.server_status_message.message_id = msg.id
+		gc.server_status_message.channel_id = str(ch_id)
+		gc.server_status_message.message_id = str(msg.id)
 
 		# ギルドコンフィグを保存
 		await GuildConfig.set(ctx.guild.id, gc)
@@ -563,8 +563,8 @@ async def create(ctx: discord.ApplicationContext,
 	except Exception:
 		# 設定をリセット
 		if gc:
-			gc.server_status_message.channel_id = 0
-			gc.server_status_message.message_id = 0
+			gc.server_status_message.channel_id = "0"
+			gc.server_status_message.message_id = "0"
 			await GuildConfig.set(ctx.guild.id, gc)
 		logger.error(traceback.format_exc())
 		await ctx.send_followup(embed=embeds.Notification.internal_error())

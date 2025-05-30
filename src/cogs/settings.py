@@ -155,11 +155,11 @@ class SettingsCommands(commands.Cog):
 						await ctx.send_followup(embed=embeds.Notification.error(description=_("Cmd_setnotification_RoleIsNotMentionable")))
 						return
 					# 指定されたロールのIDを保存
-					gc.server_status_notification.role_id = role.id
+					gc.server_status_notification.role_id = str(role.id)
 				# ロールが指定されていない場合
 				else:
 					# メンションを無効化
-					gc.server_status_notification.role_id = 0
+					gc.server_status_notification.role_id = "0"
 
 				# 自動削除の値が設定されている場合
 				if auto_delete:
@@ -170,13 +170,13 @@ class SettingsCommands(commands.Cog):
 					gc.server_status_notification.auto_delete = 10
 
 				# 指定されたチャンネルのIDを保存
-				gc.server_status_notification.channel_id = ch_id
+				gc.server_status_notification.channel_id = str(ch_id)
 
 			# 無効化
 			else:
-				gc.server_status_notification.channel_id = 0
-				gc.server_status_notification.role_id = 0
-				gc.server_status_notification.auto_delete = 0
+				gc.server_status_notification.channel_id = "0"
+				gc.server_status_notification.role_id = "0"
+				gc.server_status_notification.auto_delete = "0"
 
 			# ギルドデータを保存
 			await GuildConfig.set(ctx.guild.id, gc)
@@ -199,9 +199,9 @@ class SettingsCommands(commands.Cog):
 		except Exception:
 			# 設定をリセット
 			if gc is not None:
-				gc.server_status_notification.channel_id = 0
-				gc.server_status_notification.role_id = 0
-				gc.server_status_notification.auto_delete = 0
+				gc.server_status_notification.channel_id = "0"
+				gc.server_status_notification.role_id = "0"
+				gc.server_status_notification.auto_delete = "0"
 				await GuildConfig.set(ctx.guild.id, gc)
 			logger.error(traceback.format_exc())
 			await ctx.send_followup(embed=embeds.Notification.internal_error())
