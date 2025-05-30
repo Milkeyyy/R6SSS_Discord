@@ -76,7 +76,7 @@ class GuildConfig:
 						logger.info("- ギルド: %s", str(gid))
 						# データベースへ保存
 						await cls.create(gid)
-						await cls.set(int(gid), conf)
+						await cls.set(gid, conf)
 					# ファイルをリネームする
 					try:
 						os.rename("./guilds.json", "./guilds_migrated.json")
