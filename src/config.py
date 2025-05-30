@@ -80,7 +80,7 @@ class GuildConfig:
 					os.rename("./guilds.json", "./guilds_migrated.json")
 				except OSError:
 					logger.warning(" - リネームエラー")
-					logger.warning(traceback.format_exc())
+					logger.warning(traceback.format_exc())	
 		except Exception:
 			logger.warning("ギルドコンフィグ移行エラー")
 			logger.warning(traceback.format_exc())
@@ -109,7 +109,7 @@ class GuildConfig:
 			await GuildDB.col.insert_one(cls.generate_default_guild_data(str(guild_id)))
 			obj = await GuildDB.col.find_one({"guild_id": str(guild_id)})
 			if obj is None:
-				logger.warning("ギルドコンフィグ取得失敗: obj is None")
+				logger.warning("ギルドコンフィグの取得失敗: obj is None")
 				return None
 
 		return AttrDict(obj["config"])
@@ -122,4 +122,4 @@ class GuildConfig:
 			{"guild_id": str(guild_id)},
 			{"$set": {"config": value}}
 		)
-		logger.info("ギルドコンフィグ更新 - ID: %s | Matched Count: %d", str(guild_id), result.matched_count)
+		logger.info("ギルドコンフィグを更新 - ID: %s | Matched Count: %d", str(guild_id), result.matched_count)
