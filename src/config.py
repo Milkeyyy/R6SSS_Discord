@@ -67,7 +67,9 @@ class GuildConfigManager:
 				# なんらかの理由で config だけが存在しない場合も新規作成する
 				if not gd.get("config"):
 					await cls.create(gid)
-				await cls._check_dict_items(gd.get("config"), cls.DEFAULT_GUILD_DATA.copy())
+				else:
+					# チェックしたコンフィグに更新する
+					await GuildDB.col.update_one({"guild_id": gid}, {"$set": (await cls._check_dict_items(gd.get("config"), cls.DEFAULT_GUILD_DATA.copy()))})
 
 	@classmethod
 	async def load(cls) -> None:
