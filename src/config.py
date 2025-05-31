@@ -58,9 +58,16 @@ class GuildConfigManager:
 		for guild in client.guilds:
 			gid = str(guild.id)
 			logger.info("- ID: %s", gid)
+			# データベースからIDに一致するコンフィグを取得する
 			gd = await GuildDB.col.find_one({"guild_id": gid})
 			if gd is None:
+				# 見つからない場合は新規作成する
 				await cls.create(gid)
+			else:
+				# なんらかの理由で config だけが存在しない場合も新規作成する
+				if not gd.get("config"):
+					await cls.create(gid)
+				await cls._check_dict_items(gd.get("config"), cls.DEFAULT_GUILD_DATA.copy())
 
 	@classmethod
 	async def load(cls) -> None:
@@ -102,7 +109,7 @@ class GuildConfigManager:
 		guild_id = str(guild_id)
 
 		logger.info("ギルドコンフィグを新規作成: %s", guild_id)
-		await GuildDB.col.insert_one(cls.generate_default_guild_data(guild_id))
+		await GuildDB.col.update_one({"guild_id": guild_id}, {"$set": cls.generate_default_guild_data(guild_id)}, upsert=True)
 
 	@classmethod
 	async def delete(cls, guild_id: str | int) -> None:
