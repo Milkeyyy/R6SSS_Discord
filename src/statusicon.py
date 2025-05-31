@@ -1,5 +1,0 @@
-Operational = "<:Operational:1052687160509218977>"
-Interrupted = "<:Interrupted:1052687159062179910>"
-Degraded = "<:Degraded:1052687157627731968>"
-Unknown = "<:Unknown:1052687154549112832>"
-Maintenance = "<:Maintenance:1052687156033880144>"
