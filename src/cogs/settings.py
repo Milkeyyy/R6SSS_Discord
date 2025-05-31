@@ -226,8 +226,8 @@ class SettingsCommands(commands.Cog):
 				title=":gear: " + _("Cmd_showsettings_CurrentSettings")
 			)
 			# 作成されたサーバーステータスメッセージ
-			status_msg_ch = client.get_channel(gc.server_status_message.channel_id)
-			status_msg = await status_msg_ch.fetch_message(gc.server_status_message.message_id)
+			status_msg_ch = client.get_channel(int(gc.server_status_message.channel_id))
+			status_msg = await status_msg_ch.fetch_message(int(gc.server_status_message.message_id))
 			embed.add_field(
 				name=f":envelope: {_("Cmd_showsettings_ServerStatusMessage")}",
 				value=f"[**{_("Cmd_showsettings_ServerStatusMessage_Created")}**]({status_msg.jump_url})" if status_msg else f"**{_("Cmd_showsettings_ServerStatusMessage_None")}**"
@@ -243,14 +243,14 @@ class SettingsCommands(commands.Cog):
 				value=f"`{EXISTS_LOCALE_LIST.get(gc.server_status_message.language)}` (`{gc.server_status_message.language}`)"
 			)
 			# 通知
-			notif_ch = client.get_channel(gc.server_status_notification.channel_id)
+			notif_ch = client.get_channel(int(gc.server_status_notification.channel_id))
 			if notif_ch:
 				# 有効
 				notif_settings_text = f"`{_("True")}`"
 				# チャンネル
 				notif_settings_text += f"\n> `{_("Cmd_setnotification_Channel")}`: {notif_ch.mention}"
 				# ロール
-				if gc.server_status_notification.role_id != 0:
+				if gc.server_status_notification.role_id != "0":
 					notif_role_text = f"<@&{gc.server_status_notification.role_id}>"
 				else:
 					notif_role_text = F"`{_("False")}`"
