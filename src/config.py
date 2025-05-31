@@ -134,7 +134,7 @@ class GuildConfig:
 		return AttrDict(obj["config"])
 
 	@classmethod
-	async def set(cls, guild_id: str | int, value: AttrDict) -> None:
+	async def set(cls, guild_id: str | int, value: AttrDict | dict) -> None:
 		"""指定されたギルドIDのコンフィグを更新する"""
 
 		guild_id = str(guild_id)
@@ -144,3 +144,4 @@ class GuildConfig:
 			{"$set": {"config": dict(value)}}
 		)
 		logger.info("ギルドコンフィグを更新 - ID: %s | Matched: %d | Modified: %d", guild_id, result.matched_count, result.modified_count)
+		logger.info("- Value: %s", value)
