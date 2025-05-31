@@ -612,8 +612,9 @@ async def about(ctx: discord.ApplicationContext) -> None:
 
 @client.slash_command()
 @discord.guild_only()
+@discord.default_permissions(administrator=True)
 @commands.cooldown(2, 5)
-async def test_notification(ctx: discord.ApplicationContext, comparison_target: str) -> None:
+async def testnotification(ctx: discord.ApplicationContext, comparison_target: str) -> None:
 	try:
 		if await client.is_owner(ctx.user):
 			await ctx.defer(ephemeral=True)
@@ -636,13 +637,14 @@ async def test_notification(ctx: discord.ApplicationContext, comparison_target: 
 					embed=embeds.Notification.get_by_comparison_result(result, "ja")
 				)
 		else:
-			await ctx.respond(content=_("CmdMsg_DontHavePermission_Execution"))
+			await ctx.respond(embed=embeds.Notification.error(description=_("CmdMsg_DontHavePermission_Execution")))
 	except Exception:
 		logger.error(traceback.format_exc())
 		await ctx.send_followup(embed=embeds.Notification.internal_error())
 
 @client.slash_command()
 @discord.guild_only()
+@discord.default_permissions(administrator=True)
 @commands.cooldown(2, 5)
 async def synccommands(ctx: discord.ApplicationContext) -> None:
 	try:
@@ -652,7 +654,7 @@ async def synccommands(ctx: discord.ApplicationContext) -> None:
 			await client.sync_commands()
 			await ctx.send_followup(content="コマンドを同期しました。")
 		else:
-			await ctx.respond(content=_("CmdMsg_DontHavePermission_Execution"), ephemeral=True)
+			await ctx.respond(embed=embeds.Notification.error(description=_("CmdMsg_DontHavePermission_Execution")))
 	except Exception:
 		logger.error(traceback.format_exc())
 		await ctx.send_followup(embed=embeds.Notification.internal_error(), ephemeral=True)
