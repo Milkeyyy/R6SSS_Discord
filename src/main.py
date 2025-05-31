@@ -94,19 +94,28 @@ async def on_ready() -> None:
 	logger.info("サーバーステータスの定期更新開始")
 	update_serverstatus.start()
 
+# サーバー参加時のイベント
+@client.event
+async def on_guild_join(guild: discord.Guild) -> None:
+	logger.info("ギルド参加: %s (%d)", guild.name, guild.id)
+	# 参加したギルドのコンフィグを作成する
+	await GuildConfig.create(guild.id)
+
+# サーバー脱退時のイベント
+@client.event
+async def on_guild_remove(guild: discord.Guild) -> None:
+	logger.info("ギルド脱退: %s (%d)", guild.name, guild.id)
+	# 脱退したギルドのコンフィグを削除する
+	await GuildConfig.delete(guild.id)
 
 # アプリケーションコマンド実行時のイベント
 @client.event
 async def on_application_command_completion(ctx: discord.ApplicationContext) -> None:
 	full_command_name = ctx.command.qualified_name
 	if ctx.guild is not None:
-		logger.info(
-			f"アプリケーションコマンド {full_command_name} が {ctx.guild.name} (ID: {ctx.guild.id}) にて {ctx.user} (ID: {ctx.user.id}) によって実行"
-		)
+		logger.info("アプリケーションコマンド実行 - %s | ギルド: %s (%d) | 実行者: %s (%d)", full_command_name, ctx.guild.name, ctx.guild.id, ctx.user, ctx.user.id)
 	else:
-		logger.info(
-			f"アプリケーションコマンド {full_command_name} が {ctx.user} (ID: {ctx.user.id}) によって DM にて実行"
-		)
+		logger.info("アプリケーションコマンド実行 - %s | DM | 実行者: %s (%d)", full_command_name, ctx.user, ctx.user.id)
 
 # アプリケーションコマンドエラー時のイベント
 @client.event

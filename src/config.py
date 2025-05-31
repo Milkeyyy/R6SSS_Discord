@@ -104,6 +104,15 @@ class GuildConfig:
 		await GuildDB.col.insert_one(cls.generate_default_guild_data(guild_id))
 
 	@classmethod
+	async def delete(cls, guild_id: str | int) -> None:
+		"""指定されたギルドIDのコンフィグを削除する"""
+
+		guild_id = str(guild_id)
+
+		logger.info("ギルドコンフィグを削除: %s", guild_id)
+		await GuildDB.col.delete_one({"guild_id": guild_id})
+
+	@classmethod
 	async def get(cls, guild_id: str | int) -> AttrDict | None:
 		"""指定されたギルドIDのコンフィグを取得して返す"""
 
