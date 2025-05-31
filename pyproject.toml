@@ -10,6 +10,7 @@ dependencies = [
     "pycord-i18n==1.2.*",
     "pymongo>=4.13.0",
     "python-box>=7.3.2",
+    "python-dotenv>=1.1.0",
     "r6sss",
     "six>=1.17.0",
 ]
