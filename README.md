@@ -10,7 +10,7 @@ Discordのテキストチャンネルにレインボーシックス シージの
 [**[Botをサーバーへ招待する]**](https://discord.com/oauth2/authorize?client_id=990497421488451615)
 
 ### 稼働状況
-[![Status](http://status.milkeyyy.com/api/badge/13/status?style=for-the-badge)](https://status.milkeyyy.com/)
+[![Status](http://status.milkeyyy.com/api/badge/21/status?style=for-the-badge)](https://status.milkeyyy.com/)
 
 ### サポート Discord サーバー
 [![Discord](https://img.shields.io/discord/889239399550844978?style=for-the-badge&label=Discord&logo=discord&logoColor=white)](https://discord.gg/bMf9dDjndC)
