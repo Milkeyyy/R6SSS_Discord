@@ -62,3 +62,8 @@ Discordのテキストチャンネルにレインボーシックス シージの
   > 通知の例
   >
   > <img src="https://github.com/user-attachments/assets/baf3e13d-647b-4feb-a77d-88f28f074d32" width="40%" />
+
+
+## 利用規約・プライバシーポリシー
+- [利用規約](./TERMS-OF-SERVICE.md)
+- [プライバシーポリシー](./PRIVACY_POLICY.md)
