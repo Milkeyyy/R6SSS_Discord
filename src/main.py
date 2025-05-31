@@ -124,7 +124,10 @@ async def on_application_command_error(ctx: discord.ApplicationContext, ex: disc
 	logger.error(ex)
 	# クールダウン
 	if str(ex).startswith("You are on cooldown"):
-		await ctx.respond(embed=embeds.Notification.warning(description=_("CmdMsg_CooldownWarning")))
+		await ctx.respond(
+			embed=embeds.Notification.warning(description=_("CmdMsg_CooldownWarning")),
+			ephemeral=True
+		)
 
 
 # 1分毎にサーバーステータスを更新する
