@@ -73,7 +73,8 @@ class GuildConfig:
 					with open("./guilds.json", "r", encoding="utf-8") as f:
 						old_gc = json.loads(f.read())
 					for gid, conf in old_gc["config"].items():
-						logger.info("- ギルド: %s", str(gid))
+						gid = str(gid)
+						logger.info("- ギルド: %s", gid)
 						# データベースへ保存
 						await cls.create(gid)
 						await cls.set(gid, conf)
