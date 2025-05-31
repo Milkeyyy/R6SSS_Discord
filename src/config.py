@@ -69,7 +69,10 @@ class GuildConfigManager:
 					await cls.create(gid)
 				else:
 					# チェックしたコンフィグに更新する
-					await GuildDB.col.update_one({"guild_id": gid}, {"$set": (await cls._check_dict_items(gd.get("config"), cls.DEFAULT_GUILD_DATA.copy()))})
+					await GuildDB.col.update_one(
+						{"guild_id": gid},
+						{"$set": {"config": (await cls._check_dict_items(gd.get("config"), cls.DEFAULT_GUILD_DATA.copy()))}}
+					)
 
 	@classmethod
 	async def load(cls) -> None:
