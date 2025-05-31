@@ -598,10 +598,11 @@ async def about(ctx: discord.ApplicationContext) -> None:
 	try:
 		embed = discord.Embed(color=discord.Colour.blue())
 		embed.set_author(name=app.NAME, icon_url=client.user.display_avatar.url)
-		embed.set_footer(text="Developed by Milkeyyy")
+		embed.set_footer(text=app.COPYRIGHT)
 		embed.add_field(name="Version", value=f"`{app.VERSION}` ([`{app.get_git_commit_hash()[0:7]}`]({app.GITHUB_REPO_URL}/commit/{app.get_git_commit_hash()}))")
-		embed.add_field(name="Source", value="[GitHub]" + "(" + app.GITHUB_REPO_URL + ")", inline=False)
-		embed.add_field(name="Social", value=f"- [Twitter (Developer)]({app.DEVELOPER_TWITTER_URL})\n- [Bluesky Bot]({app.BLUESKY_BOT_URL})", inline=False)
+		embed.add_field(name="Source", value=f"[GitHub]({app.GITHUB_REPO_URL})", inline=False)
+		embed.add_field(name="Developer", value=f"- {app.DEVELOPER_NAME}\n - [Website]({app.DEVELOPER_WEBSITE_URL})\n - [Twitter]({app.DEVELOPER_TWITTER_URL})", inline=False)
+		embed.add_field(name="Other Services", value=f"- [Bluesky Bot]({app.BLUESKY_BOT_URL})\n- [Twitter Bot]({app.TWITTER_BOT_URL})", inline=False)
 		await ctx.respond(embed=embed)
 	except Exception:
 		logger.error(traceback.format_exc())
