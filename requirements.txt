@@ -49,6 +49,8 @@ pycord-i18n==1.2.1
     # via r6sss-discord
 pymongo==4.13.0
     # via r6sss-discord
+python-box==7.3.2
+    # via r6sss-discord
 r6sss @ git+https://github.com/Milkeyyy/R6SSS_Python@93e0f6c525274343f1b3d771d31c123d3d4ba24e
     # via r6sss-discord
 six==1.17.0

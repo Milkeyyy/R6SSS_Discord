@@ -6,7 +6,7 @@ from discord.ext import commands
 from pycord.i18n import _
 
 from client import client
-from config import GuildConfig
+from config import GuildConfigManager
 import embeds
 import localizations
 from localizations import EXISTS_LOCALE_LIST
@@ -32,7 +32,7 @@ class SettingsCommands(commands.Cog):
 		gc = None
 		try:
 			# ギルドコンフィグを取得する
-			gc = await GuildConfig.get(ctx.guild.id)
+			gc = await GuildConfigManager.get(ctx.guild.id)
 			if not gc:
 				await ctx.send_followup(embed=embeds.Notification.internal_error(description=_("CmdMsg_FailedToGetConfig")))
 				return
@@ -42,8 +42,11 @@ class SettingsCommands(commands.Cog):
 			else:
 				gc.server_status_message.language = "en_GB"
 
-			# ギルドデータを保存
-			await GuildConfig.set(ctx.guild.id, gc)
+			# ギルドコンフィグを更新
+			if not (await GuildConfigManager.update(ctx.guild.id, gc)):
+				# コンフィグの更新に失敗した場合はエラーメッセージを返す
+				await ctx.send_followup(embed=embeds.Notification.error(description=_("CmdMsg_FailedToUpdateConfig")))
+				return
 
 			await ctx.send_followup(embed=embeds.Notification.success(
 				description=_(
@@ -56,7 +59,7 @@ class SettingsCommands(commands.Cog):
 			# 設定をリセット
 			if gc is not None:
 				gc.server_status_message.language = "en_GB"
-				await GuildConfig.set(ctx.guild.id, gc)
+				await GuildConfigManager.update(ctx.guild.id, gc)
 			logger.error(traceback.format_exc())
 			await ctx.send_followup(embed=embeds.Notification.internal_error())
 
@@ -74,22 +77,25 @@ class SettingsCommands(commands.Cog):
 		gc = None
 		try:
 			# ギルドコンフィグを取得する
-			gc = await GuildConfig.get(ctx.guild.id)
+			gc = await GuildConfigManager.get(ctx.guild.id)
 			if not gc:
 				await ctx.send_followup(embed=embeds.Notification.internal_error(description=_("CmdMsg_FailedToGetConfig")))
 				return
 
 			gc.server_status_message.status_indicator = enable
 
-			# ギルドコンフィグを保存
-			await GuildConfig.set(ctx.guild.id, gc)
+			# ギルドコンフィグを更新
+			if not (await GuildConfigManager.update(ctx.guild.id, gc)):
+				# コンフィグの更新に失敗した場合はエラーメッセージを返す
+				await ctx.send_followup(embed=embeds.Notification.error(description=_("CmdMsg_FailedToUpdateConfig")))
+				return
 
 			await ctx.send_followup(embed=embeds.Notification.success(description=_("Cmd_setindicator_Success", _(str(enable)))))
 		except Exception:
 			# 設定をリセット
 			if gc is not None:
 				gc.server_status_message.status_indicator = False
-				await GuildConfig.set(ctx.guild.id, gc)
+				await GuildConfigManager.update(ctx.guild.id, gc)
 			logger.error(traceback.format_exc())
 			await ctx.send_followup(embed=embeds.Notification.internal_error())
 
@@ -123,7 +129,7 @@ class SettingsCommands(commands.Cog):
 		gc = None
 		try:
 			# ギルドコンフィグを取得する
-			gc = await GuildConfig.get(ctx.guild.id)
+			gc = await GuildConfigManager.get(ctx.guild.id)
 			if not gc:
 				await ctx.send_followup(embed=embeds.Notification.internal_error(description=_("CmdMsg_FailedToGetConfig")))
 				return
@@ -178,8 +184,11 @@ class SettingsCommands(commands.Cog):
 				gc.server_status_notification.role_id = "0"
 				gc.server_status_notification.auto_delete = "0"
 
-			# ギルドデータを保存
-			await GuildConfig.set(ctx.guild.id, gc)
+			# ギルドコンフィグを更新
+			if not (await GuildConfigManager.update(ctx.guild.id, gc)):
+				# コンフィグの更新に失敗した場合はエラーメッセージを返す
+				await ctx.send_followup(embed=embeds.Notification.error(description=_("CmdMsg_FailedToUpdateConfig")))
+				return
 
 			# 設定完了メッセージを送信する
 			success_embed = embeds.Notification.success(description=_("Cmd_setnotification_Success", _(str(enable))))
@@ -202,7 +211,7 @@ class SettingsCommands(commands.Cog):
 				gc.server_status_notification.channel_id = "0"
 				gc.server_status_notification.role_id = "0"
 				gc.server_status_notification.auto_delete = "0"
-				await GuildConfig.set(ctx.guild.id, gc)
+				await GuildConfigManager.update(ctx.guild.id, gc)
 			logger.error(traceback.format_exc())
 			await ctx.send_followup(embed=embeds.Notification.internal_error())
 
@@ -216,7 +225,7 @@ class SettingsCommands(commands.Cog):
 		gc = None
 		try:
 			# ギルドコンフィグを取得する
-			gc = await GuildConfig.get(ctx.guild.id)
+			gc = await GuildConfigManager.get(ctx.guild.id)
 			if not gc:
 				await ctx.send_followup(embed=embeds.Notification.internal_error(description=_("CmdMsg_FailedToGetConfig")))
 				return

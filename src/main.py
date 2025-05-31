@@ -24,7 +24,7 @@ import client as app
 from client import client
 
 # コンフィグ/DB
-from config import GuildConfig
+from config import GuildConfigManager
 from db import GuildDB
 
 # 埋め込み
@@ -89,7 +89,7 @@ async def on_ready() -> None:
 	await GuildDB.connect()
 
 	# ギルドデータのチェックを実行
-	await GuildConfig.load()
+	await GuildConfigManager.load()
 
 	logger.info("サーバーステータスの定期更新開始")
 	update_serverstatus.start()
@@ -99,14 +99,14 @@ async def on_ready() -> None:
 async def on_guild_join(guild: discord.Guild) -> None:
 	logger.info("ギルド参加: %s (%d)", guild.name, guild.id)
 	# 参加したギルドのコンフィグを作成する
-	await GuildConfig.create(guild.id)
+	await GuildConfigManager.create(guild.id)
 
 # サーバー脱退時のイベント
 @client.event
 async def on_guild_remove(guild: discord.Guild) -> None:
 	logger.info("ギルド脱退: %s (%d)", guild.name, guild.id)
 	# 脱退したギルドのコンフィグを削除する
-	await GuildConfig.delete(guild.id)
+	await GuildConfigManager.delete(guild.id)
 
 # アプリケーションコマンド実行時のイベント
 @client.event
@@ -154,7 +154,7 @@ async def update_serverstatus() -> None:
 			logger.info("ギルド: %s", guild.name)
 			try:
 				# データベースからギルドコンフィグを取得する
-				gc = await GuildConfig.get(guild.id)
+				gc = await GuildConfigManager.get(guild.id)
 				# 取得できなかった場合はスキップする
 				if not gc:
 					logger.warning("ギルドデータ (%s) の取得失敗", guild.name)
@@ -178,7 +178,7 @@ async def update_serverstatus() -> None:
 						gc.server_status_message.channel_id = "0"
 						gc.server_status_message.message_id = "0"
 						# ギルドコンフィグを保存
-						await GuildConfig.set(guild.id, gc)
+						await GuildConfigManager.update(guild.id, gc)
 						continue # ループを続ける
 
 					ch_name = ch.name
@@ -199,7 +199,7 @@ async def update_serverstatus() -> None:
 						gc.server_status_message.channel_id = "0"
 						gc.server_status_message.message_id = "0"
 						# ギルドデータを保存
-						await GuildConfig.set(guild.id, gc)
+						await GuildConfigManager.update(guild.id, gc)
 					else:
 						# テキストチャンネルの名前にステータスインジケーターを設定
 						try:
@@ -503,7 +503,7 @@ async def status(ctx: discord.ApplicationContext) -> None:
 	await ctx.defer(ephemeral=False)
 	try:
 		# ギルドコンフィグを取得する
-		gc = await GuildConfig.get(ctx.guild.id)
+		gc = await GuildConfigManager.get(ctx.guild.id)
 		if not gc:
 			await ctx.send_followup(embed=embeds.Notification.internal_error(description=_("CmdMsg_FailedToGetConfig")))
 			return
@@ -532,7 +532,7 @@ async def create(ctx: discord.ApplicationContext,
 	gc = None
 	try:
 		# ギルドコンフィグを取得する
-		gc = await GuildConfig.get(ctx.guild.id)
+		gc = await GuildConfigManager.get(ctx.guild.id)
 		if not gc:
 			await ctx.send_followup(embed=embeds.Notification.internal_error(description=_("CmdMsg_FailedToGetConfig")))
 			return
@@ -556,7 +556,7 @@ async def create(ctx: discord.ApplicationContext,
 			gc.server_status_message.channel_id = str(ch.id)
 			gc.server_status_message.message_id = str(msg.id)
 			# ギルドコンフィグを保存
-			await GuildConfig.set(ctx.guild.id, gc)
+			await GuildConfigManager.update(ctx.guild.id, gc)
 		except Exception as e:
 			# 権限エラー
 			if isinstance(e, discord.errors.ApplicationCommandInvokeError) and str(e).endswith("Missing Permissions"):
@@ -573,7 +573,7 @@ async def create(ctx: discord.ApplicationContext,
 		if gc:
 			gc.server_status_message.channel_id = "0"
 			gc.server_status_message.message_id = "0"
-			await GuildConfig.set(ctx.guild.id, gc)
+			await GuildConfigManager.update(ctx.guild.id, gc)
 		logger.error(traceback.format_exc())
 		await ctx.send_followup(embed=embeds.Notification.internal_error())
 

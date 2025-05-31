@@ -2,15 +2,16 @@ import json
 import os
 import traceback
 
-from attrdict import AttrDict
+from box import Box
 
 from client import client
 from db import GuildDB
 from logger import logger
 
 
-class GuildConfig:
-	FILE_PATH: str = "./guilds.json"
+class GuildConfigManager:
+	"""各ギルドのコンフィグを管理するクラス"""
+
 	DEFAULT_DB_DATA: dict = {
 		"guild_id": "",
 		"config": {}
@@ -40,7 +41,7 @@ class GuildConfig:
 
 	@classmethod
 	async def _check_dict_items(cls, item: dict, default_items: dict) -> dict:
-		for k, v in default_items.copy().items():
+		for k, v in default_items.items():
 			if k not in item:
 				item[k] = v
 			if isinstance(item[k], dict):
@@ -80,7 +81,7 @@ class GuildConfig:
 						logger.info("- ギルド: %s", gid)
 						# データベースへ保存
 						await cls.create(gid)
-						await cls.set(gid, conf)
+						await cls.update(gid, conf)
 					# ファイルをリネームする
 					try:
 						os.rename("./guilds.json", "./guilds_migrated.json")
@@ -113,7 +114,7 @@ class GuildConfig:
 		await GuildDB.col.delete_one({"guild_id": guild_id})
 
 	@classmethod
-	async def get(cls, guild_id: str | int) -> AttrDict | None:
+	async def get(cls, guild_id: str | int) -> Box | None:
 		"""指定されたギルドIDのコンフィグを取得して返す"""
 
 		guild_id = str(guild_id)
@@ -131,17 +132,27 @@ class GuildConfig:
 				logger.warning("ギルドコンフィグの取得失敗: obj is None")
 				return None
 
-		return AttrDict(obj["config"])
+		if not obj.get("config"):
+			logger.warning("ギルドコンフィグの取得失敗: config is None")
+			return None
+
+		return Box(obj["config"])
 
 	@classmethod
-	async def set(cls, guild_id: str | int, value: AttrDict | dict) -> None:
-		"""指定されたギルドIDのコンフィグを更新する"""
+	async def update(cls, guild_id: str | int, value: Box) -> bool:
+		"""指定されたギルドIDのコンフィグを更新する
+		
+		ギルドIDに一致するコンフィグが見つからない場合は `False` を返す"""
 
 		guild_id = str(guild_id)
 
 		result = await GuildDB.col.update_one(
 			{"guild_id": guild_id},
-			{"$set": {"config": dict(value)}}
+			{"$set": {"config": value.to_dict()}}
 		)
 		logger.info("ギルドコンフィグを更新 - ID: %s | Matched: %d | Modified: %d", guild_id, result.matched_count, result.modified_count)
-		logger.info("- Value: %s", value)
+
+		if result.matched_count != 0:
+			logger.warning("- ギルドコンフィグの更新失敗")
+
+		return result.matched_count != 0
