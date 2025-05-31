@@ -113,9 +113,9 @@ async def on_guild_remove(guild: discord.Guild) -> None:
 async def on_application_command_completion(ctx: discord.ApplicationContext) -> None:
 	full_command_name = ctx.command.qualified_name
 	if ctx.guild is not None:
-		logger.info("アプリケーションコマンド実行 - %s | ギルド: %s (%d) | 実行者: %s (%d)", full_command_name, ctx.guild.name, ctx.guild.id, ctx.user, ctx.user.id)
+		logger.info("アプリケーションコマンド実行 - %s | ギルド: %s (%d) | 実行者: %s (%s)", full_command_name, ctx.guild.name, ctx.guild.id, ctx.user, ctx.user.id)
 	else:
-		logger.info("アプリケーションコマンド実行 - %s | DM | 実行者: %s (%d)", full_command_name, ctx.user, ctx.user.id)
+		logger.info("アプリケーションコマンド実行 - %s | DM | 実行者: %s (%s)", full_command_name, ctx.user, ctx.user.id)
 
 # アプリケーションコマンドエラー時のイベント
 @client.event
