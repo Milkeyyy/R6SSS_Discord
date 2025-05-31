@@ -30,7 +30,7 @@ class GuildConfig:
 	}
 
 	@classmethod
-	def generate_default_guild_data(cls, guild_id: str) -> dict:
+	def generate_default_guild_data(cls, guild_id: str | int) -> dict:
 		"""初期ギルドコンフィグを生成して返す"""
 
 		d = cls.DEFAULT_DB_DATA.copy()
@@ -95,7 +95,7 @@ class GuildConfig:
 		await cls.check()
 
 	@classmethod
-	async def create(cls, guild_id: str) -> None:
+	async def create(cls, guild_id: str | int) -> None:
 		"""指定されたギルドIDのコンフィグを新規作成する"""
 
 		guild_id = str(guild_id)
@@ -104,7 +104,7 @@ class GuildConfig:
 		await GuildDB.col.insert_one(cls.generate_default_guild_data(guild_id))
 
 	@classmethod
-	async def get(cls, guild_id: str) -> AttrDict | None:
+	async def get(cls, guild_id: str | int) -> AttrDict | None:
 		"""指定されたギルドIDのコンフィグを取得して返す"""
 
 		guild_id = str(guild_id)
@@ -125,7 +125,7 @@ class GuildConfig:
 		return AttrDict(obj["config"])
 
 	@classmethod
-	async def set(cls, guild_id: str, value: dict) -> None:
+	async def set(cls, guild_id: str | int, value: dict) -> None:
 		"""指定されたギルドIDのコンフィグを更新する"""
 
 		guild_id = str(guild_id)
