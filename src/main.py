@@ -542,15 +542,21 @@ async def create(ctx: discord.ApplicationContext,
 			additional_msg = f"\n({_('Cmd_create_OldMessagesWillNoLongerBeUpdated')})"
 
 		if channel is None:
-			ch_id = ctx.channel_id()
+			ch_id = ctx.channel_id
 		else:
 			ch_id = channel.id
-		ch = client.get_channel(ch_id)
+		ch = ctx.guild.get_channel(ch_id)
 
-		# サーバーステータス埋め込みメッセージを送信
 		try:
+			# メンテナンススケジュールを取得
 			sched = MaintenanceScheduleManager.schedule
+			# サーバーステータス埋め込みメッセージを送信
 			msg = await ch.send(embeds=await generate_serverstatus_embed(gc.server_status_message.language, sched))
+			# 送信したチャンネルとメッセージのIDをギルドデータへ保存する
+			gc.server_status_message.channel_id = str(ch.id)
+			gc.server_status_message.message_id = str(msg.id)
+			# ギルドコンフィグを保存
+			await GuildConfig.set(ctx.guild.id, gc)
 		except Exception as e:
 			# 権限エラー
 			if isinstance(e, discord.errors.ApplicationCommandInvokeError) and str(e).endswith("Missing Permissions"):
@@ -560,13 +566,6 @@ async def create(ctx: discord.ApplicationContext,
 				logger.error(traceback.format_exc())
 				await ctx.send_followup(embed=embeds.Notification.internal_error())
 			return
-
-		# 送信したチャンネルとメッセージのIDをギルドデータへ保存する
-		gc.server_status_message.channel_id = str(ch_id)
-		gc.server_status_message.message_id = str(msg.id)
-
-		# ギルドコンフィグを保存
-		await GuildConfig.set(ctx.guild.id, gc)
 
 		await ctx.send_followup(embed=embeds.Notification.success(description=_("Cmd_create_Success", ch.mention) + additional_msg))
 	except Exception:
