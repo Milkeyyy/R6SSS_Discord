@@ -152,7 +152,7 @@ class GuildConfigManager:
 		)
 		logger.info("ギルドコンフィグを更新 - ID: %s | Matched: %d | Modified: %d", guild_id, result.matched_count, result.modified_count)
 
-		if result.matched_count != 0:
+		if result.matched_count == 0:
 			logger.warning("- ギルドコンフィグの更新失敗")
 
 		return result.matched_count != 0
