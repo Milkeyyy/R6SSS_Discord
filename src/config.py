@@ -34,7 +34,7 @@ class GuildConfig:
 		"""初期ギルドコンフィグを生成して返す"""
 
 		d = cls.DEFAULT_DB_DATA.copy()
-		d["guild_id"] = guild_id
+		d["guild_id"] = str(guild_id)
 		d["config"] = cls.DEFAULT_GUILD_DATA.copy()
 		return d
 
@@ -51,9 +51,12 @@ class GuildConfig:
 	async def check(cls) -> None:
 		"""各ギルドのコンフィグをチェックする 存在しなければ新規作成する"""
 
+		logger.info("ギルドコンフィグをチェック")
+
 		# コンフィグファイルの各ギルドの項目チェック
 		for guild in client.guilds:
 			gid = str(guild.id)
+			logger.info("- ID: %s", gid)
 			gd = await GuildDB.col.find_one({"guild_id": gid})
 			if gd is None:
 				await cls.create(gid)
@@ -95,12 +98,16 @@ class GuildConfig:
 	async def create(cls, guild_id: str) -> None:
 		"""指定されたギルドIDのコンフィグを新規作成する"""
 
+		guild_id = str(guild_id)
+
 		logger.info("ギルドコンフィグを新規作成: %s", guild_id)
 		await GuildDB.col.insert_one(cls.generate_default_guild_data(guild_id))
 
 	@classmethod
 	async def get(cls, guild_id: str) -> AttrDict | None:
 		"""指定されたギルドIDのコンフィグを取得して返す"""
+
+		guild_id = str(guild_id)
 
 		logger.info("ギルドコンフィグを取得 - ID: %s", guild_id)
 
@@ -120,6 +127,8 @@ class GuildConfig:
 	@classmethod
 	async def set(cls, guild_id: str, value: dict) -> None:
 		"""指定されたギルドIDのコンフィグを更新する"""
+
+		guild_id = str(guild_id)
 
 		result = await GuildDB.col.update_one(
 			{"guild_id": guild_id},
