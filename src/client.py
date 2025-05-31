@@ -1,7 +1,7 @@
 import os
 import subprocess
 
-from discord import Bot, User
+from discord import Bot
 
 
 NAME = "R6SSS"
