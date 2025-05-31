@@ -84,7 +84,7 @@ class SettingsCommands(commands.Cog):
 			# ギルドコンフィグを保存
 			await GuildConfig.set(ctx.guild.id, gc)
 
-			await ctx.send_followup(embed=embeds.Notification.success(description=_("Cmd_setindicator_Success", str(enable))))
+			await ctx.send_followup(embed=embeds.Notification.success(description=_("Cmd_setindicator_Success", _(str(enable)))))
 		except Exception:
 			# 設定をリセット
 			if gc is not None:
