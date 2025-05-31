@@ -66,4 +66,4 @@ Discordのテキストチャンネルにレインボーシックス シージの
 
 ## 利用規約・プライバシーポリシー
 - [利用規約](./TERMS-OF-SERVICE.md)
-- [プライバシーポリシー](./PRIVACY_POLICY.md)
+- [プライバシーポリシー](./PRIVACY-POLICY.md)
