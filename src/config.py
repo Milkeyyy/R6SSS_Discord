@@ -109,7 +109,7 @@ class GuildConfig:
 
 		# 見つからない場合は初期値を新たに作成する
 		if obj is None:
-			await GuildDB.col.insert_one(cls.generate_default_guild_data(guild_id))
+			await cls.create(guild_id)
 			obj = await GuildDB.col.find_one({"guild_id": guild_id})
 			if obj is None:
 				logger.warning("ギルドコンフィグの取得失敗: obj is None")
