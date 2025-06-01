@@ -10,6 +10,7 @@ from logger import logger
 
 locale = "ja-JP"
 
+
 def load_localedata() -> None:
 	global i18n
 	global LOCALE_DATA
@@ -46,13 +47,10 @@ def load_localedata() -> None:
 		if lang in EXISTS_LOCALE_LIST:
 			EXISTS_LOCALE_LIST[lang] = LOCALE_DATA[lang]["info"]["name"]
 
-	i18n = I18n(
-		client,
-		consider_user_locale=True,
-		**LOCALE_DATA
-	)
+	i18n = I18n(client, consider_user_locale=True, **LOCALE_DATA)
 
-def translate(text: str, values: list = [], lang: str="en_GB") -> str:
+
+def translate(text: str, values: list = [], lang: str = "en_GB") -> str:
 	global LOCALE_DATA
 
 	try:
@@ -60,6 +58,7 @@ def translate(text: str, values: list = [], lang: str="en_GB") -> str:
 	except KeyError as e:
 		logger.error("Translate KeyError: %s", str(e))
 		return text
+
 
 _ = translate
 

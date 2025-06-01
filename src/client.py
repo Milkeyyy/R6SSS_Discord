@@ -19,17 +19,19 @@ DEVELOPER_TWITTER_URL = "https://twitter.com/Milkeyyy_53"
 
 # くらいあんと
 intents = None
-client = Bot(intents = intents)
+client = Bot(intents=intents)
 
 _git_commit_hash = None
+
+
 def get_git_commit_hash() -> str:
 	global _git_commit_hash
 	try:
 		if _git_commit_hash:
 			return _git_commit_hash
 		cwd = os.path.dirname(os.path.abspath(__file__))
-		out = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'], cwd=cwd)
-		_git_commit_hash = out.strip().decode('ascii')
+		out = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], cwd=cwd)
+		_git_commit_hash = out.strip().decode("ascii")
 		return _git_commit_hash
 	except Exception:
 		# Coolify

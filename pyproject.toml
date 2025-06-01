@@ -17,3 +17,6 @@ dependencies = [
 
 [tool.uv.sources]
 r6sss = { git = "https://github.com/Milkeyyy/R6SSS_Python" }
+
+[tool.ruff.format]
+indent-style = "tab"

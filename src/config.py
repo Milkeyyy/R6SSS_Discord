@@ -8,22 +8,19 @@ from logger import logger
 class GuildConfigManager:
 	"""各ギルドのコンフィグを管理するクラス"""
 
-	DEFAULT_DB_DATA: dict = {
-		"guild_id": "",
-		"config": {}
-	}
+	DEFAULT_DB_DATA: dict = {"guild_id": "", "config": {}}
 	DEFAULT_GUILD_DATA: dict = {
 		"server_status_message": {
 			"channel_id": "0",
 			"message_id": "0",
 			"language": "en_GB",
-			"status_indicator": True
+			"status_indicator": True,
 		},
 		"server_status_notification": {
 			"channel_id": "0",
 			"role_id": "0",
-			"auto_delete": 10
-		}
+			"auto_delete": 10,
+		},
 	}
 
 	@classmethod
@@ -67,7 +64,15 @@ class GuildConfigManager:
 					# チェックしたコンフィグに更新する
 					await DBManager.col.update_one(
 						{"guild_id": gid},
-						{"$set": {"config": (await cls._check_dict_items(gd.get("config"), cls.DEFAULT_GUILD_DATA.copy()))}}
+						{
+							"$set": {
+								"config": (
+									await cls._check_dict_items(
+										gd.get("config"), cls.DEFAULT_GUILD_DATA.copy()
+									)
+								)
+							}
+						},
 					)
 
 	@classmethod
@@ -86,7 +91,11 @@ class GuildConfigManager:
 		guild_id = str(guild_id)
 
 		logger.info("ギルドコンフィグを新規作成: %s", guild_id)
-		await DBManager.col.update_one({"guild_id": guild_id}, {"$set": cls.generate_default_guild_data(guild_id)}, upsert=True)
+		await DBManager.col.update_one(
+			{"guild_id": guild_id},
+			{"$set": cls.generate_default_guild_data(guild_id)},
+			upsert=True,
+		)
 
 	@classmethod
 	async def delete(cls, guild_id: str | int) -> None:
@@ -125,16 +134,20 @@ class GuildConfigManager:
 	@classmethod
 	async def update(cls, guild_id: str | int, value: Box) -> bool:
 		"""指定されたギルドIDのコンフィグを更新する
-		
+
 		ギルドIDに一致するコンフィグが見つからない場合は `False` を返す"""
 
 		guild_id = str(guild_id)
 
 		result = await DBManager.col.update_one(
-			{"guild_id": guild_id},
-			{"$set": {"config": value.to_dict()}}
+			{"guild_id": guild_id}, {"$set": {"config": value.to_dict()}}
 		)
-		logger.info("ギルドコンフィグを更新 - ID: %s | Matched: %d | Modified: %d", guild_id, result.matched_count, result.modified_count)
+		logger.info(
+			"ギルドコンフィグを更新 - ID: %s | Matched: %d | Modified: %d",
+			guild_id,
+			result.matched_count,
+			result.modified_count,
+		)
 
 		if result.matched_count == 0:
 			logger.warning("- ギルドコンフィグの更新失敗")

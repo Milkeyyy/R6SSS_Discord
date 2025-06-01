@@ -36,9 +36,7 @@ class DBManager:
 
 			# 接続する
 			logger.info("データベースへ接続")
-			cls._client = pymongo.AsyncMongoClient(
-				host=db_uri
-			)
+			cls._client = pymongo.AsyncMongoClient(host=db_uri)
 			await cls._client.aconnect()
 
 			# データベース/コレクションを取得

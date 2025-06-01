@@ -11,7 +11,9 @@ class ServerStatusManager:
 	data: list = []
 	previous_data: list = []
 	updated_at = 0
-	indicator = status_indicator.Unknown # テキストチャンネルの名前に表示するステータスインジケーター(絵文字)
+	indicator = (
+		status_indicator.Unknown
+	)  # テキストチャンネルの名前に表示するステータスインジケーター(絵文字)
 
 	@classmethod
 	async def get(cls) -> list[r6sss.Status] | None:
@@ -30,7 +32,12 @@ class ServerStatusManager:
 			st = status.connectivity
 			status_list.append(st)
 
-			if st == "Operational" and "Interrupted" not in status_list and "Degraded" not in status_list and "Maintenance" not in status_list:
+			if (
+				st == "Operational"
+				and "Interrupted" not in status_list
+				and "Degraded" not in status_list
+				and "Maintenance" not in status_list
+			):
 				cls.indicator = status_indicator.Operational
 			if st == "Interrupted":
 				cls.indicator = status_indicator.Interrupted
