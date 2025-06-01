@@ -320,7 +320,7 @@ async def after_updateserverstatus() -> None:
 		update_serverstatus.start()
 
 # サーバーステータス埋め込みメッセージを更新
-async def generate_serverstatus_embed(locale, sched: MaintenanceSchedule) -> list[discord.Embed]:
+async def generate_serverstatus_embed(locale, sched: MaintenanceSchedule | None) -> list[discord.Embed]:
 	embed_settings = {
 		"PC": [discord.Colour.from_rgb(255, 255, 255), 2], # 埋め込みの色, 埋め込みのスペーシング
 		"PS4": [discord.Colour.from_rgb(0, 67, 156), 0],

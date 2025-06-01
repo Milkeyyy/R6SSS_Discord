@@ -6,7 +6,7 @@ class MaintenanceScheduleManager:
 	schedule: MaintenanceSchedule | None
 
 	@classmethod
-	async def get(cls) -> MaintenanceSchedule:
+	async def get(cls) -> MaintenanceSchedule | None:
 		"""最新のメンテナンススケジュールを取得して整えて返す"""
 
 		# メンテナンススケジュールを取得
