@@ -25,7 +25,7 @@ from client import client
 
 # コンフィグ/DB
 from config import GuildConfigManager
-from db import GuildDB
+from db import DBManager
 
 # 埋め込み
 import embeds
@@ -86,7 +86,7 @@ async def on_ready() -> None:
 	logger.info("%s へログインしました！ (ID: %s)", client.user.display_name, str(client.user.id))
 
 	# データベースへ接続する
-	await GuildDB.connect()
+	await DBManager.connect()
 
 	# ギルドデータのチェックを実行
 	await GuildConfigManager.load()
