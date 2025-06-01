@@ -1,7 +1,7 @@
 from box import Box
 
 from client import client
-from db import GuildDB
+from db import DBManager
 from logger import logger
 
 
@@ -55,7 +55,7 @@ class GuildConfigManager:
 			gid = str(guild.id)
 			logger.info("- ID: %s", gid)
 			# データベースからIDに一致するコンフィグを取得する
-			gd = await GuildDB.col.find_one({"guild_id": gid})
+			gd = await DBManager.col.find_one({"guild_id": gid})
 			if gd is None:
 				# 見つからない場合は新規作成する
 				await cls.create(gid)
@@ -65,7 +65,7 @@ class GuildConfigManager:
 					await cls.create(gid)
 				else:
 					# チェックしたコンフィグに更新する
-					await GuildDB.col.update_one(
+					await DBManager.col.update_one(
 						{"guild_id": gid},
 						{"$set": {"config": (await cls._check_dict_items(gd.get("config"), cls.DEFAULT_GUILD_DATA.copy()))}}
 					)
@@ -86,7 +86,7 @@ class GuildConfigManager:
 		guild_id = str(guild_id)
 
 		logger.info("ギルドコンフィグを新規作成: %s", guild_id)
-		await GuildDB.col.update_one({"guild_id": guild_id}, {"$set": cls.generate_default_guild_data(guild_id)}, upsert=True)
+		await DBManager.col.update_one({"guild_id": guild_id}, {"$set": cls.generate_default_guild_data(guild_id)}, upsert=True)
 
 	@classmethod
 	async def delete(cls, guild_id: str | int) -> None:
@@ -95,7 +95,7 @@ class GuildConfigManager:
 		guild_id = str(guild_id)
 
 		logger.info("ギルドコンフィグを削除: %s", guild_id)
-		await GuildDB.col.delete_one({"guild_id": guild_id})
+		await DBManager.col.delete_one({"guild_id": guild_id})
 
 	@classmethod
 	async def get(cls, guild_id: str | int) -> Box | None:
@@ -106,12 +106,12 @@ class GuildConfigManager:
 		logger.info("ギルドコンフィグを取得 - ID: %s", guild_id)
 
 		# データベースから指定されたギルドIDに一致するコンフィグを取得する
-		obj = await GuildDB.col.find_one({"guild_id": guild_id})
+		obj = await DBManager.col.find_one({"guild_id": guild_id})
 
 		# 見つからない場合は初期値を新たに作成する
 		if obj is None:
 			await cls.create(guild_id)
-			obj = await GuildDB.col.find_one({"guild_id": guild_id})
+			obj = await DBManager.col.find_one({"guild_id": guild_id})
 			if obj is None:
 				logger.warning("ギルドコンフィグの取得失敗: obj is None")
 				return None
@@ -130,7 +130,7 @@ class GuildConfigManager:
 
 		guild_id = str(guild_id)
 
-		result = await GuildDB.col.update_one(
+		result = await DBManager.col.update_one(
 			{"guild_id": guild_id},
 			{"$set": {"config": value.to_dict()}}
 		)
