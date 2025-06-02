@@ -12,7 +12,8 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
 # 
 COPY src/*.py /code/src/
-COPY src/cogs/* /code/src/cogs/
+COPY src/cogs/commands/*.py /code/src/cogs/commands/
+COPY src/cogs/tasks/*.py /code/src/cogs/tasks/
 COPY locales/*.json /code/locales/
 
 # 
