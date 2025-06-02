@@ -150,7 +150,7 @@ async def status(ctx: discord.ApplicationContext) -> None:
 			return
 
 		# サーバーステータスを取得する
-		status_data = ServerStatusManager.get()
+		status_data = await ServerStatusManager.get()
 		# 取得できなかった場合 (None) はエラーメッセージを返す
 		if status_data is None:
 			await ctx.send_followup(
@@ -209,7 +209,7 @@ async def create(
 
 		try:
 			# サーバーステータスを取得する
-			status_data = ServerStatusManager.get()
+			status_data = await ServerStatusManager.get()
 			# 取得できなかった場合 (None) はエラーメッセージを返す
 			if status_data is None:
 				await ctx.send_followup(
@@ -343,7 +343,7 @@ async def testnotification(
 					r6sss.functions.Status(r6sss.types.Platform[_platform], _status),
 				)
 
-			status_data = ServerStatusManager.get()
+			status_data = await ServerStatusManager.get()
 
 			# サーバーステータスが None の場合はエラーメッセージを返す
 			if status_data is None:
