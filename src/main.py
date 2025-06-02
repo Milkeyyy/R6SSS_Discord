@@ -155,6 +155,8 @@ async def on_application_command_error(
 
 
 class ServerStatusEmbedManager:
+	server_status_update_loop_is_running: bool
+
 	def __init__(self) -> None:
 		self.server_status_update_loop_is_running = False
 

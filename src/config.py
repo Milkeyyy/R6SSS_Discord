@@ -9,6 +9,9 @@ from logger import logger
 class GuildConfigManager:
 	"""各ギルドのコンフィグを管理するクラス"""
 
+	DEFAULT_DB_DATA: dict
+	DEFAULT_GUILD_DATA: dict
+
 	def __init__(self) -> None:
 		self.DEFAULT_DB_DATA: dict = {"guild_id": "", "config": {}}
 		self.DEFAULT_GUILD_DATA: dict = {

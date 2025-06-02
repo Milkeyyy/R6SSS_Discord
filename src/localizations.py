@@ -9,6 +9,10 @@ from logger import logger
 
 
 class Localization:
+	i18n: I18n | None
+	LOCALE_DATA: dict
+	EXISTS_LOCALE_LIST: dict
+
 	def __init__(self) -> None:
 		self.i18n = None
 		self.LOCALE_DATA = {}
