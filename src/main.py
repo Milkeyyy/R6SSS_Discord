@@ -53,7 +53,7 @@ async def on_connect() -> None:
 @client.event
 async def on_ready() -> None:
 	logger.info("---------------------------------------")
-	logger.info(f" {app.NAME} - Version {app.VERSION}")
+	logger.info(f" {app.NAME} - Version {app.VERSION_STRING}")
 	logger.info(f" using Pycord {discord.__version__}")
 	logger.info(f" Developed by {app.DEVELOPER_NAME}")
 	logger.info(f" {app.COPYRIGHT}")
@@ -62,7 +62,7 @@ async def on_ready() -> None:
 
 	# ステータス表示を更新
 	await client.change_presence(
-		activity=discord.Game(name=f"Type /create | v{app.VERSION}"),
+		activity=discord.Game(name=f"Type /create | v{app.VERSION_STRING}"),
 	)
 	logger.info(
 		"%s へログインしました！ (ID: %s)",
@@ -299,7 +299,7 @@ async def about(ctx: discord.ApplicationContext) -> None:
 		embed.set_footer(text=app.COPYRIGHT)
 		embed.add_field(
 			name="Version",
-			value=f"`{app.VERSION}` ([`{app.get_git_commit_hash()[0:7]}`]({app.GITHUB_REPO_URL}/commit/{app.get_git_commit_hash()}))",
+			value=f"`{app.VERSION_STRING}` ([`{app.get_git_commit_hash()[0:7]}`]({app.GITHUB_REPO_URL}/commit/{app.get_git_commit_hash()}))",
 		)
 		embed.add_field(
 			name="Source",

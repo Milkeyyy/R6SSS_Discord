@@ -3,7 +3,8 @@ import os
 from discord import Bot
 
 NAME = "R6SSS"
-VERSION = "2.0.0"
+VERSION = (2, 1, 0)
+VERSION_STRING = ".".join(map(str, VERSION))
 COPYRIGHT = "Copyright (C) 2025 Milkeyyy"
 
 GITHUB_REPO_URL = "https://github.com/Milkeyyy/R6SSS_Discord"
