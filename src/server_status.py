@@ -10,7 +10,7 @@ class ServerStatusManager:
 	"""サーバーステータスを管理するクラス"""
 
 	data: list[r6sss.types.Status] | None = None
-	previous_data: ClassVar[list] = []
+	previous_data: ClassVar[list] | None = None
 	updated_at: int = 0
 	indicator = status_indicator.Unknown  # テキストチャンネルの名前に表示するステータスインジケーター(絵文字)
 
@@ -22,6 +22,13 @@ class ServerStatusManager:
 		if result is None:
 			return None
 
+		# 以前のサーバーステータスを更新する
+		cls.previous_data = cls.data
+
+		# 現在のサーバーステータスを更新する
+		cls.data = result
+
+		# 更新日時を設定
 		cls.updated_at = int(datetime.datetime.now(tz=datetime.UTC).timestamp())
 
 		status_list = []
@@ -29,25 +36,15 @@ class ServerStatusManager:
 		for status in result:
 			st = status.connectivity
 			status_list.append(st)
-
-			if (
-				st == "Operational"
-				and "Interrupted" not in status_list
-				and "Degraded" not in status_list
-				and "Maintenance" not in status_list
+			if all(
+				(st == "Operational", "Interrupted" not in status_list, "Degraded" not in status_list, "Maintenance" not in status_list)
 			):
 				cls.indicator = status_indicator.Operational
 			if st == "Interrupted":
 				cls.indicator = status_indicator.Interrupted
-			if st == "Degraded":
+			if st in ("Degraded", "Outage"):  # Connectivity が Outage になるかわからないので、念の為入れておく
 				cls.indicator = status_indicator.Degraded
 			if status.maintenance:
 				cls.indicator = status_indicator.Maintenance
 
 		return result
-
-	@classmethod
-	async def update(cls) -> None:
-		"""サーバーステータスを更新する"""
-		cls.previous_data = cls.data
-		cls.data = await cls.get()

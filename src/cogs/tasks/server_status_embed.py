@@ -150,7 +150,7 @@ class ServerStatusEmbedManager(commands.Cog):
 						)
 
 					try:
-						if ServerStatusManager.previous_data:
+						if ServerStatusManager.previous_data is not None:
 							notif_embeds = []
 
 							# if client.user is not None:
@@ -161,78 +161,81 @@ class ServerStatusEmbedManager(commands.Cog):
 							# else:
 							# 	embed_author = None
 
-							# サーバーステータスの比較を行う
-							compare_result = r6sss.compare_server_status(ServerStatusManager.previous_data, status_data)
+							# 以前のサーバーステータスが None でなければ、サーバーステータスの比較を行う
+							if ServerStatusManager.previous_data is not None:
+								compare_result = r6sss.compare_server_status(ServerStatusManager.previous_data, status_data)
 
-							# ステータスの比較結果一覧から通知用の埋め込みメッセージを生成する
-							notif_embeds = [embeds.Notification.get_by_comparison_result(result, lang) for result in compare_result]
-							# for result in compare_result:
-							# 	# 対象プラットフォームの一覧テキストを生成
-							# 	# 全プラットフォームの場合は専用のテキストにする
-							# 	if {p.platform for p in ServerStatusManager.data}.issubset(set(result.platforms)):
-							# 		target_platforms_text = localizations.translate("Platform_All", lang=lang)
-							# 	else:
-							# 		target_platforms_text = " | ".join(
-							# 			[platform_icon.LIST[p.value] + " " + p.name for p in result.platforms]
-							# 		)
+								# ステータスの比較結果一覧から通知用の埋め込みメッセージを生成する
+								notif_embeds = [embeds.Notification.get_by_comparison_result(result, lang) for result in compare_result]
+								# for result in compare_result:
+								# 	# 対象プラットフォームの一覧テキストを生成
+								# 	# 全プラットフォームの場合は専用のテキストにする
+								# 	if {p.platform for p in ServerStatusManager.data}.issubset(set(result.platforms)):
+								# 		target_platforms_text = localizations.translate("Platform_All", lang=lang)
+								# 	else:
+								# 		target_platforms_text = " | ".join(
+								# 			[platform_icon.LIST[p.value] + " " + p.name for p in result.platforms]
+								# 		)
 
-							# 	if result.detail == r6sss.ComparisonDetail.START_MAINTENANCE:
-							# 		# メンテナンス開始
-							# 		logger.info("通知送信: メンテナンス開始")
-							# 		notif_embeds.append(
-							# 			discord.Embed(
-							# 				color=discord.Colour.light_grey(),
-							# 				title=localizations.translate("Title_Maintenance_Start", lang=lang),
-							# 				description="**"
-							# 				+ localizations.translate("TargetPlatform", lang=lang)
-							# 				+ ": "
-							# 				+ target_platforms_text
-							# 				+ "**",
-							# 				author=embed_author,
-							# 			)
-							# 		)
+								# 	if result.detail == r6sss.ComparisonDetail.START_MAINTENANCE:
+								# 		# メンテナンス開始
+								# 		logger.info("通知送信: メンテナンス開始")
+								# 		notif_embeds.append(
+								# 			discord.Embed(
+								# 				color=discord.Colour.light_grey(),
+								# 				title=localizations.translate("Title_Maintenance_Start", lang=lang),
+								# 				description="**"
+								# 				+ localizations.translate("TargetPlatform", lang=lang)
+								# 				+ ": "
+								# 				+ target_platforms_text
+								# 				+ "**",
+								# 				author=embed_author,
+								# 			)
+								# 		)
 
-							# 通知メッセージを送信するチャンネルを取得
-							notif_ch = guild.get_channel(notif_ch_id)
-							notif_role = guild.get_role(notif_role_id)
+								# 通知メッセージを送信するチャンネルを取得
+								notif_ch = guild.get_channel(notif_ch_id)
+								notif_role = guild.get_role(notif_role_id)
 
-							# メンションするロールが設定済みかつメンションが可能な場合はメンション用のテキストを設定
-							notif_role_mention = (notif_role.mention if notif_role.mentionable else "") if notif_role is not None else ""
+								# メンションするロールが設定済みかつメンションが可能な場合はメンション用のテキストを設定
+								notif_role_mention = (
+									(notif_role.mention if notif_role.mentionable else "") if notif_role is not None else ""
+								)
 
-							# 通知メッセージを送信
-							if notif_ch is not None and notif_embeds is not None:
-								for notif_embed in notif_embeds:
-									if notif_embed is not None:
-										notif_embed.description = f"\
-[**💬 {localizations.translate('Notification_Show_Server_Status', lang=lang)}**]\
-({msg.jump_url})\n{notif_embed.description}"
-								if notif_embeds:
-									# 自動削除が有効の場合は削除までの時間を指定する
-									notif_delete_after_seconds = int(
-										gc.server_status_notification.auto_delete,
-									)
-									if notif_delete_after_seconds > 0:
-										await notif_ch.send(
-											content=localizations.translate(
-												"Notification_Server_Status_Updated",
-												lang=lang,
-											)
-											+ "\n"
-											+ notif_role_mention,
-											embeds=notif_embeds,
-											delete_after=notif_delete_after_seconds,
+								# 通知メッセージを送信
+								if notif_ch is not None and notif_embeds is not None:
+									for notif_embed in notif_embeds:
+										if notif_embed is not None:
+											notif_embed.description = f"\
+	[**💬 {localizations.translate('Notification_Show_Server_Status', lang=lang)}**]\
+	({msg.jump_url})\n{notif_embed.description}"
+									if notif_embeds:
+										# 自動削除が有効の場合は削除までの時間を指定する
+										notif_delete_after_seconds = int(
+											gc.server_status_notification.auto_delete,
 										)
-									# 自動削除が無効の場合は削除までの時間を指定しない
-									else:
-										await notif_ch.send(
-											content=localizations.translate(
-												"Notification_Server_Status_Updated",
-												lang=lang,
+										if notif_delete_after_seconds > 0:
+											await notif_ch.send(
+												content=localizations.translate(
+													"Notification_Server_Status_Updated",
+													lang=lang,
+												)
+												+ "\n"
+												+ notif_role_mention,
+												embeds=notif_embeds,
+												delete_after=notif_delete_after_seconds,
 											)
-											+ "\n"
-											+ notif_role_mention,
-											embeds=notif_embeds,
-										)
+										# 自動削除が無効の場合は削除までの時間を指定しない
+										else:
+											await notif_ch.send(
+												content=localizations.translate(
+													"Notification_Server_Status_Updated",
+													lang=lang,
+												)
+												+ "\n"
+												+ notif_role_mention,
+												embeds=notif_embeds,
+											)
 
 					except Exception as e:
 						logger.error(traceback.format_exc())

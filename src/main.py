@@ -150,7 +150,7 @@ async def status(ctx: discord.ApplicationContext) -> None:
 			return
 
 		# サーバーステータスを取得する
-		status_data = ServerStatusManager.data
+		status_data = ServerStatusManager.get()
 		# 取得できなかった場合 (None) はエラーメッセージを返す
 		if status_data is None:
 			await ctx.send_followup(
@@ -209,7 +209,7 @@ async def create(
 
 		try:
 			# サーバーステータスを取得する
-			status_data = ServerStatusManager.data
+			status_data = ServerStatusManager.get()
 			# 取得できなかった場合 (None) はエラーメッセージを返す
 			if status_data is None:
 				await ctx.send_followup(
@@ -343,18 +343,21 @@ async def testnotification(
 					r6sss.functions.Status(r6sss.types.Platform[_platform], _status),
 				)
 
+			status_data = ServerStatusManager.get()
+
 			# サーバーステータスが None の場合はエラーメッセージを返す
-			if ServerStatusManager.data is None:
+			if status_data is None:
 				logger.error("ServerStatusManager.data is None")
 				await ctx.respond(
 					embed=embeds.Notification.error(
 						description=_("CmdMsg_FailedToGetServerStatus"),
 					),
 				)
+				return
 
 			# 比較を実行
 			compare_result = r6sss.compare_server_status(
-				ServerStatusManager.data,
+				status_data,
 				status_list,
 			)
 
