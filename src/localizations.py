@@ -1,5 +1,5 @@
 import json
-from os import path
+from pathlib import Path
 from typing import get_args
 
 from pycord.i18n import I18n, Locale
@@ -8,59 +8,75 @@ from client import client
 from logger import logger
 
 
-locale = "ja-JP"
+class Localization:
+	def __init__(self) -> None:
+		self.i18n = None
+		self.LOCALE_DATA = {}
+		self.EXISTS_LOCALE_LIST = {}
 
-def load_localedata() -> None:
-	global i18n
-	global LOCALE_DATA
-	global EXISTS_LOCALE_LIST
+	@classmethod
+	def load_locale_data(cls) -> None:
+		# 言語一覧
+		cls.LOCALE_DATA = {}
+		cls.EXISTS_LOCALE_LIST = {}
 
-	# 言語一覧
-	LOCALE_DATA = {}
-	EXISTS_LOCALE_LIST = {}
+		# 言語ファイルを読み込む
+		logger.info("言語ファイルを読み込み")
+		for lang_code in get_args(Locale):
+			# 言語ファイルのフォルダー
+			lang_file_base_path = "./locales"
+			# - を _ へ置き換える
+			lang = lang_code.replace("-", "_")
+			# 言語ファイルのパス
+			lang_file_path = Path(lang_file_base_path) / lang / ".json"
+			# 対象の言語ファイルが存在するかチェック
+			if not Path(lang_file_path).exists():
+				# ファイルが存在しない場合は英語 (en_GB) のファイルを読み込むようにする (フォールバック
+				logger.info("- %s -> en_GB (フォールバック)", lang)
+				lang_file_path = Path(lang_file_base_path) / "en_GB.json"
+			else:
+				logger.info("- %s", lang)
+				# 有効な言語一覧へ追加
+				cls.EXISTS_LOCALE_LIST[lang] = lang
 
-	# 言語ファイルを読み込む
-	logger.info("言語ファイルを読み込み")
-	for lang in get_args(Locale):
-		# 言語ファイルのフォルダー
-		lang_file_base_path = "./locales"
-		# - を _ へ置き換える
-		lang = lang.replace("-", "_")
-		# 言語ファイルのパス
-		lang_file_path = path.join(lang_file_base_path, lang + ".json")
-		# 対象の言語ファイルが存在するかチェック
-		if not path.exists(lang_file_path):
-			# ファイルが存在しない場合は英語 (en_GB) のファイルを読み込むようにする (フォールバック
-			logger.info("- %s -> en_GB (フォールバック)", lang)
-			lang_file_path = path.join(lang_file_base_path, "en_GB.json")
+			# 翻訳データを読み込む
+			with Path(lang_file_path).open(encoding="utf-8") as lang_file:
+				cls.LOCALE_DATA[lang] = json.loads(lang_file.read())
+
+			# 有効な言語一覧の名称を設定する
+			if lang in cls.EXISTS_LOCALE_LIST:
+				cls.EXISTS_LOCALE_LIST[lang] = cls.LOCALE_DATA[lang]["info"]["name"]
+
+		# Pycord の多言語対応用クラスのインスタンスを生成
+		cls.i18n = I18n(client, consider_user_locale=True, **cls.LOCALE_DATA)
+
+	@classmethod
+	def localize_commands(cls) -> None:
+		logger.info("コマンドの多言語化実行")
+		if cls.i18n is not None:
+			cls.i18n.localize_commands()
+			logger.info("- 完了")
 		else:
-			logger.info("- %s", lang)
-			# 有効な言語一覧へ追加
-			EXISTS_LOCALE_LIST[lang] = lang
+			logger.error("- エラー: i18n is None")
 
-		# 翻訳データを読み込む
-		with open(lang_file_path, mode="r", encoding="utf-8") as lang_file:
-			LOCALE_DATA[lang] = json.loads(lang_file.read())
+	@classmethod
+	def translate(cls, text: str, values: list | None = None, lang: str = "en_GB") -> str:
+		if values is None:
+			values = []
 
-		# 有効な言語一覧の名称を設定する
-		if lang in EXISTS_LOCALE_LIST:
-			EXISTS_LOCALE_LIST[lang] = LOCALE_DATA[lang]["info"]["name"]
+		try:
+			if cls.LOCALE_DATA:
+				return cls.LOCALE_DATA[lang]["strings"][text].format(values)
+		except KeyError as e:
+			logger.error("Translate Error - KeyError: %s", str(e))
+			return text
 
-	i18n = I18n(
-		client,
-		consider_user_locale=True,
-		**LOCALE_DATA
-	)
-
-def translate(text: str, values: list = [], lang: str="en_GB") -> str:
-	global LOCALE_DATA
-
-	try:
-		return LOCALE_DATA[lang]["strings"][text].format(values)
-	except KeyError as e:
-		logger.error("Translate KeyError: %s", str(e))
+		logger.error("Translate Error - LOCALE_DATA is None")
 		return text
 
-_ = translate
 
-load_localedata()
+def translate(text: str, values: list | None = None, lang: str = "en_GB") -> str:
+	"""指定されたキーのテキストを取得する"""
+	if values is None:
+		values = []
+	return Localization.translate(text, values, lang)
