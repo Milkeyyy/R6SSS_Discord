@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from box import Box
 
 from client import client
@@ -9,24 +11,20 @@ from logger import logger
 class GuildConfigManager:
 	"""各ギルドのコンフィグを管理するクラス"""
 
-	DEFAULT_DB_DATA: dict
-	DEFAULT_GUILD_DATA: dict
-
-	def __init__(self) -> None:
-		self.DEFAULT_DB_DATA: dict = {"guild_id": "", "config": {}}
-		self.DEFAULT_GUILD_DATA: dict = {
-			"server_status_message": {
-				"channel_id": "0",
-				"message_id": "0",
-				"language": "en_GB",
-				"status_indicator": True,
-			},
-			"server_status_notification": {
-				"channel_id": "0",
-				"role_id": "0",
-				"auto_delete": 10,
-			},
-		}
+	DEFAULT_DB_DATA: ClassVar[dict] = {"guild_id": "", "config": {}}
+	DEFAULT_GUILD_DATA: ClassVar[dict] = {
+		"server_status_message": {
+			"channel_id": "0",
+			"message_id": "0",
+			"language": "en_GB",
+			"status_indicator": True,
+		},
+		"server_status_notification": {
+			"channel_id": "0",
+			"role_id": "0",
+			"auto_delete": 10,
+		},
+	}
 
 	@classmethod
 	def generate_default_guild_data(cls, guild_id: str | int) -> dict:

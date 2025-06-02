@@ -13,11 +13,6 @@ class Localization:
 	LOCALE_DATA: dict
 	EXISTS_LOCALE_LIST: dict
 
-	def __init__(self) -> None:
-		self.i18n = None
-		self.LOCALE_DATA = {}
-		self.EXISTS_LOCALE_LIST = {}
-
 	@classmethod
 	def load_locale_data(cls) -> None:
 		# 言語一覧

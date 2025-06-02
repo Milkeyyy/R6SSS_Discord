@@ -1,4 +1,5 @@
 import datetime
+from typing import ClassVar
 
 import r6sss
 
@@ -8,11 +9,10 @@ import status_indicator
 class ServerStatusManager:
 	"""サーバーステータスを管理するクラス"""
 
-	def __init__(self) -> None:
-		self.data: list[r6sss.types.Status] | None = []
-		self.previous_data: list = []
-		self.updated_at: int = 0
-		self.indicator = status_indicator.Unknown  # テキストチャンネルの名前に表示するステータスインジケーター(絵文字)
+	data: list[r6sss.types.Status] | None = None
+	previous_data: ClassVar[list] = []
+	updated_at: int = 0
+	indicator = status_indicator.Unknown  # テキストチャンネルの名前に表示するステータスインジケーター(絵文字)
 
 	@classmethod
 	async def get(cls) -> list[r6sss.types.Status] | None:
