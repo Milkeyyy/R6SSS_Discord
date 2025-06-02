@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import ClassVar, get_args
+from typing import get_args
 
 from pycord.i18n import I18n, Locale
 
