@@ -211,9 +211,7 @@ class ServerStatusEmbedManager(commands.Cog):
 	({msg.jump_url})\n{notif_embed.description}"
 									if len(notif_embeds) >= 1:
 										# 自動削除が有効の場合は削除までの時間を指定する
-										notif_delete_after_seconds = int(
-											gc.server_status_notification.auto_delete,
-										)
+										notif_delete_after_seconds = int(gc.server_status_notification.auto_delete)
 										if notif_delete_after_seconds > 0:
 											await notif_ch.send(
 												content=localizations.translate(

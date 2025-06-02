@@ -162,7 +162,7 @@ class SettingsCommands(commands.Cog):
 				# 自動削除の値が設定されている場合
 				if auto_delete is not None:
 					# 秒数を保存
-					gc.server_status_notification.auto_delete = auto_delete
+					gc.server_status_notification.auto_delete = int(auto_delete)
 				# 指定されていない場合はデフォルト値の10秒にする
 				else:
 					gc.server_status_notification.auto_delete = 10
@@ -179,14 +179,14 @@ class SettingsCommands(commands.Cog):
 				# 自動削除の項目
 				success_embed.add_field(
 					name=_("Cmd_setnotification_AutoDelete"),
-					value=_("False") if auto_delete == 0 else _("Cmd_setnotification_AutoDelete_Seconds", auto_delete),
+					value=_("False") if int(auto_delete) == 0 else _("Cmd_setnotification_AutoDelete_Seconds", auto_delete),
 				)
 
 			# 無効化
 			else:
 				gc.server_status_notification.channel_id = "0"
 				gc.server_status_notification.role_id = "0"
-				gc.server_status_notification.auto_delete = "0"
+				gc.server_status_notification.auto_delete = 0
 
 			# ギルドコンフィグを更新
 			if not (await GuildConfigManager.update(ctx.guild.id, gc)):
@@ -201,7 +201,7 @@ class SettingsCommands(commands.Cog):
 			if gc is not None:
 				gc.server_status_notification.channel_id = "0"
 				gc.server_status_notification.role_id = "0"
-				gc.server_status_notification.auto_delete = "0"
+				gc.server_status_notification.auto_delete = 0
 				await GuildConfigManager.update(ctx.guild.id, gc)
 			logger.error(traceback.format_exc())
 			await ctx.send_followup(embed=embeds.Notification.internal_error())
@@ -259,13 +259,13 @@ class SettingsCommands(commands.Cog):
 					notif_role_text = f"`{_('False')}`"
 				notif_settings_text += f"\n> `{_('Cmd_setnotification_Mention')}`: {notif_role_text}"
 				# 自動削除
-				if gc.server_status_notification.auto_delete != 0:
+				if int(gc.server_status_notification.auto_delete) == 0:
+					notif_ad_text = f"`{_('False')}`"
+				else:
 					notif_ad_text = _(
 						"Cmd_setnotification_AutoDelete_Seconds",
 						gc.server_status_notification.auto_delete,
 					)
-				else:
-					notif_ad_text = f"`{_('False')}`"
 				notif_settings_text += f"\n> `{_('Cmd_setnotification_AutoDelete')}`: {notif_ad_text}"
 			else:
 				# 無効
