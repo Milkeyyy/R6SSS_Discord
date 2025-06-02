@@ -141,7 +141,7 @@ async def status(ctx: discord.ApplicationContext) -> None:
 	try:
 		# ギルドコンフィグを取得する
 		gc = await GuildConfigManager.get(ctx.guild.id)
-		if not gc:
+		if gc is None:
 			await ctx.send_followup(
 				embed=embeds.Notification.internal_error(
 					description=_("CmdMsg_FailedToGetConfig"),
@@ -152,22 +152,16 @@ async def status(ctx: discord.ApplicationContext) -> None:
 		# サーバーステータスを取得する
 		status_data = ServerStatusManager.data
 		# 取得できなかった場合 (None) はエラーメッセージを返す
-		if not status_data:
+		if status_data is None:
 			await ctx.send_followup(
 				embed=embeds.Notification.internal_error(
 					description=_("CmdMsg_FailedToGetServerStatus"),
 				),
 			)
+			return
 
 		# メンテナンススケジュールを取得する
 		schedule_data = MaintenanceScheduleManager.schedule
-		# 取得できなかった場合 (None) はエラーメッセージを返す
-		if not schedule_data:
-			await ctx.send_followup(
-				embed=embeds.Notification.internal_error(
-					description=_("CmdMsg_FailedToGetMaintenanceSchedule"),
-				),
-			)
 
 		# 埋め込みメッセージを生成して送信する
 		await ctx.send_followup(
@@ -196,7 +190,7 @@ async def create(
 	try:
 		# ギルドコンフィグを取得する
 		gc = await GuildConfigManager.get(ctx.guild.id)
-		if not gc:
+		if gc is None:
 			await ctx.send_followup(
 				embed=embeds.Notification.internal_error(
 					description=_("CmdMsg_FailedToGetConfig"),
@@ -217,7 +211,7 @@ async def create(
 			# サーバーステータスを取得する
 			status_data = ServerStatusManager.data
 			# 取得できなかった場合 (None) はエラーメッセージを返す
-			if not status_data:
+			if status_data is None:
 				await ctx.send_followup(
 					embed=embeds.Notification.internal_error(
 						description=_("CmdMsg_FailedToGetServerStatus"),
@@ -226,13 +220,6 @@ async def create(
 
 			# メンテナンススケジュールを取得する
 			schedule_data = MaintenanceScheduleManager.schedule
-			# 取得できなかった場合 (None) はエラーメッセージを返す
-			if not schedule_data:
-				await ctx.send_followup(
-					embed=embeds.Notification.internal_error(
-						description=_("CmdMsg_FailedToGetMaintenanceSchedule"),
-					),
-				)
 
 			# サーバーステータス埋め込みメッセージ生成してを送信する (作成)
 			msg = await ch.send(
@@ -248,6 +235,7 @@ async def create(
 			gc.server_status_message.message_id = str(msg.id)
 			# ギルドコンフィグを保存
 			await GuildConfigManager.update(ctx.guild.id, gc)
+
 		except Exception as e:
 			# 権限エラー
 			if isinstance(e, discord.errors.ApplicationCommandInvokeError) and str(
@@ -266,12 +254,13 @@ async def create(
 				logger.error(traceback.format_exc())
 				await ctx.send_followup(embed=embeds.Notification.internal_error())
 			return
-
-		await ctx.send_followup(
-			embed=embeds.Notification.success(
-				description=_("Cmd_create_Success", ch.mention) + additional_msg,
-			),
-		)
+		else:
+			# 作成成功メッセージを送信する
+			await ctx.send_followup(
+				embed=embeds.Notification.success(
+					description=_("Cmd_create_Success", ch.mention) + additional_msg,
+				),
+			)
 	except Exception:
 		# 設定をリセット
 		if gc:
