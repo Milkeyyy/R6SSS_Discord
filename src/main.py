@@ -415,7 +415,7 @@ async def synccommands(ctx: discord.ApplicationContext) -> None:
 # ログイン
 try:
 	# .envファイルが存在する場合はファイルから環境変数を読み込む
-	env_path = Path.joinpath(Path.cwd(), ".env")
+	env_path = Path(Path.cwd()) / ".env"
 	if Path.is_file(env_path):
 		try:
 			load_dotenv(env_path)
