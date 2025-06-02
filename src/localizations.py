@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import get_args
+from typing import ClassVar, get_args
 
 from pycord.i18n import I18n, Locale
 
@@ -27,7 +27,7 @@ class Localization:
 			# - を _ へ置き換える
 			lang = lang_code.replace("-", "_")
 			# 言語ファイルのパス
-			lang_file_path = Path(lang_file_base_path) / lang / ".json"
+			lang_file_path = Path(lang_file_base_path) / (lang + ".json")
 			# 対象の言語ファイルが存在するかチェック
 			if not Path(lang_file_path).exists():
 				# ファイルが存在しない場合は英語 (en_GB) のファイルを読み込むようにする (フォールバック
