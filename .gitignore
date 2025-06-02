@@ -1,4 +1,4 @@
-.vscode/launch.json
+_dev_files/*
 guild.json
 guilds*.json
 token*.txt
