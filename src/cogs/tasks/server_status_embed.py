@@ -274,3 +274,7 @@ class ServerStatusEmbedManager(commands.Cog):
 		await self.bot.wait_until_ready()
 		logger.info("- クライアントの準備完了")
 		logger.info("定期更新開始")
+
+
+def setup(bot: discord.Bot) -> None:
+	bot.add_cog(ServerStatusEmbedManager(bot))
