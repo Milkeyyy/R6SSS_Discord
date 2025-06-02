@@ -1,6 +1,6 @@
-from os import getenv
 import sys
 import traceback
+from os import getenv
 
 import pymongo
 import pymongo.asynchronous.collection
@@ -19,7 +19,6 @@ class DBManager:
 	@classmethod
 	async def connect(cls) -> None:
 		"""データベースへ接続する"""
-
 		try:
 			# データベース情報が設定されているかチェックする
 			db_uri = getenv("DB_URI")

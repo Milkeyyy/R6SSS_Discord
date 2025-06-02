@@ -5,16 +5,15 @@ from discord.commands import Option, OptionChoice
 from discord.ext import commands
 from pycord.i18n import _
 
+import embeds
 from client import client
 from config import GuildConfigManager
-import embeds
-import localizations
-from localizations import EXISTS_LOCALE_LIST
+from localizations import Localization
 from logger import logger
 
 
 class SettingsCommands(commands.Cog):
-	def __init__(self, bot) -> None:
+	def __init__(self, bot: discord.Bot) -> None:
 		self.bot = bot
 
 	@commands.slash_command()
@@ -27,7 +26,7 @@ class SettingsCommands(commands.Cog):
 		locale: Option(
 			str,
 			choices=[
-				OptionChoice(_n, _l) for _l, _n in EXISTS_LOCALE_LIST.items()
+				OptionChoice(_n, _l) for _l, _n in Localization.EXISTS_LOCALE_LIST.items()
 			],  # 選択可能言語リストから選択肢のリストを生成
 		),  # pyright: ignore[reportInvalidTypeForm]
 	) -> None:
@@ -38,14 +37,10 @@ class SettingsCommands(commands.Cog):
 			# ギルドコンフィグを取得する
 			gc = await GuildConfigManager.get(ctx.guild.id)
 			if not gc:
-				await ctx.send_followup(
-					embed=embeds.Notification.internal_error(
-						description=_("CmdMsg_FailedToGetConfig")
-					)
-				)
+				await ctx.send_followup(embed=embeds.Notification.internal_error(description=_("CmdMsg_FailedToGetConfig")))
 				return
 
-			if locale in localizations.LOCALE_DATA:
+			if locale in Localization.LOCALE_DATA:
 				gc.server_status_message.language = locale
 			else:
 				gc.server_status_message.language = "en_GB"
@@ -53,18 +48,14 @@ class SettingsCommands(commands.Cog):
 			# ギルドコンフィグを更新
 			if not (await GuildConfigManager.update(ctx.guild.id, gc)):
 				# コンフィグの更新に失敗した場合はエラーメッセージを返す
-				await ctx.send_followup(
-					embed=embeds.Notification.error(
-						description=_("CmdMsg_FailedToUpdateConfig")
-					)
-				)
+				await ctx.send_followup(embed=embeds.Notification.error(description=_("CmdMsg_FailedToUpdateConfig")))
 				return
 
 			await ctx.send_followup(
 				embed=embeds.Notification.success(
 					description=_(
 						"Cmd_setlanguage_Success",
-						EXISTS_LOCALE_LIST.get(gc.server_status_message.language),
+						Localization.EXISTS_LOCALE_LIST.get(gc.server_status_message.language),
 						gc.server_status_message.language,
 					)
 				)
@@ -93,11 +84,7 @@ class SettingsCommands(commands.Cog):
 			# ギルドコンフィグを取得する
 			gc = await GuildConfigManager.get(ctx.guild.id)
 			if not gc:
-				await ctx.send_followup(
-					embed=embeds.Notification.internal_error(
-						description=_("CmdMsg_FailedToGetConfig")
-					)
-				)
+				await ctx.send_followup(embed=embeds.Notification.internal_error(description=_("CmdMsg_FailedToGetConfig")))
 				return
 
 			gc.server_status_message.status_indicator = enable
@@ -105,18 +92,10 @@ class SettingsCommands(commands.Cog):
 			# ギルドコンフィグを更新
 			if not (await GuildConfigManager.update(ctx.guild.id, gc)):
 				# コンフィグの更新に失敗した場合はエラーメッセージを返す
-				await ctx.send_followup(
-					embed=embeds.Notification.error(
-						description=_("CmdMsg_FailedToUpdateConfig")
-					)
-				)
+				await ctx.send_followup(embed=embeds.Notification.error(description=_("CmdMsg_FailedToUpdateConfig")))
 				return
 
-			await ctx.send_followup(
-				embed=embeds.Notification.success(
-					description=_("Cmd_setindicator_Success", _(str(enable)))
-				)
-			)
+			await ctx.send_followup(embed=embeds.Notification.success(description=_("Cmd_setindicator_Success", _(str(enable)))))
 		except Exception:
 			# 設定をリセット
 			if gc is not None:
@@ -135,49 +114,35 @@ class SettingsCommands(commands.Cog):
 		enable: Option(bool, required=True),  # pyright: ignore[reportInvalidTypeForm]
 		channel: Option(discord.TextChannel, required=False),  # pyright: ignore[reportInvalidTypeForm]
 		role: Option(discord.Role, required=False),  # pyright: ignore[reportInvalidTypeForm]
-		auto_delete: Option(
-			int, required=False, default=10, min_value=0, max_value=600
-		),  # pyright: ignore[reportInvalidTypeForm]
+		auto_delete: Option(int, required=False, default=10, min_value=0, max_value=600),  # pyright: ignore[reportInvalidTypeForm]
 	) -> None:
 		await ctx.defer(ephemeral=True)
 
 		gc = None
 		try:
+			# 設定完了埋め込みメッセージを生成
+			success_embed = embeds.Notification.success(description=_("Cmd_setnotification_Success", _(str(enable))))
+
 			# ギルドコンフィグを取得する
 			gc = await GuildConfigManager.get(ctx.guild.id)
 			if not gc:
-				await ctx.send_followup(
-					embed=embeds.Notification.internal_error(
-						description=_("CmdMsg_FailedToGetConfig")
-					)
-				)
+				await ctx.send_followup(embed=embeds.Notification.internal_error(description=_("CmdMsg_FailedToGetConfig")))
 				return
 
 			# 有効化
 			if enable:
 				# チャンネルが指定されていない場合はコマンドが実行されたチャンネルにする
-				if channel is None:
-					ch_id = ctx.channel_id
-				else:
-					ch_id = channel.id
+				ch_id = ctx.channel_id if channel is None else channel.id
 
 				# 指定されたチャンネルが存在するかチェックする
 				ch = client.get_channel(ch_id)
 				# 見つからない場合はエラーメッセージを送信する
 				if not ch:
-					await ctx.send_followup(
-						embed=embeds.Notification.error(
-							description=_("CmdMsg_TextChannelNotFound")
-						)
-					)
+					await ctx.send_followup(embed=embeds.Notification.error(description=_("CmdMsg_TextChannelNotFound")))
 					return
 				# メッセージを送信する権限がない場合もエラーメッセージを送信する
 				if not ch.can_send():
-					await ctx.send_followup(
-						embed=embeds.Notification.error(
-							description=_("CmdMsg_DontHavePermission_SendMessage")
-						)
-					)
+					await ctx.send_followup(embed=embeds.Notification.error(description=_("CmdMsg_DontHavePermission_SendMessage")))
 					return
 
 				# ロールが指定されている場合
@@ -185,13 +150,7 @@ class SettingsCommands(commands.Cog):
 					# 指定されたロールがメンション可能かチェックする
 					# メンションができない場合はエラーメッセージを送信する
 					if not role.mentionable:
-						await ctx.send_followup(
-							embed=embeds.Notification.error(
-								description=_(
-									"Cmd_setnotification_RoleIsNotMentionable"
-								)
-							)
-						)
+						await ctx.send_followup(embed=embeds.Notification.error(description=_("Cmd_setnotification_RoleIsNotMentionable")))
 						return
 					# 指定されたロールのIDを保存
 					gc.server_status_notification.role_id = str(role.id)
@@ -211,6 +170,18 @@ class SettingsCommands(commands.Cog):
 				# 指定されたチャンネルのIDを保存
 				gc.server_status_notification.channel_id = str(ch_id)
 
+				# 設定完了埋め込みメッセージに項目を追加する
+				# テキストチャンネルの項目
+				success_embed.add_field(name=_("Cmd_setnotification_Channel"), value=ch.mention)
+				# メンションが有効かどうかの項目
+				mention_settings_text = role.mention if role else _("False")
+				success_embed.add_field(name=_("Cmd_setnotification_Mention"), value=mention_settings_text)
+				# 自動削除の項目
+				success_embed.add_field(
+					name=_("Cmd_setnotification_AutoDelete"),
+					value=_("False") if auto_delete == 0 else _("Cmd_setnotification_AutoDelete_Seconds", auto_delete),
+				)
+
 			# 無効化
 			else:
 				gc.server_status_notification.channel_id = "0"
@@ -220,37 +191,9 @@ class SettingsCommands(commands.Cog):
 			# ギルドコンフィグを更新
 			if not (await GuildConfigManager.update(ctx.guild.id, gc)):
 				# コンフィグの更新に失敗した場合はエラーメッセージを返す
-				await ctx.send_followup(
-					embed=embeds.Notification.error(
-						description=_("CmdMsg_FailedToUpdateConfig")
-					)
-				)
+				await ctx.send_followup(embed=embeds.Notification.error(description=_("CmdMsg_FailedToUpdateConfig")))
 				return
 
-			# 設定完了メッセージを送信する
-			success_embed = embeds.Notification.success(
-				description=_("Cmd_setnotification_Success", _(str(enable)))
-			)
-			if enable:
-				# テキストチャンネルの項目
-				success_embed.add_field(
-					name=_("Cmd_setnotification_Channel"), value=ch.mention
-				)
-				# メンションが有効かどうかの項目
-				if role:
-					mention_settings_text = role.mention
-				else:
-					mention_settings_text = _("False")
-				success_embed.add_field(
-					name=_("Cmd_setnotification_Mention"), value=mention_settings_text
-				)
-				# 自動削除の項目
-				success_embed.add_field(
-					name=_("Cmd_setnotification_AutoDelete"),
-					value=_("False")
-					if auto_delete == 0
-					else _("Cmd_setnotification_AutoDelete_Seconds", auto_delete),
-				)
 			await ctx.send_followup(embed=success_embed)
 		# 例外発生時
 		except Exception:
@@ -267,7 +210,7 @@ class SettingsCommands(commands.Cog):
 	@discord.guild_only()
 	@discord.default_permissions(administrator=True)
 	@commands.cooldown(2, 5)
-	async def viewsettings(self, ctx: discord.ApplicationContext):
+	async def viewsettings(self, ctx: discord.ApplicationContext) -> None:
 		await ctx.defer(ephemeral=True)
 
 		gc = None
@@ -275,23 +218,15 @@ class SettingsCommands(commands.Cog):
 			# ギルドコンフィグを取得する
 			gc = await GuildConfigManager.get(ctx.guild.id)
 			if not gc:
-				await ctx.send_followup(
-					embed=embeds.Notification.internal_error(
-						description=_("CmdMsg_FailedToGetConfig")
-					)
-				)
+				await ctx.send_followup(embed=embeds.Notification.internal_error(description=_("CmdMsg_FailedToGetConfig")))
 				return
 
 			# 埋め込みメッセージを生成
-			embed = discord.Embed(
-				title=":gear: " + _("Cmd_showsettings_CurrentSettings")
-			)
+			embed = discord.Embed(title=":gear: " + _("Cmd_showsettings_CurrentSettings"))
 			# 作成されたサーバーステータスメッセージ(とそのテキストチャンネル)を取得する
 			status_msg_ch = client.get_channel(int(gc.server_status_message.channel_id))
 			if status_msg_ch:
-				status_msg = await status_msg_ch.fetch_message(
-					int(gc.server_status_message.message_id)
-				)
+				status_msg = await status_msg_ch.fetch_message(int(gc.server_status_message.message_id))
 			else:
 				status_msg = None
 			embed.add_field(
@@ -308,7 +243,7 @@ class SettingsCommands(commands.Cog):
 			# 言語
 			embed.add_field(
 				name=f":globe_with_meridians: {_('Cmd_showsettings_Language')}",
-				value=f"`{EXISTS_LOCALE_LIST.get(gc.server_status_message.language)}` (`{gc.server_status_message.language}`)",
+				value=f"`{Localization.EXISTS_LOCALE_LIST.get(gc.server_status_message.language)}` (`{gc.server_status_message.language}`)",
 			)
 			# 通知
 			notif_ch = client.get_channel(int(gc.server_status_notification.channel_id))
@@ -316,17 +251,13 @@ class SettingsCommands(commands.Cog):
 				# 有効
 				notif_settings_text = f"`{_('True')}`"
 				# チャンネル
-				notif_settings_text += (
-					f"\n> `{_('Cmd_setnotification_Channel')}`: {notif_ch.mention}"
-				)
+				notif_settings_text += f"\n> `{_('Cmd_setnotification_Channel')}`: {notif_ch.mention}"
 				# ロール
 				if gc.server_status_notification.role_id != "0":
 					notif_role_text = f"<@&{gc.server_status_notification.role_id}>"
 				else:
 					notif_role_text = f"`{_('False')}`"
-				notif_settings_text += (
-					f"\n> `{_('Cmd_setnotification_Mention')}`: {notif_role_text}"
-				)
+				notif_settings_text += f"\n> `{_('Cmd_setnotification_Mention')}`: {notif_role_text}"
 				# 自動削除
 				if gc.server_status_notification.auto_delete != 0:
 					notif_ad_text = _(
@@ -335,9 +266,7 @@ class SettingsCommands(commands.Cog):
 					)
 				else:
 					notif_ad_text = f"`{_('False')}`"
-				notif_settings_text += (
-					f"\n> `{_('Cmd_setnotification_AutoDelete')}`: {notif_ad_text}"
-				)
+				notif_settings_text += f"\n> `{_('Cmd_setnotification_AutoDelete')}`: {notif_ad_text}"
 			else:
 				# 無効
 				notif_settings_text = f"`{_('False')}`"
@@ -353,5 +282,5 @@ class SettingsCommands(commands.Cog):
 			await ctx.send_followup(embed=embeds.Notification.internal_error())
 
 
-def setup(bot):
+def setup(bot: discord.Bot) -> None:
 	bot.add_cog(SettingsCommands(bot))

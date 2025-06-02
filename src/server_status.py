@@ -8,23 +8,21 @@ import status_indicator
 class ServerStatusManager:
 	"""サーバーステータスを管理するクラス"""
 
-	data: list = []
-	previous_data: list = []
-	updated_at = 0
-	indicator = (
-		status_indicator.Unknown
-	)  # テキストチャンネルの名前に表示するステータスインジケーター(絵文字)
+	def __init__(self) -> None:
+		self.data: list[r6sss.types.Status] | None = []
+		self.previous_data: list = []
+		self.updated_at: int = 0
+		self.indicator = status_indicator.Unknown  # テキストチャンネルの名前に表示するステータスインジケーター(絵文字)
 
 	@classmethod
-	async def get(cls) -> list[r6sss.Status] | None:
+	async def get(cls) -> list[r6sss.types.Status] | None:
 		"""サーバーステータスを取得して整えて返す"""
-
 		# サーバーステータスを取得
 		result = r6sss.get_server_status()
 		if result is None:
 			return None
 
-		cls.updated_at = int(datetime.datetime.now().timestamp())
+		cls.updated_at = int(datetime.datetime.now(tz=datetime.UTC).timestamp())
 
 		status_list = []
 		# ステータスインジケーターを設定

@@ -1,75 +1,70 @@
-import discord
-from pycord.i18n import _
-import r6sss
+import datetime
 
-from client import client
+import discord
+import r6sss
+from pycord.i18n import _
+
 import localizations
 import platform_icon
+import status_icon as status_icon_set
+from client import client
+from logger import logger
 from server_status import ServerStatusManager
 
 
 class Notification:
 	@classmethod
-	def success(cls, title: str = "", description: str = ""):
+	def success(cls, title: str = "", description: str = "") -> discord.Embed:
 		"""成功時用埋め込みメッセージ"""
-
 		if title == "":
 			title = _("CmdMsg_Success")
 
-		embed = discord.Embed(
+		return discord.Embed(
 			title=":white_check_mark: " + title,
 			description=description,
 			colour=discord.Colour.from_rgb(140, 176, 91),
 		)
-		return embed
 
 	@classmethod
-	def warning(cls, title: str = "", description: str = ""):
+	def warning(cls, title: str = "", description: str = "") -> discord.Embed:
 		"""警告用埋め込みメッセージ"""
-
 		if title == "":
 			title = _("CmdMsg_Warning")
 
-		embed = discord.Embed(
+		return discord.Embed(
 			title=":warning: " + title,
 			description=description,
 			colour=discord.Colour.from_rgb(228, 146, 16),
 		)
-		return embed
 
 	@classmethod
-	def error(cls, title: str = "", description: str = ""):
+	def error(cls, title: str = "", description: str = "") -> discord.Embed:
 		"""エラー発生時用埋め込みメッセージ"""
-
 		if title == "":
 			title = _("CmdMsg_ExcutionError")
 
-		embed = discord.Embed(
+		return discord.Embed(
 			title=":no_entry_sign: " + title,
 			description=description,
 			colour=discord.Colour.from_rgb(247, 206, 80),
 		)
-		return embed
 
 	@classmethod
-	def internal_error(cls, description: str | None = None):
+	def internal_error(cls, description: str | None = None) -> discord.Embed:
 		"""内部エラー発生時用埋め込みメッセージ"""
-
-		embed = discord.Embed(
+		return discord.Embed(
 			title=":closed_book: " + _("CmdMsg_InternalError"),
-			description=description
-			if description
-			else _("CmdMsg_InternalError_Description"),
+			description=description if description else _("CmdMsg_InternalError_Description"),
 			colour=discord.Colour.from_rgb(205, 61, 66),
 		)
-		return embed
 
 	@classmethod
 	def get_by_comparison_result(
-		cls, result: r6sss.ComparisonResult, lang: str
+		cls,
+		result: r6sss.comparison.ComparisonResult,
+		lang: str,
 	) -> discord.Embed | None:
 		"""サーバーステータスの比較結果から通知用のEmbedを生成する"""
-
 		if ServerStatusManager.data is None or client.user is None:
 			return None
 
@@ -80,24 +75,21 @@ class Notification:
 		embed_author = None
 
 		# 影響を受ける機能の名称を翻訳する
-		impacted_features_list = [
-			localizations.translate("Status_" + f, lang=lang)
-			for f in result.impacted_features
-		]
+		impacted_features_list = [localizations.translate("Status_" + f, lang=lang) for f in result.impacted_features]
 
 		# 対象プラットフォームの一覧テキストを生成
 		# 全プラットフォームの場合は専用のテキストにする
 		if {p.platform for p in ServerStatusManager.data}.issubset(
-			set(result.platforms)
+			set(result.platforms),
 		):
 			target_platforms_text = localizations.translate("Platform_All", lang=lang)
 		else:
 			target_platforms_text = "- " + "\n- ".join(
-				[platform_icon.LIST[p.name] + " " + p.name for p in result.platforms]
+				[platform_icon.LIST[p.name] + " " + p.name for p in result.platforms],
 			)
 
 		# メンテナンス開始
-		if result.detail == r6sss.ComparisonDetail.START_MAINTENANCE:
+		if result.detail == r6sss.comparison.ComparisonDetail.START_MAINTENANCE:
 			embed = discord.Embed(
 				color=discord.Colour.light_grey(),
 				title=localizations.translate("Title_Maintenance_Start", lang=lang),
@@ -105,7 +97,7 @@ class Notification:
 				author=embed_author,
 			)
 		# メンテナンス終了
-		elif result.detail == r6sss.ComparisonDetail.END_MAINTENANCE:
+		elif result.detail == r6sss.comparison.ComparisonDetail.END_MAINTENANCE:
 			embed = discord.Embed(
 				color=discord.Colour.light_grey(),
 				title=localizations.translate("Title_Maintenance_End", lang=lang),
@@ -116,23 +108,25 @@ class Notification:
 		# TODO: 計画メンテナンス開始/終了の場合の処理を実装する
 
 		# すべての機能の問題が解消
-		elif result.detail == r6sss.ComparisonDetail.ALL_FEATURES_OUTAGE_RESOLVED:
+		elif result.detail == r6sss.comparison.ComparisonDetail.ALL_FEATURES_OUTAGE_RESOLVED:
 			embed = discord.Embed(
 				color=discord.Colour.green(),
 				title=localizations.translate(
-					"Title_AllFeaturesOutageResolved", lang=lang
+					"Title_AllFeaturesOutageResolved",
+					lang=lang,
 				),
 				# description="**" + localizations.translate("TargetPlatform", lang=lang) + ": " + target_platforms_text + "**",
 				author=embed_author,
 			)
 			embed.add_field(
 				name=localizations.translate(
-					"Detail_ImpactedFeatures_After", lang=lang
+					"Detail_ImpactedFeatures_After",
+					lang=lang,
 				),
 				value="- " + "\n- ".join(result.resolved_impacted_features),
 			)
 		# すべての機能で問題が発生中
-		elif result.detail == r6sss.ComparisonDetail.ALL_FEATURES_OUTAGE:
+		elif result.detail == r6sss.comparison.ComparisonDetail.ALL_FEATURES_OUTAGE:
 			embed = discord.Embed(
 				color=discord.Colour.red(),
 				title=localizations.translate("Title_AllFeaturesOutage", lang=lang),
@@ -144,7 +138,7 @@ class Notification:
 				value="- " + "\n- ".join(impacted_features_list),
 			)
 		# 一部の機能で問題が発生中
-		elif result.detail == r6sss.ComparisonDetail.SOME_FEATURES_OUTAGE:
+		elif result.detail == r6sss.comparison.ComparisonDetail.SOME_FEATURES_OUTAGE:
 			embed = discord.Embed(
 				color=discord.Colour.yellow(),
 				title=localizations.translate("Title_SomeFeaturesOutage", lang=lang),
@@ -156,11 +150,12 @@ class Notification:
 				value="- " + "\n- ".join(impacted_features_list),
 			)
 		# 一部の機能で問題が解消 (影響を受ける機能が変わった)
-		elif result.detail == r6sss.ComparisonDetail.SOME_FEATURES_OUTAGE_RESOLVED:
+		elif result.detail == r6sss.comparison.ComparisonDetail.SOME_FEATURES_OUTAGE_RESOLVED:
 			embed = discord.Embed(
 				color=discord.Colour.yellow(),
 				title=localizations.translate(
-					"Title_SomeFeaturesOutageResolved", lang=lang
+					"Title_SomeFeaturesOutageResolved",
+					lang=lang,
 				),
 				# description="**" + localizations.translate("TargetPlatform", lang=lang) + ": " + target_platforms_text + "**",
 				author=embed_author,
@@ -171,7 +166,8 @@ class Notification:
 			)
 			embed.add_field(
 				name=localizations.translate(
-					"Detail_ImpactedFeatures_After", lang=lang
+					"Detail_ImpactedFeatures_After",
+					lang=lang,
 				),
 				value="- " + "\n- ".join(impacted_features_list),
 			)
@@ -183,10 +179,256 @@ class Notification:
 			embed.fields.insert(
 				0,
 				discord.EmbedField(
-					name=":video_game: "
-					+ localizations.translate("TargetPlatform", lang=lang),
+					name=":video_game: " + localizations.translate("TargetPlatform", lang=lang),
 					value=target_platforms_text,
 				),
 			)
 
 		return embed
+
+
+class ServerStatus:
+	@classmethod
+	async def generate(  # noqa: PLR0915
+		cls,
+		locale: str,
+		status_data: list[r6sss.types.Status] | None,
+		schedule_data: r6sss.types.MaintenanceSchedule | None,
+	) -> list[discord.Embed]:
+		"""サーバーステータスとメンテナンススケジュール情報から埋め込みメッセージを生成する"""
+		embed_settings = {
+			"PC": [discord.Colour.from_rgb(255, 255, 255), 2],  # 埋め込みの色, 埋め込みのスペーシング
+			"PS4": [discord.Colour.from_rgb(0, 67, 156), 0],
+			"PS5": [discord.Colour.from_rgb(0, 67, 156), 1],
+			"XB1": [discord.Colour.from_rgb(16, 124, 16), 0],
+			"XBSX": [discord.Colour.from_rgb(16, 124, 16), 1],
+		}
+
+		embeds = []
+
+		# サーバーステータスが取得できてない場合はエラーメッセージを返す
+		if status_data is None:
+			logger.error("サーバーステータス埋め込みメッセージ生成中止 - サーバーステータスが取得できていません")
+			return [
+				discord.Embed(
+					color=discord.Colour.light_grey(),
+					title=localizations.translate("Embed_Unknown_Title", lang=locale),
+					description=localizations.translate("Embed_Unknown_Desc", lang=locale),
+				),
+			]
+
+		# 各プラットフォームごとの埋め込みメッセージを作成
+		embed = discord.Embed(color=embed_settings["PC"][0])  # 色は白で固定
+		embed.title = "📶 R6S Server Status"
+		embed.description = (
+			"🕒 "
+			+ localizations.translate("Last Update", lang=locale)
+			+ ": "
+			+ f"<t:{ServerStatusManager.updated_at}:f> (<t:{ServerStatusManager.updated_at}:R>)"
+		)
+		embed.set_footer(
+			text="⚠️\n" + localizations.translate("NotAffiliatedWithOrRndorsedBy", lang=locale),
+		)
+
+		status_index = -1
+		for status in status_data:
+			status_index += 1
+
+			connectivity_text_list = []
+
+			pf_id = status.platform.name  # PC, PS4, XB1...
+			pf_display_name = status.platform.value  # プラットフォームの表示名
+
+			if pf_id.startswith("_"):
+				continue
+
+			# サーバーの状態によってアイコンを変更する
+			# 問題なし
+			if status.connectivity == "Operational":
+				status_icon = status_icon_set.OPERATIONAL
+			# 計画メンテナンス
+			elif status.connectivity == "Maintenance":
+				status_icon = status_icon_set.MAINTENANCE
+			# 想定外の問題
+			elif status.connectivity == "Interrupted":
+				status_icon = status_icon_set.INTERRUPTED
+			# 想定外の停止
+			elif status.connectivity == "Degraded":
+				status_icon = status_icon_set.DEGRADED
+			# それ以外
+			else:
+				status_icon = status_icon_set.UNKNOWN
+
+			connectivity_text = localizations.translate(status.connectivity, lang=locale)
+
+			mt_text = ""
+			if status.maintenance:
+				status_icon = status_icon_set.MAINTENANCE
+				connectivity_text = localizations.translate("Maintenance", lang=locale)
+
+			features_list = []
+			features_text = ""
+			features_status_text = ""
+			# 各サービスをループしてステータスに合わせてアイコンとテキストを設定
+			# for f, s in status[pf_id]["Status"]["Features"].items():
+			for s in [
+				("Authentication", status.authentication),
+				("Matchmaking", status.matchmaking),
+				("Purchase", status.purchase),
+			]:
+				# 通常
+				f_status_icon = status_icon_set.OPERATIONAL
+				features_status_text = localizations.translate(s[1], lang=locale)
+				# 停止
+				if s[1] != "Operational":
+					f_status_icon = status_icon_set.DEGRADED
+				# メンテナンス
+				if status.maintenance:
+					f_status_icon = status_icon_set.MAINTENANCE
+				# 不明
+				if s[1] == "Unknown":
+					f_status_icon = status_icon_set.UNKNOWN
+					features_status_text = localizations.translate("Unknown", lang=locale)
+
+				features_list.append(
+					"" + localizations.translate(s[0], lang=locale) + "\n┗ " + f_status_icon + "`" + features_status_text + "`",
+				)
+
+			features_text = "" + "\n".join(features_list)
+
+			# 埋め込みメッセージにプラットフォームのフィールドを追加
+			connectivity_text_list.append(mt_text + features_text)
+
+			# プラットフォームのステータスのフィールドを追加
+			embed.add_field(
+				name=platform_icon.LIST[status.platform.name]
+				+ " "
+				+ pf_display_name
+				+ " - "
+				+ status_icon
+				+ "**`"
+				+ connectivity_text
+				+ "`**",
+				value="\n".join(connectivity_text_list),
+			)
+			# 各プラットフォームごとに別の行にするために、リストで指定された数の空のフィールドを挿入する
+			# for _ in range(embed_settings[status.platform.value][1]):
+			# 	embed.add_field(name="", value="")
+			for _n in range(list(embed_settings.values())[status_index][1]):
+				embed.add_field(name="", value="")
+
+		# 生成した埋め込みメッセージを一覧へ追加する
+		embeds.append(embed)
+
+		# メンテナンススケジュール情報が存在しない場合はスケジュールの埋め込みメッセージを生成せずに埋め込みメッセージ一覧を返す
+		if schedule_data is None:
+			return embeds
+
+		# スケジュール埋め込みを生成
+		# platform_list = [p["Name"] for p in sched["Platforms"]]
+		pf_list_text = ""
+		platform_list = schedule_data.platforms
+
+		# タイムスタンプを整数へ変換
+		date_timestamp = int(schedule_data.date.timestamp())
+
+		# 全プラットフォーム同一
+		# if "All" in platform_list:
+		# 	# スケジュールが範囲内か判定
+		# 	if datetime.datetime.now().timestamp() >= (date_timestamp + (sched.downtime * 60)):
+		# 		create = False
+		# 	# プラットフォーム一覧テキストを生成
+		# 	pf_list_text = "・**" + localizations.translate('Platform_All', lang=locale) + "**\n"
+		# else: # プラットフォーム別
+
+		# スケジュールが範囲内か判定 範囲内であればスケジュールの埋め込みメッセージを生成する
+		if datetime.datetime.now(tz=datetime.UTC).timestamp() <= (date_timestamp + (schedule_data.downtime * 60)):
+			# TODO: プラットフォームごとに実施日時が異なる場合があるかもしれないのでそれに対応する？
+			for p in platform_list:
+				# プラットフォーム一覧テキストを生成
+				pf_list_text = (
+					pf_list_text
+					+ "- **"
+					+ platform_icon.LIST[p.name]
+					+ " "
+					+ localizations.translate(f"Platform_{p.name}", lang=locale)
+					+ "**\n"
+				)
+
+			# 埋め込みメッセージを生成
+			embed = discord.Embed(
+				colour=discord.colour.Colour.nitro_pink(),
+				title=":wrench::calendar: " + localizations.translate("MaintenanceSchedule", lang=locale),
+				description="**" + schedule_data.title + "**\n" + schedule_data.detail,
+				footer=discord.EmbedFooter(
+					"⚠️\n" + localizations.translate("MaintenanceSchedule_Notes", lang=locale),
+				),
+				fields=[
+					# ダウンタイム
+					discord.EmbedField(
+						name="**:clock3: "
+						+ localizations.translate(
+							"MaintenanceSchedule_Downtime",
+							lang=locale,
+						)
+						+ "**",
+						value="- "
+						+ str(schedule_data.downtime)
+						+ " "
+						+ localizations.translate(
+							"MaintenanceSchedule_Downtime_Minute",
+							lang=locale,
+						),
+					),
+					# 予定日時
+					discord.EmbedField(
+						name="**:calendar: "
+						+ localizations.translate(
+							"MaintenanceSchedule_ScheduledDT",
+							lang=locale,
+						)
+						+ "**",
+						value=f"- <t:{date_timestamp}:f> (<t:{date_timestamp}:R>)",
+					),
+					# 対象プラットフォーム一覧
+					discord.EmbedField(
+						name="**:video_game: "
+						+ localizations.translate(
+							"MaintenanceSchedule_TargetPlatform",
+							lang=locale,
+						)
+						+ "**",
+						value=pf_list_text,
+					),
+				],
+			)
+			# パッチノートのURLが指定されている場合は末尾にフィールドを追加する
+			if schedule_data.patchnotes.startswith(("http://", "https://")):
+				embed.fields.append(
+					discord.EmbedField(
+						name="**:notepad_spiral: "
+						+ localizations.translate(
+							"MaintenanceSchedule_PatchNotes",
+							lang=locale,
+						)
+						+ "**",
+						value=schedule_data.patchnotes,
+					),
+				)
+		# 予定されているメンテナンスがない場合の埋め込みメッセージ
+		else:
+			embed = discord.Embed(
+				colour=discord.colour.Colour.nitro_pink(),
+				title=":wrench::calendar: " + localizations.translate("MaintenanceSchedule", lang=locale),
+				description=localizations.translate(
+					"MaintenanceSchedule_NoMaintenanceScheduled",
+					lang=locale,
+				),
+				footer=discord.EmbedFooter(
+					"⚠️\n" + localizations.translate("MaintenanceSchedule_Notes", lang=locale),
+				),
+			)
+
+		# メンテナンススケジュールの埋め込みメッセージを一覧へ追加して埋め込みメッセージ一覧を返す
+		embeds.append(embed)
+		return embeds

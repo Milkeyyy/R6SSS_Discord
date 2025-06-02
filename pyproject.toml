@@ -18,5 +18,44 @@ dependencies = [
 [tool.uv.sources]
 r6sss = { git = "https://github.com/Milkeyyy/R6SSS_Python" }
 
+[tool.ruff]
+line-length = 140
+
 [tool.ruff.format]
+docstring-code-format = true
 indent-style = "tab"
+
+[tool.ruff.lint]
+select = ["ALL"]
+# 無視するルール
+ignore = [
+    "BLE001", # キャッチする例外が明示されていない
+    "COM812", # 末尾にカンマがない
+    "FIX002", # TODO がある
+    "ERA001", # コメントアウトされたコード
+    "D1",    # docstring が存在しない
+    "D203",  # docstring の前に空白行がない
+    "D206", # docstring にタブによるインデントが使用されている
+    "D213",  # docstring の最初の行が空白行ではない
+    "D400", # docstring の最初の行の末尾が句読点で終わっていない
+    "D415", # 同上 (クエスチョンマークなども含む)
+    "INP001", # __init__.py ファイルが欠けているパッケージあり
+    "RUF001", # あいまいな Unicode 文字の文字列
+    "RUF003", # あいまいな Unicode 文字のコメント
+    "SIM105", # try-except-pass ブロックを contextlib.suppress コンテキストマネージャーに置き換え
+    "TD001", # invalid todo tag
+    "TD002", # missing todo author
+    "TD003", # missing todo link
+    "W191", # インデントがタブになっている
+]
+unfixable = [
+    "F401", # unused import
+    "F841", # unused variable
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 25
+
+[tool.ruff.lint.pylint]
+max-args = 6
+max-branches = 25

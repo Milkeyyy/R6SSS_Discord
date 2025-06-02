@@ -1,8 +1,6 @@
 import os
-import subprocess
 
 from discord import Bot
-
 
 NAME = "R6SSS"
 VERSION = "2.0.0"
@@ -21,23 +19,10 @@ DEVELOPER_TWITTER_URL = "https://twitter.com/Milkeyyy_53"
 intents = None
 client = Bot(intents=intents)
 
-_git_commit_hash = None
-
 
 def get_git_commit_hash() -> str:
-	global _git_commit_hash
-	try:
-		if _git_commit_hash:
-			return _git_commit_hash
-		cwd = os.path.dirname(os.path.abspath(__file__))
-		out = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], cwd=cwd)
-		_git_commit_hash = out.strip().decode("ascii")
-		return _git_commit_hash
-	except Exception:
-		# Coolify
-		hash = os.getenv("SOURCE_COMMIT")
-		if hash:
-			_git_commit_hash = hash
-			return _git_commit_hash
-		_git_commit_hash = "Unknown"
-	return _git_commit_hash
+	# Coolify
+	commit_hash = os.getenv("SOURCE_COMMIT")
+	if commit_hash is None or commit_hash == "":
+		commit_hash = "Unknown"
+	return commit_hash

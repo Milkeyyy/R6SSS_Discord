@@ -9,7 +9,7 @@ class KumaSan:
 	cl = httpx.AsyncClient()
 
 	@classmethod
-	async def ping(cls, state: str = "up", message: str = "OK", ping="") -> None:
+	async def ping(cls, state: str = "up", message: str = "OK", ping: str = "") -> None:
 		base_url = getenv("UPTIME_KUMA_PUSH_URL")
 		if not base_url:
 			logger.warning("UPTIME_KUMA_PUSH_URL is not set")
