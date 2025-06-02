@@ -159,8 +159,8 @@ class ServerStatusEmbedManager:
 		self.server_status_update_loop_is_running = False
 
 	# 2分毎にサーバーステータスを更新する
+	@tasks.loop(minutes=2)
 	@classmethod
-	@tasks.loop(seconds=120.0)
 	async def update_server_status(cls) -> None:  # noqa: PLR0915
 		cls.server_status_update_loop_is_running = True
 
@@ -398,8 +398,8 @@ class ServerStatusEmbedManager:
 
 		await KumaSan.ping(state="up", message="サーバーステータスの更新完了")
 
-	@classmethod
 	@update_server_status.after_loop
+	@classmethod
 	async def after_update_server_status(cls) -> None:
 		cls.server_status_update_loop_is_running = False
 		logger.info("サーバーステータスの定期更新終了")
