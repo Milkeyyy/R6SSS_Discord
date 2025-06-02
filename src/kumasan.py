@@ -11,7 +11,7 @@ class KumaSan:
 	@classmethod
 	async def ping(cls, state: str = "up", message: str = "OK", ping: str = "") -> None:
 		base_url = getenv("UPTIME_KUMA_PUSH_URL")
-		if not base_url:
+		if base_url is None:
 			logger.warning("UPTIME_KUMA_PUSH_URL is not set")
 			return
 		result = None

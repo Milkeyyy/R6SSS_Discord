@@ -36,7 +36,7 @@ class SettingsCommands(commands.Cog):
 		try:
 			# ギルドコンフィグを取得する
 			gc = await GuildConfigManager.get(ctx.guild.id)
-			if not gc:
+			if gc is None:
 				await ctx.send_followup(embed=embeds.Notification.internal_error(description=_("CmdMsg_FailedToGetConfig")))
 				return
 
@@ -83,7 +83,7 @@ class SettingsCommands(commands.Cog):
 		try:
 			# ギルドコンフィグを取得する
 			gc = await GuildConfigManager.get(ctx.guild.id)
-			if not gc:
+			if gc is None:
 				await ctx.send_followup(embed=embeds.Notification.internal_error(description=_("CmdMsg_FailedToGetConfig")))
 				return
 
@@ -125,7 +125,7 @@ class SettingsCommands(commands.Cog):
 
 			# ギルドコンフィグを取得する
 			gc = await GuildConfigManager.get(ctx.guild.id)
-			if not gc:
+			if gc is None:
 				await ctx.send_followup(embed=embeds.Notification.internal_error(description=_("CmdMsg_FailedToGetConfig")))
 				return
 
@@ -137,7 +137,7 @@ class SettingsCommands(commands.Cog):
 				# 指定されたチャンネルが存在するかチェックする
 				ch = client.get_channel(ch_id)
 				# 見つからない場合はエラーメッセージを送信する
-				if not ch:
+				if ch is None:
 					await ctx.send_followup(embed=embeds.Notification.error(description=_("CmdMsg_TextChannelNotFound")))
 					return
 				# メッセージを送信する権限がない場合もエラーメッセージを送信する
@@ -217,7 +217,7 @@ class SettingsCommands(commands.Cog):
 		try:
 			# ギルドコンフィグを取得する
 			gc = await GuildConfigManager.get(ctx.guild.id)
-			if not gc:
+			if gc is None:
 				await ctx.send_followup(embed=embeds.Notification.internal_error(description=_("CmdMsg_FailedToGetConfig")))
 				return
 
@@ -247,7 +247,7 @@ class SettingsCommands(commands.Cog):
 			)
 			# 通知
 			notif_ch = client.get_channel(int(gc.server_status_notification.channel_id))
-			if notif_ch:
+			if notif_ch is not None:
 				# 有効
 				notif_settings_text = f"`{_('True')}`"
 				# チャンネル

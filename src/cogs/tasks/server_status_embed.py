@@ -50,7 +50,7 @@ class ServerStatusEmbedManager(commands.Cog):
 					# データベースからギルドコンフィグを取得する
 					gc = await GuildConfigManager.get(guild.id)
 					# 取得できなかった場合はスキップする
-					if not gc:
+					if gc is None:
 						logger.warning("更新スキップ: ギルドデータ (%s) の取得失敗", guild.name)
 						continue
 					ch_id = int(gc.server_status_message.channel_id)

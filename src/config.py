@@ -123,7 +123,7 @@ class GuildConfigManager:
 				await KumaSan.ping("pending", "ギルドコンフィグの取得失敗: obj is None")
 				return None
 
-		if not obj.get("config"):
+		if obj.get("config") is None:
 			logger.warning("ギルドコンフィグの取得失敗: config is None")
 			await KumaSan.ping("pending", "ギルドコンフィグの取得失敗: config is None")
 			return None
