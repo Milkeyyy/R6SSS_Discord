@@ -10,7 +10,7 @@ class ServerStatusManager:
 	"""サーバーステータスを管理するクラス"""
 
 	data: list[r6sss.types.Status] | None = None
-	previous_data: ClassVar[list] | None = None
+	previous_data: list[r6sss.types.Status] | None = None
 	updated_at: int = 0
 	indicator = status_indicator.Unknown  # テキストチャンネルの名前に表示するステータスインジケーター(絵文字)
 
