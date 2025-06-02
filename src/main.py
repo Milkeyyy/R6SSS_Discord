@@ -157,9 +157,6 @@ async def on_application_command_error(
 class ServerStatusEmbedManager:
 	server_status_update_loop_is_running: bool
 
-	def __init__(self) -> None:
-		self.server_status_update_loop_is_running = False
-
 	# 2分毎にサーバーステータスを更新する
 	@tasks.loop(minutes=2)
 	async def update_server_status(self) -> None:  # noqa: PLR0915
