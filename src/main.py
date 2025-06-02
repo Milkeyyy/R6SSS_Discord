@@ -160,9 +160,8 @@ class ServerStatusEmbedManager:
 
 	# 2分毎にサーバーステータスを更新する
 	@tasks.loop(minutes=2)
-	@classmethod
-	async def update_server_status(cls) -> None:  # noqa: PLR0915
-		cls.server_status_update_loop_is_running = True
+	async def update_server_status(self) -> None:  # noqa: PLR0915
+		self.server_status_update_loop_is_running = True
 
 		# Heartbeatイベントを送信 (サーバーステータスの更新が開始されたことを報告)
 		await KumaSan.ping(state="up", message="サーバーステータスの更新開始")
@@ -399,12 +398,11 @@ class ServerStatusEmbedManager:
 		await KumaSan.ping(state="up", message="サーバーステータスの更新完了")
 
 	@update_server_status.after_loop
-	@classmethod
-	async def after_update_server_status(cls) -> None:
-		cls.server_status_update_loop_is_running = False
+	async def after_update_server_status(self) -> None:
+		self.server_status_update_loop_is_running = False
 		logger.info("サーバーステータスの定期更新終了")
-		if not cls.server_status_update_loop_is_running:
-			cls.update_server_status.start()
+		if not self.server_status_update_loop_is_running:
+			self.update_server_status.start()
 
 
 # コマンド
