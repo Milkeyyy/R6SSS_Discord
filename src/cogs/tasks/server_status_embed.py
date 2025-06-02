@@ -209,7 +209,7 @@ class ServerStatusEmbedManager(commands.Cog):
 											notif_embed.description = f"\
 	[**💬 {localizations.translate('Notification_Show_Server_Status', lang=lang)}**]\
 	({msg.jump_url})\n{notif_embed.description}"
-									if notif_embeds:
+									if len(notif_embeds) >= 1:
 										# 自動削除が有効の場合は削除までの時間を指定する
 										notif_delete_after_seconds = int(
 											gc.server_status_notification.auto_delete,

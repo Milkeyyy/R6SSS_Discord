@@ -39,7 +39,7 @@ class KumaSan:
 				message,
 				ping,
 			)
-			if result:
+			if result is not None:
 				logger.warning(
 					"- Status code: %s / Elapsed time: %ds",
 					result.status_code,

@@ -263,7 +263,7 @@ async def create(
 			)
 	except Exception:
 		# 設定をリセット
-		if gc:
+		if gc is not None:
 			gc.server_status_message.channel_id = "0"
 			gc.server_status_message.message_id = "0"
 			await GuildConfigManager.update(ctx.guild.id, gc)

@@ -146,7 +146,7 @@ class SettingsCommands(commands.Cog):
 					return
 
 				# ロールが指定されている場合
-				if role:
+				if role is not None:
 					# 指定されたロールがメンション可能かチェックする
 					# メンションができない場合はエラーメッセージを送信する
 					if not role.mentionable:
@@ -160,7 +160,7 @@ class SettingsCommands(commands.Cog):
 					gc.server_status_notification.role_id = "0"
 
 				# 自動削除の値が設定されている場合
-				if auto_delete:
+				if auto_delete is not None:
 					# 秒数を保存
 					gc.server_status_notification.auto_delete = auto_delete
 				# 指定されていない場合はデフォルト値の10秒にする

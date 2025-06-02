@@ -88,6 +88,8 @@ class Notification:
 				[platform_icon.LIST[p.name] + " " + p.name for p in result.platforms],
 			)
 
+		embed = None
+
 		# メンテナンス開始
 		if result.detail == r6sss.comparison.ComparisonDetail.START_MAINTENANCE:
 			embed = discord.Embed(
@@ -175,7 +177,7 @@ class Notification:
 			embed = None
 
 		# 対象プラットフォームのフィールドを先頭へ挿入
-		if embed:
+		if embed is not None:
 			embed.fields.insert(
 				0,
 				discord.EmbedField(

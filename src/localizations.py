@@ -64,7 +64,7 @@ class Localization:
 			values = []
 
 		try:
-			if cls.LOCALE_DATA:
+			if cls.LOCALE_DATA is not None:
 				return cls.LOCALE_DATA[lang]["strings"][text].format(values)
 		except KeyError as e:
 			logger.error("Translate Error - KeyError: %s", str(e))
