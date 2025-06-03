@@ -434,6 +434,6 @@ class ServerStatus:
 			)
 
 		# メンテナンススケジュールの埋め込みメッセージを一覧へ追加して埋め込みメッセージ一覧を返す
-		logger.info("サーバーステータス埋め込みメッセージ生成終了 (スケジュール情報あり)", locale)
+		logger.info("サーバーステータス埋め込みメッセージ生成終了 (スケジュール情報あり)")
 		embeds.append(embed)
 		return embeds
