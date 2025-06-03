@@ -299,7 +299,8 @@ async def about(ctx: discord.ApplicationContext) -> None:
 		embed.set_footer(text=app.COPYRIGHT)
 		embed.add_field(
 			name="Version",
-			value=f"`{app.VERSION_STRING}` ([`{app.get_git_commit_hash()[0:7]}`]({app.GITHUB_REPO_URL}/commit/{app.get_git_commit_hash()}))",
+			value=f"`{app.VERSION_STRING}` ([`{app.get_git_commit_hash()[0:7]}`]\
+({app.GITHUB_REPO_URL}/commit/{app.get_git_commit_hash()}))",
 		)
 		embed.add_field(
 			name="Source",
