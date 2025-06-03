@@ -197,7 +197,12 @@ class ServerStatus:
 		status_data: list[r6sss.types.Status] | None,
 		schedule_data: r6sss.types.MaintenanceSchedule | None,
 	) -> list[discord.Embed]:
-		"""サーバーステータスとメンテナンススケジュール情報から埋め込みメッセージを生成する"""
+		"""サーバーステータスとメンテナンススケジュール情報から埋め込みメッセージを生成する
+
+		戻り値は サーバーステータス, メンテナンススケジュール の順に格納された埋め込みメッセージのリスト
+
+		メンテナンススケジュールが存在しない場合はサーバーステータスの埋め込みメッセージのみを返す
+		"""
 		logger.info("サーバーステータス埋め込みメッセージ生成開始 - 言語: %s", locale)
 
 		embed_settings = {
