@@ -198,6 +198,8 @@ class ServerStatus:
 		schedule_data: r6sss.types.MaintenanceSchedule | None,
 	) -> list[discord.Embed]:
 		"""サーバーステータスとメンテナンススケジュール情報から埋め込みメッセージを生成する"""
+		logger.info("サーバーステータス埋め込みメッセージ生成開始 - 言語: %s", locale)
+
 		embed_settings = {
 			"PC": [discord.Colour.from_rgb(255, 255, 255), 2],  # 埋め込みの色, 埋め込みのスペーシング
 			"PS4": [discord.Colour.from_rgb(0, 67, 156), 0],
@@ -205,7 +207,6 @@ class ServerStatus:
 			"XB1": [discord.Colour.from_rgb(16, 124, 16), 0],
 			"XBSX": [discord.Colour.from_rgb(16, 124, 16), 1],
 		}
-
 		embeds = []
 
 		# サーバーステータスが取得できてない場合はエラーメッセージを返す
@@ -324,6 +325,7 @@ class ServerStatus:
 
 		# メンテナンススケジュール情報が存在しない場合はスケジュールの埋め込みメッセージを生成せずに埋め込みメッセージ一覧を返す
 		if schedule_data is None:
+			logger.info("サーバーステータス埋め込みメッセージ生成終了 (スケジュール情報なし)")
 			return embeds
 
 		# スケジュール埋め込みを生成
@@ -432,5 +434,6 @@ class ServerStatus:
 			)
 
 		# メンテナンススケジュールの埋め込みメッセージを一覧へ追加して埋め込みメッセージ一覧を返す
+		logger.info("サーバーステータス埋め込みメッセージ生成終了 (スケジュール情報あり)", locale)
 		embeds.append(embed)
 		return embeds
