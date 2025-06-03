@@ -141,7 +141,7 @@ class ServerStatusEmbedManager(commands.Cog):
 
 						try:
 							# 設定言語のサーバーステータスの埋め込みメッセージを取得
-							target_embeds = [status_embeds.get(lang)]
+							target_embeds = status_embeds.get(lang)
 							if target_embeds[0] is None:
 								logger.error("サーバーステータスメッセージの取得失敗: 言語 %s の埋め込みメッセージが存在しません", lang)
 								target_embeds = None
