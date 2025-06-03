@@ -82,9 +82,8 @@ class ServerStatusEmbedManager(commands.Cog):
 
 				# サーバーステータス埋め込みメッセージの更新処理
 				try:
-					# テキストチャンネルとメッセージのID, 通知メッセージの送信先
-					# 両方が設定されていない場合は処理をスキップする
-					if ch_id == 0 or msg_id == 0:
+					# テキストチャンネルとメッセージIDが両方とも設定されている場合は更新処理を実行する
+					if ch_id != 0 and msg_id != 0:
 						# IDからテキストチャンネルを取得する
 						ch = guild.get_channel(ch_id)
 						# チャンネルが存在しない場合はギルドデータのチャンネルIDとメッセージIDをリセットする
