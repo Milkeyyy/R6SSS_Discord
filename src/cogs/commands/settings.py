@@ -30,6 +30,7 @@ class SettingsCommands(commands.Cog):
 			],  # 選択可能言語リストから選択肢のリストを生成
 		),  # pyright: ignore[reportInvalidTypeForm]
 	) -> None:
+		"""サーバーステータスメッセージの言語を設定するコマンド"""
 		await ctx.defer(ephemeral=True)
 
 		gc = None
@@ -77,6 +78,7 @@ class SettingsCommands(commands.Cog):
 		ctx: discord.ApplicationContext,
 		enable: Option(bool),  # pyright: ignore[reportInvalidTypeForm]
 	) -> None:
+		"""サーバーステータスメッセージが送信されているテキストチャンネルの名前の先頭に表示するインジケーターを設定するコマンド"""
 		await ctx.defer(ephemeral=True)
 
 		gc = None
@@ -116,6 +118,7 @@ class SettingsCommands(commands.Cog):
 		role: Option(discord.Role, required=False),  # pyright: ignore[reportInvalidTypeForm]
 		auto_delete: Option(int, required=False, default=10, min_value=0, max_value=600),  # pyright: ignore[reportInvalidTypeForm]
 	) -> None:
+		"""サーバーステータスに変化があった際に送信される通知を設定するコマンド"""
 		await ctx.defer(ephemeral=True)
 
 		gc = None
