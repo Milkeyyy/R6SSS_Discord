@@ -213,6 +213,43 @@ class SettingsCommands(commands.Cog):
 	@discord.guild_only()
 	@discord.default_permissions(administrator=True)
 	@commands.cooldown(2, 5)
+	async def setscheduledisplay(
+		self,
+		ctx: discord.ApplicationContext,
+		enable: Option(bool, required=True),  # pyright: ignore[reportInvalidTypeForm]
+	) -> None:
+		"""サーバーステータスメッセージにメンテナンススケジュール情報を表示するかどうかを設定するコマンド"""
+		await ctx.defer(ephemeral=True)
+
+		gc = None
+		try:
+			# ギルドコンフィグを取得する
+			gc = await GuildConfigManager.get(ctx.guild.id)
+			if gc is None:
+				await ctx.send_followup(embed=embeds.Notification.internal_error(description=_("CmdMsg_FailedToGetConfig")))
+				return
+
+			gc.server_status_message.maintenance_schedule = enable
+
+			# ギルドコンフィグを更新
+			if not (await GuildConfigManager.update(ctx.guild.id, gc)):
+				# コンフィグの更新に失敗した場合はエラーメッセージを返す
+				await ctx.send_followup(embed=embeds.Notification.error(description=_("CmdMsg_FailedToUpdateConfig")))
+				return
+
+			await ctx.send_followup(embed=embeds.Notification.success(description=_("Cmd_setscheduledisplay_Success", _(str(enable)))))
+		except Exception:
+			# 設定をリセット
+			if gc is not None:
+				gc.server_status_message.maintenance_schedule = True
+				await GuildConfigManager.update(ctx.guild.id, gc)
+			logger.error(traceback.format_exc())
+			await ctx.send_followup(embed=embeds.Notification.internal_error())
+
+	@commands.slash_command()
+	@discord.guild_only()
+	@discord.default_permissions(administrator=True)
+	@commands.cooldown(2, 5)
 	async def viewsettings(self, ctx: discord.ApplicationContext) -> None:
 		await ctx.defer(ephemeral=True)
 

@@ -5,14 +5,13 @@ import r6sss
 from discord.ext import commands, tasks
 
 import embeds
+import icons
 import localizations
-import status_indicator
 from client import client
 from config import GuildConfigManager
 from kumasan import KumaSan
 from localizations import Localization
 from logger import logger
-from maintenance_schedule import MaintenanceScheduleManager
 from server_status import ServerStatusManager
 
 
@@ -28,7 +27,9 @@ class ServerStatusEmbedManager(commands.Cog):
 		self.server_status_update_loop_is_running = True
 		status_data = None  # 現在のサーバーステータス情報
 		schedule_data = None  # 現在のメンテナンススケジュール情報
-		status_embeds = {}  # 各言語のサーバーステータス埋め込みメッセージのリスト (言語コードをキーとする辞書)
+		# 各言語のサーバーステータス埋め込みメッセージのリスト
+		# 言語コードをキーとする辞書 値はリスト (ステータスの埋め込みリスト, メンテナンススケジュールの埋め込みリスト)
+		status_embeds = {}
 		notif_embeds = []  # サーバーステータス通知埋め込みメッセージのリスト
 
 		# Heartbeatイベントを送信 (サーバーステータスの更新が開始されたことを報告)
@@ -45,15 +46,20 @@ class ServerStatusEmbedManager(commands.Cog):
 				await KumaSan.ping("pending", "サーバーステータスの更新中止: status_data is None")
 				return
 
-			# メンテナンススケジュール情報を取得する
-			schedule_data = await MaintenanceScheduleManager.get()
-
 			# 各言語のサーバーステータス情報埋め込みメッセージと通知メッセージを生成する
 			for lang_code in Localization.EXISTS_LOCALE_LIST:
+				status_embeds[lang_code] = []
+
 				# サーバーステータス情報の埋め込みメッセージを生成する
-				generated_status_embed = await embeds.ServerStatus.generate(lang_code, status_data, schedule_data)
-				if generated_status_embed is not None:
-					status_embeds[lang_code] = generated_status_embed
+				generated_status_embed = await embeds.ServerStatus.generate_embed(lang_code, status_data)
+				if generated_status_embed:
+					status_embeds[lang_code].append(generated_status_embed)
+
+				# メンテナンススケジュール情報の埋め込みメッセージを生成する
+				generated_schedule_embed = await embeds.MaintenanceSchedule.generate_embed(lang_code, schedule_data)
+				if generated_schedule_embed:
+					status_embeds[lang_code].append(generated_schedule_embed)
+
 				# 以前のサーバーステータス情報が存在する場合はサーバーステータスの通知メッセージを生成する
 				if ServerStatusManager.previous_data is not None:
 					compare_result = r6sss.compare_server_status(ServerStatusManager.previous_data, status_data)
@@ -72,6 +78,7 @@ class ServerStatusEmbedManager(commands.Cog):
 						continue
 					ch_id = int(gc.server_status_message.channel_id)
 					msg_id = int(gc.server_status_message.message_id)
+					schedule_display = gc.server_status_message.maintenance_schedule
 					notif_ch_id = int(gc.server_status_notification.channel_id)
 					notif_role_id = int(gc.server_status_notification.role_id)
 					lang = gc.server_status_message.language
@@ -139,21 +146,21 @@ class ServerStatusEmbedManager(commands.Cog):
 								logger.error(traceback.format_exc())
 								logger.error("ギルド %s のステータスインジケーターの更新に失敗: %s", guild.name, str(e))
 
-						try:
-							# 設定言語のサーバーステータスの埋め込みメッセージを取得
-							target_embeds = status_embeds.get(lang)
-							if target_embeds is None:
-								logger.error("サーバーステータスメッセージの取得失敗: 言語 %s の埋め込みメッセージが存在しません", lang)
-								target_embeds = None
-						except Exception as e:
-							target_embeds = None
-							logger.error(traceback.format_exc())
-							logger.error("サーバーステータスメッセージの取得失敗: %s", str(e))
+						# 設定言語のサーバーステータスの埋め込みメッセージを取得
+						target_embeds = status_embeds.get(lang)
 
 						try:
 							# 既存のサーバーステータス埋め込みメッセージを新しいものに編集する
 							if target_embeds is not None:
-								await msg.edit(embeds=target_embeds)
+								# メンテナンススケジュールの埋め込みが生成されているかつ
+								# 表示設定が有効な場合はメンテナンススケジュールの埋め込みを追加する
+								if schedule_display and len(target_embeds) >= 2:  # noqa: PLR2004
+									await msg.edit(embeds=target_embeds[0])
+								# メンテナンススケジュール埋め込みなし (ステータス埋め込みのみ)
+								else:
+									await msg.edit(embeds=target_embeds[0:1])
+							else:
+								logger.error("サーバーステータスメッセージの取得失敗: 言語 %s の埋め込みメッセージが存在しません", lang)
 						except Exception as e:
 							logger.error(traceback.format_exc())
 							logger.error("サーバーステータスメッセージの編集失敗: %s", str(e))

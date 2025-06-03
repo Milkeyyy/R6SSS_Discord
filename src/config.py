@@ -18,6 +18,7 @@ class GuildConfigManager:
 			"message_id": "0",
 			"language": "en_GB",
 			"status_indicator": True,
+			"maintenance_schedule": True,
 		},
 		"server_status_notification": {
 			"channel_id": "0",
