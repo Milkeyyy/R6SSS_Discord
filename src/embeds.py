@@ -6,8 +6,6 @@ from pycord.i18n import _
 
 import icons
 import localizations
-import platform_icon
-import status_icon as status_icon_set
 from client import client
 from logger import logger
 from server_status import ServerStatusManager
@@ -192,17 +190,14 @@ class Notification:
 
 class ServerStatus:
 	@classmethod
-	async def generate(  # noqa: PLR0915
+	async def generate_embed(  # noqa: PLR0915
 		cls,
 		locale: str,
 		status_data: list[r6sss.types.Status] | None,
-		schedule_data: r6sss.types.MaintenanceSchedule | None,
 	) -> list[discord.Embed]:
-		"""サーバーステータスとメンテナンススケジュール情報から埋め込みメッセージを生成する
+		"""サーバーステータス情報から埋め込みメッセージを生成する
 
-		戻り値は サーバーステータス, メンテナンススケジュール の順に格納された埋め込みメッセージのリスト
-
-		メンテナンススケジュールが存在しない場合はサーバーステータスの埋め込みメッセージのみを返す
+		サーバーステータス情報が `None` の場合は空のリストを返す
 		"""
 		logger.info("サーバーステータス埋め込みメッセージ生成開始 - 言語: %s", locale)
 
@@ -213,11 +208,11 @@ class ServerStatus:
 			"XB1": [discord.Colour.from_rgb(16, 124, 16), 0],
 			"XBSX": [discord.Colour.from_rgb(16, 124, 16), 1],
 		}
-		embeds = []
+		embeds = []  # 埋め込みメッセージ一覧
 
 		# サーバーステータスが取得できてない場合はエラーメッセージを返す
 		if status_data is None:
-			logger.error("サーバーステータス埋め込みメッセージ生成中止 - サーバーステータスが取得できていません")
+			logger.error("サーバーステータス埋め込みメッセージ生成中止 (サーバーステータス情報なし)")
 			return [
 				discord.Embed(
 					color=discord.Colour.light_grey(),
@@ -326,21 +321,24 @@ class ServerStatus:
 			for _n in range(list(embed_settings.values())[status_index][1]):
 				embed.add_field(name="", value="")
 
-		# 生成した埋め込みメッセージを一覧へ追加する
+		# メンテナンススケジュールの埋め込みメッセージを一覧へ追加して埋め込みメッセージ一覧を返す
+		logger.info("サーバーステータス埋め込みメッセージ生成終了")
 		embeds.append(embed)
+		return embeds
 
-		# メンテナンススケジュール情報が存在しない場合はスケジュールの埋め込みメッセージを生成せずに埋め込みメッセージ一覧を返す
-		if schedule_data is None:
-			logger.info("サーバーステータス埋め込みメッセージ生成終了 (スケジュール情報なし)")
-			return embeds
 
-		# スケジュール埋め込みを生成
+class MaintenanceSchedule:
+	@classmethod
+	async def generate_embed(cls, locale: str, schedule_data: r6sss.types.MaintenanceSchedule | None) -> list[discord.Embed]:
+		"""メンテナンススケジュール情報から埋め込みメッセージを生成する
+
+		メンテナンススケジュール情報が `None` の場合は専用の埋め込みメッセージを返す
+		"""
+		logger.info("メンテナンススケジュール埋め込みメッセージ生成開始 - 言語: %s", locale)
+
+		embeds = []  # 埋め込みメッセージ一覧
+
 		# platform_list = [p["Name"] for p in sched["Platforms"]]
-		pf_list_text = ""
-		platform_list = schedule_data.platforms
-
-		# タイムスタンプを整数へ変換
-		date_timestamp = int(schedule_data.date.timestamp())
 
 		# 全プラットフォーム同一
 		# if "All" in platform_list:
@@ -351,80 +349,89 @@ class ServerStatus:
 		# 	pf_list_text = "・**" + localizations.translate('Platform_All', lang=locale) + "**\n"
 		# else: # プラットフォーム別
 
-		# スケジュールが範囲内か判定 範囲内であればスケジュールの埋め込みメッセージを生成する
-		if datetime.datetime.now(tz=datetime.UTC).timestamp() <= (date_timestamp + (schedule_data.downtime * 60)):
-			# TODO: プラットフォームごとに実施日時が異なる場合があるかもしれないのでそれに対応する？
-			for p in platform_list:
-				# プラットフォーム一覧テキストを生成
-				pf_list_text = (
-					pf_list_text
-					+ "- **"
-					+ platform_icon.LIST[p.name]
-					+ " "
-					+ localizations.translate(f"Platform_{p.name}", lang=locale)
-					+ "**\n"
-				)
-
-			# 埋め込みメッセージを生成
-			embed = discord.Embed(
-				colour=discord.colour.Colour.nitro_pink(),
-				title=":wrench::calendar: " + localizations.translate("MaintenanceSchedule", lang=locale),
-				description="**" + schedule_data.title + "**\n" + schedule_data.detail,
-				footer=discord.EmbedFooter(
-					"⚠️\n" + localizations.translate("MaintenanceSchedule_Notes", lang=locale),
-				),
-				fields=[
-					# ダウンタイム
-					discord.EmbedField(
-						name="**:clock3: "
-						+ localizations.translate(
-							"MaintenanceSchedule_Downtime",
-							lang=locale,
-						)
-						+ "**",
-						value="- "
-						+ str(schedule_data.downtime)
+		# メンテナンススケジュール情報が存在するか
+		if schedule_data is not None:
+			pf_list_text = ""
+			platform_list = schedule_data.platforms
+			date_timestamp = int(schedule_data.date.timestamp())
+			# スケジュールが範囲内か判定
+			# 範囲内であればスケジュールの埋め込みメッセージを生成する
+			if datetime.datetime.now(tz=datetime.UTC).timestamp() <= (date_timestamp + (schedule_data.downtime * 60)):
+				# TODO: プラットフォームごとに実施日時が異なる場合があるかもしれないのでそれに対応する？
+				for p in platform_list:
+					# プラットフォーム一覧テキストを生成
+					pf_list_text = (
+						pf_list_text
+						+ "- **"
+						+ icons.Platform[p.name].value
 						+ " "
-						+ localizations.translate(
-							"MaintenanceSchedule_Downtime_Minute",
-							lang=locale,
+						+ localizations.translate(f"Platform_{p.name}", lang=locale)
+						+ "**\n"
+					)
+
+				# 埋め込みメッセージを生成
+				embed = discord.Embed(
+					colour=discord.colour.Colour.nitro_pink(),
+					title=":wrench::calendar: " + localizations.translate("MaintenanceSchedule", lang=locale),
+					description="**" + schedule_data.title + "**\n" + schedule_data.detail,
+					footer=discord.EmbedFooter(
+						"⚠️\n" + localizations.translate("MaintenanceSchedule_Notes", lang=locale),
+					),
+					fields=[
+						# ダウンタイム
+						discord.EmbedField(
+							name="**:clock3: "
+							+ localizations.translate(
+								"MaintenanceSchedule_Downtime",
+								lang=locale,
+							)
+							+ "**",
+							value="- "
+							+ str(schedule_data.downtime)
+							+ " "
+							+ localizations.translate(
+								"MaintenanceSchedule_Downtime_Minute",
+								lang=locale,
+							),
 						),
-					),
-					# 予定日時
-					discord.EmbedField(
-						name="**:calendar: "
-						+ localizations.translate(
-							"MaintenanceSchedule_ScheduledDT",
-							lang=locale,
-						)
-						+ "**",
-						value=f"- <t:{date_timestamp}:f> (<t:{date_timestamp}:R>)",
-					),
-					# 対象プラットフォーム一覧
-					discord.EmbedField(
-						name="**:video_game: "
-						+ localizations.translate(
-							"MaintenanceSchedule_TargetPlatform",
-							lang=locale,
-						)
-						+ "**",
-						value=pf_list_text,
-					),
-				],
-			)
-			# パッチノートのURLが指定されている場合は末尾にフィールドを追加する
-			if schedule_data.patchnotes.startswith(("http://", "https://")):
-				embed.fields.append(
-					discord.EmbedField(
-						name="**:notepad_spiral: "
-						+ localizations.translate(
-							"MaintenanceSchedule_PatchNotes",
-							lang=locale,
-						)
-						+ "**",
-						value=schedule_data.patchnotes,
-					),
+						# 予定日時
+						discord.EmbedField(
+							name="**:calendar: "
+							+ localizations.translate(
+								"MaintenanceSchedule_ScheduledDT",
+								lang=locale,
+							)
+							+ "**",
+							value=f"- <t:{date_timestamp}:f> (<t:{date_timestamp}:R>)",
+						),
+						# 対象プラットフォーム一覧
+						discord.EmbedField(
+							name="**:video_game: "
+							+ localizations.translate(
+								"MaintenanceSchedule_TargetPlatform",
+								lang=locale,
+							)
+							+ "**",
+							value=pf_list_text,
+						),
+					],
 				)
+				# パッチノートのURLが指定されている場合は末尾にフィールドを追加する
+				if schedule_data.patchnotes.startswith(("http://", "https://")):
+					embed.fields.append(
+						discord.EmbedField(
+							name="**:notepad_spiral: "
+							+ localizations.translate(
+								"MaintenanceSchedule_PatchNotes",
+								lang=locale,
+							)
+							+ "**",
+							value=schedule_data.patchnotes,
+						),
+					)
+				# 埋め込みメッセージを一覧へ追加
+				embeds.append(embed)
+
 		# 予定されているメンテナンスがない場合の埋め込みメッセージ
 		else:
 			embed = discord.Embed(
@@ -438,8 +445,9 @@ class ServerStatus:
 					"⚠️\n" + localizations.translate("MaintenanceSchedule_Notes", lang=locale),
 				),
 			)
+			# 埋め込みメッセージを一覧へ追加
+			embeds.append(embed)
 
 		# メンテナンススケジュールの埋め込みメッセージを一覧へ追加して埋め込みメッセージ一覧を返す
-		logger.info("サーバーステータス埋め込みメッセージ生成終了 (スケジュール情報あり)")
-		embeds.append(embed)
+		logger.info("メンテナンススケジュール埋め込みメッセージ生成終了")
 		return embeds

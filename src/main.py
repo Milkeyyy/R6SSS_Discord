@@ -160,17 +160,37 @@ async def status(ctx: discord.ApplicationContext) -> None:
 			)
 			return
 
+		# 埋め込みメッセージを生成して送信する
+		await ctx.send_followup(
+			embeds=await embeds.ServerStatus.generate_embed(gc.server_status_message.language, status_data),
+		)
+	except Exception:
+		logger.error(traceback.format_exc())
+		await ctx.send_followup(embed=embeds.Notification.internal_error())
+
+
+@client.slash_command()
+@discord.guild_only()
+@discord.default_permissions(send_messages=True)
+@commands.cooldown(2, 5)
+async def schedule(ctx: discord.ApplicationContext) -> None:
+	await ctx.defer(ephemeral=False)
+	try:
+		# ギルドコンフィグを取得する
+		gc = await GuildConfigManager.get(ctx.guild.id)
+		if gc is None:
+			await ctx.send_followup(
+				embed=embeds.Notification.internal_error(
+					description=_("CmdMsg_FailedToGetConfig"),
+				),
+			)
+			return
+
 		# メンテナンススケジュールを取得する
 		schedule_data = MaintenanceScheduleManager.schedule
 
 		# 埋め込みメッセージを生成して送信する
-		await ctx.send_followup(
-			embeds=await embeds.ServerStatus.generate(
-				gc.server_status_message.language,
-				status_data,
-				schedule_data,
-			),
-		)
+		await ctx.send_followup(embeds=await embeds.MaintenanceSchedule.generate_embed(gc.server_status_message.language, schedule_data))
 	except Exception:
 		logger.error(traceback.format_exc())
 		await ctx.send_followup(embed=embeds.Notification.internal_error())
@@ -223,7 +243,7 @@ async def create(
 
 			# サーバーステータス埋め込みメッセージ生成してを送信する (作成)
 			msg = await ch.send(
-				embeds=await embeds.ServerStatus.generate(
+				embeds=await embeds.ServerStatus.generate_embed(
 					gc.server_status_message.language,
 					status_data,
 					schedule_data,
