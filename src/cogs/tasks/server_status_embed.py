@@ -123,7 +123,7 @@ class ServerStatusEmbedManager(commands.Cog):
 						if all(
 							(
 								gc.server_status_message.status_indicator,  # ステータスインジケーターが有効
-								ch_name[0] in status_indicator.List,  # チャンネル名の先頭がステータスインジケーターか
+								ch_name[0] in icons.Indicator,  # チャンネル名の先頭がステータスインジケーターか
 								ch_name[0] != ServerStatusManager.indicator,  # チャンネル名の先頭が現在のインジケーターと異なるか
 							)
 						):

@@ -4,6 +4,7 @@ import discord
 import r6sss
 from pycord.i18n import _
 
+import icons
 import localizations
 import platform_icon
 import status_icon as status_icon_set
@@ -85,7 +86,7 @@ class Notification:
 			target_platforms_text = localizations.translate("Platform_All", lang=lang)
 		else:
 			target_platforms_text = "- " + "\n- ".join(
-				[platform_icon.LIST[p.name] + " " + p.name for p in result.platforms],
+				[icons.Platform[p.name] + " " + p.name for p in result.platforms],
 			)
 
 		embed = None
@@ -227,7 +228,7 @@ class ServerStatus:
 
 		# 各プラットフォームごとの埋め込みメッセージを作成
 		embed = discord.Embed(color=embed_settings["PC"][0])  # 色は白で固定
-		embed.title = "📶 R6S Server Status"
+		embed.title = icons.R6SSS.ICON.value + " Rainbow Six Siege Server Status"
 		embed.description = (
 			"🕒 "
 			+ localizations.translate("Last Update", lang=locale)
@@ -253,25 +254,25 @@ class ServerStatus:
 			# サーバーの状態によってアイコンを変更する
 			# 問題なし
 			if status.connectivity == "Operational":
-				status_icon = status_icon_set.OPERATIONAL
+				status_icon = icons.Status.OPERATIONAL.value
 			# 計画メンテナンス
 			elif status.connectivity == "Maintenance":
-				status_icon = status_icon_set.MAINTENANCE
+				status_icon = icons.Status.MAINTENANCE.value
 			# 想定外の問題
 			elif status.connectivity == "Interrupted":
-				status_icon = status_icon_set.INTERRUPTED
+				status_icon = icons.Status.INTERRUPTED.value
 			# 想定外の停止
 			elif status.connectivity == "Degraded":
-				status_icon = status_icon_set.DEGRADED
+				status_icon = icons.Status.DEGRADED.value
 			# それ以外
 			else:
-				status_icon = status_icon_set.UNKNOWN
+				status_icon = icons.Status.UNKNOWN.value
 
 			connectivity_text = localizations.translate(status.connectivity, lang=locale)
 
 			mt_text = ""
 			if status.maintenance:
-				status_icon = status_icon_set.MAINTENANCE
+				status_icon = icons.Status.MAINTENANCE.value
 				connectivity_text = localizations.translate("Maintenance", lang=locale)
 
 			features_list = []
@@ -285,17 +286,17 @@ class ServerStatus:
 				("Purchase", status.purchase),
 			]:
 				# 通常
-				f_status_icon = status_icon_set.OPERATIONAL
+				f_status_icon = icons.Status.OPERATIONAL.value
 				features_status_text = localizations.translate(s[1], lang=locale)
 				# 停止
 				if s[1] != "Operational":
-					f_status_icon = status_icon_set.DEGRADED
+					f_status_icon = icons.Status.DEGRADED.value
 				# メンテナンス
 				if status.maintenance:
-					f_status_icon = status_icon_set.MAINTENANCE
+					f_status_icon = icons.Status.MAINTENANCE.value
 				# 不明
 				if s[1] == "Unknown":
-					f_status_icon = status_icon_set.UNKNOWN
+					f_status_icon = icons.Status.UNKNOWN.value
 					features_status_text = localizations.translate("Unknown", lang=locale)
 
 				features_list.append(
@@ -309,7 +310,7 @@ class ServerStatus:
 
 			# プラットフォームのステータスのフィールドを追加
 			embed.add_field(
-				name=platform_icon.LIST[status.platform.name]
+				name=icons.Platform[status.platform.name].value
 				+ " "
 				+ pf_display_name
 				+ " - "

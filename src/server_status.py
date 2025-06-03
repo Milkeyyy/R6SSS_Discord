@@ -2,7 +2,7 @@ import datetime
 
 import r6sss
 
-import status_indicator
+import icons
 
 
 class ServerStatusManager:
@@ -11,7 +11,7 @@ class ServerStatusManager:
 	data: list[r6sss.types.Status] | None = None
 	previous_data: list[r6sss.types.Status] | None = None
 	updated_at: int = 0
-	indicator = status_indicator.Unknown  # テキストチャンネルの名前に表示するステータスインジケーター(絵文字)
+	indicator = icons.Indicator.UNKNOWN.value  # テキストチャンネルの名前に表示するステータスインジケーター(絵文字)
 
 	@classmethod
 	async def get(cls) -> list[r6sss.types.Status] | None:
@@ -38,12 +38,12 @@ class ServerStatusManager:
 			if all(
 				(st == "Operational", "Interrupted" not in status_list, "Degraded" not in status_list, "Maintenance" not in status_list)
 			):
-				cls.indicator = status_indicator.Operational
+				cls.indicator = icons.Indicator.OPERATIONAL.value
 			if st == "Interrupted":
-				cls.indicator = status_indicator.Interrupted
+				cls.indicator = icons.Indicator.INTERRUPTED.value
 			if st in ("Degraded", "Outage"):  # Connectivity が Outage になるかわからないので、念の為入れておく
-				cls.indicator = status_indicator.Degraded
+				cls.indicator = icons.Indicator.DEGRADED.value
 			if status.maintenance:
-				cls.indicator = status_indicator.Maintenance
+				cls.indicator = icons.Indicator.MAINTENANCE.value
 
 		return result
