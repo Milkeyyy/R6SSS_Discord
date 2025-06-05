@@ -187,7 +187,7 @@ async def schedule(ctx: discord.ApplicationContext) -> None:
 			return
 
 		# メンテナンススケジュールを取得する
-		schedule_data = MaintenanceScheduleManager.schedule
+		schedule_data = MaintenanceScheduleManager.data
 
 		# 埋め込みメッセージを生成して送信する
 		await ctx.send_followup(embeds=await embeds.MaintenanceSchedule.generate_embed(gc.server_status_message.language, schedule_data))
@@ -239,7 +239,7 @@ async def create(
 				)
 
 			# メンテナンススケジュールを取得する
-			schedule_data = MaintenanceScheduleManager.schedule
+			schedule_data = MaintenanceScheduleManager.data
 
 			# サーバーステータス埋め込みメッセージ生成してを送信する (作成)
 			msg = await ch.send(
