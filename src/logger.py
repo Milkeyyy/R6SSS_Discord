@@ -1,5 +1,6 @@
 import logging
 import logging.handlers
+from pathlib import Path
 
 discord_logger = logging.getLogger("discord")
 discord_logger.setLevel(logging.ERROR)
@@ -20,3 +21,6 @@ rotating_handler.setFormatter(stream_formatter)
 discord_logger.addHandler(rotating_handler)
 logger.addHandler(rotating_handler)
 logger.addHandler(stream_handler)
+
+# フォルダーを作成する
+Path("./logs").mkdir(exist_ok=True)
