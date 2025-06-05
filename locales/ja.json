@@ -83,7 +83,7 @@
 		"Cmd_viewsettings_ServerStatusMessage": "サーバーステータスメッセージ",
 		"Cmd_viewsettings_ServerStatusMessage_Created": "作成済み",
 		"Cmd_viewsettings_ServerStatusMessage_None": "なし",
-		"Cmd_viewsettings_Indicator": "インジケーター",
+		"Cmd_viewsettings_Indicator": "ステータスインジケーターの表示",
 		"Cmd_viewsettings_MaintenanceSchedule": "メンテナンススケジュールの表示",
 		"Cmd_viewsettings_Notification": "通知",
 		"Cmd_viewsettings_Language": "言語",
