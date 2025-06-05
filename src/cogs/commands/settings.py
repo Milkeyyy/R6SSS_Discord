@@ -262,7 +262,7 @@ class SettingsCommands(commands.Cog):
 				return
 
 			# 埋め込みメッセージを生成
-			embed = discord.Embed(title=":gear: " + _("Cmd_showsettings_CurrentSettings"))
+			embed = discord.Embed(title=":gear: " + _("Cmd_viewsettings_CurrentSettings"))
 			# 作成されたサーバーステータスメッセージ(とそのテキストチャンネル)を取得する
 			status_msg_ch = client.get_channel(int(gc.server_status_message.channel_id))
 			if status_msg_ch:
@@ -270,20 +270,29 @@ class SettingsCommands(commands.Cog):
 			else:
 				status_msg = None
 			embed.add_field(
-				name=f":envelope: {_('Cmd_showsettings_ServerStatusMessage')}",
-				value=f"[**{_('Cmd_showsettings_ServerStatusMessage_Created')}**]({status_msg.jump_url})"
+				name=f":envelope: {_('Cmd_viewsettings_ServerStatusMessage')}",
+				value=f"[**{_('Cmd_viewsettings_ServerStatusMessage_Created')}**]({status_msg.jump_url})"
 				if status_msg
-				else f"**{_('Cmd_showsettings_ServerStatusMessage_None')}**",
+				else f"**{_('Cmd_viewsettings_ServerStatusMessage_None')}**",
+				inline=False,
+			)
+			# メンテナンススケジュールの表示
+			embed.add_field(
+				name=f":calendar: {_('Cmd_viewsettings_MaintenanceSchedule')}",
+				value=f"`{_(str(gc.server_status_message.maintenance_schedule))}`",
+				inline=False,
 			)
 			# インジケーター
 			embed.add_field(
-				name=f":radio_button: {_('Cmd_showsettings_Indicator')}",
+				name=f":radio_button: {_('Cmd_viewsettings_Indicator')}",
 				value=f"`{_(str(gc.server_status_message.status_indicator))}`",
+				inline=False,
 			)
 			# 言語
 			embed.add_field(
-				name=f":globe_with_meridians: {_('Cmd_showsettings_Language')}",
+				name=f":globe_with_meridians: {_('Cmd_viewsettings_Language')}",
 				value=f"`{Localization.EXISTS_LOCALE_LIST.get(gc.server_status_message.language)}` (`{gc.server_status_message.language}`)",
+				inline=False,
 			)
 			# 通知
 			notif_ch = client.get_channel(int(gc.server_status_notification.channel_id))
@@ -310,11 +319,7 @@ class SettingsCommands(commands.Cog):
 			else:
 				# 無効
 				notif_settings_text = f"`{_('False')}`"
-			embed.add_field(
-				name=f":bell: {_('Cmd_showsettings_Notification')}",
-				value=notif_settings_text,
-				inline=False,
-			)
+			embed.add_field(name=f":bell: {_('Cmd_viewsettings_Notification')}", value=notif_settings_text, inline=False)
 			# 生成した埋め込みメッセージを送信
 			await ctx.send_followup(embed=embed)
 		except Exception:
