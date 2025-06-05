@@ -84,7 +84,7 @@ class Notification:
 			target_platforms_text = localizations.translate("Platform_All", lang=lang)
 		else:
 			target_platforms_text = "- " + "\n- ".join(
-				[icons.Platform[p.name] + " " + p.name for p in result.platforms],
+				[icons.Platform[p.name].value + " " + p.name for p in result.platforms],
 			)
 
 		embed = None
