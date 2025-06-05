@@ -145,6 +145,16 @@
 				}
 			}
 		},
+		"setscheduledisplay": {
+			"name": "setscheduledisplay",
+			"description": "サーバーステータスメッセージにメンテナンススケジュールを表示するかどうかを設定します。",
+			"options": {
+				"enable": {
+					"name": "有効",
+					"description": "True: 有効 / False: 無効"
+				}
+			}
+		},
 		"viewsettings": {
 			"name": "viewsettings",
 			"description": "現在の設定内容を表示します。"
