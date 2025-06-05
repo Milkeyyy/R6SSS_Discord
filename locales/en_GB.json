@@ -147,11 +147,11 @@
 		},
 		"setscheduledisplay": {
 			"name": "setscheduledisplay",
-			"description": "サーバーステータスメッセージにメンテナンススケジュールを表示するかどうかを設定します。",
+			"description": "Sets whether maintenance schedules are displayed in server status messages.",
 			"options": {
 				"enable": {
-					"name": "有効",
-					"description": "True: 有効 / False: 無効"
+					"name": "Enabled",
+					"description": "True: Enable / False: Disable"
 				}
 			}
 		},
