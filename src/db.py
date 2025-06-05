@@ -1,6 +1,6 @@
-from os import getenv
-from sys import exit
+import sys
 import traceback
+from os import getenv
 
 import pymongo
 import pymongo.asynchronous.collection
@@ -11,7 +11,7 @@ import pymongo.database
 from logger import logger
 
 
-class GuildDB:
+class DBManager:
 	_client: pymongo.AsyncMongoClient
 	db: pymongo.asynchronous.database.AsyncDatabase
 	col: pymongo.asynchronous.collection.AsyncCollection
@@ -19,20 +19,30 @@ class GuildDB:
 	@classmethod
 	async def connect(cls) -> None:
 		"""データベースへ接続する"""
-
 		try:
+			# データベース情報が設定されているかチェックする
+			db_uri = getenv("DB_URI")
+			db_name = getenv("DB_DATABASE")
+			db_collection = getenv("DB_COLLECTION")
+			db_settings = (db_uri, db_name, db_collection)
+			# 1つでも設定されていないものがある場合はエラーを出力して終了する
+			if not all(db_settings):
+				logger.error("データベース接続失敗")
+				for e in db_settings:
+					if not e or e == "":
+						logger.error("- 環境変数 %s が設定されていません", e)
+				sys.exit(1)
+
 			# 接続する
 			logger.info("データベースへ接続")
-			cls._client = pymongo.AsyncMongoClient(
-				host=getenv("DB_URI")
-			)
+			cls._client = pymongo.AsyncMongoClient(host=db_uri)
 			await cls._client.aconnect()
+
 			# データベース/コレクションを取得
-			logger.info("- データベースを取得: %s", getenv("DB_DATABASE"))
-			cls.db = cls._client.get_database(getenv("DB_DATABASE"))
-			cls.col = cls.db.get_collection(getenv("DB_COLLECTION"))
+			logger.info("- データベースを取得: %s", db_name)
+			cls.db = cls._client.get_database(db_name)
+			cls.col = cls.db.get_collection(db_collection)
 		except Exception:
 			logger.error("データベース接続失敗")
 			logger.error(traceback.format_exc())
-			exit(1)
-
+			sys.exit(1)

@@ -68,22 +68,25 @@
 		"CmdMsg_CooldownWarning": "コマンドを実行する間隔が短すぎます。\nしばらく待ってからもう一度お試しください。",
 		"CmdMsg_FailedToGetConfig": "コンフィグを取得できませんでした。\nしばらく待ってからもう一度お試しください。\n(この問題が解決しない場合は、開発者へ報告してください。)",
 		"CmdMsg_FailedToUpdateConfig": "コンフィグを更新できませんでした。\nしばらく待ってからもう一度お試しください。\n(この問題が解決しない場合は、開発者へ報告してください。)",
+		"CmdMsg_FailedToGetServerStatus": "サーバーステータスを取得できませんでした、\nしばらく待ってからもう一度お試しください。\n(この問題が解決しない場合は、開発者へ報告してください。)",
 		"CmdMsg_FailedToGetMaintenanceSchedule": "メンテナンススケジュールを取得できませんでした、\nしばらく待ってからもう一度お試しください。\n(この問題が解決しない場合は、開発者へ報告してください。)",
-		"Cmd_setlanguage_Success": "サーバーステータスメッセージの言語を `{0}` (`{1}`) に設定しました。",
 		"Cmd_setindicator_Success": "サーバーステータスインジケーターの表示を `{0}` に設定しました。",
+		"Cmd_setlanguage_Success": "サーバーステータスメッセージの言語を `{0}` (`{1}`) に設定しました。",
 		"Cmd_setnotification_Success": "サーバーステータスの通知メッセージを `{0}` に設定しました。",
 		"Cmd_setnotification_Channel": "テキストチャンネル",
 		"Cmd_setnotification_Mention": "メンション",
 		"Cmd_setnotification_AutoDelete": "自動削除",
 		"Cmd_setnotification_AutoDelete_Seconds": "{0} 秒",
 		"Cmd_setnotification_RoleIsNotMentionable": "指定されたロールへのメンションは許可されていません。",
-		"Cmd_showsettings_CurrentSettings": "現在の設定",
-		"Cmd_showsettings_ServerStatusMessage": "サーバーステータスメッセージ",
-		"Cmd_showsettings_ServerStatusMessage_Created": "作成済み",
-		"Cmd_showsettings_ServerStatusMessage_None": "なし",
-		"Cmd_showsettings_Indicator": "インジケーター",
-		"Cmd_showsettings_Notification": "通知",
-		"Cmd_showsettings_Language": "言語",
+		"Cmd_setscheduledisplay_Success": "サーバーステータスメッセージへのメンテナンススケジュールの表示を `{0}` に設定しました。",
+		"Cmd_viewsettings_CurrentSettings": "現在の設定",
+		"Cmd_viewsettings_ServerStatusMessage": "サーバーステータスメッセージ",
+		"Cmd_viewsettings_ServerStatusMessage_Created": "作成済み",
+		"Cmd_viewsettings_ServerStatusMessage_None": "なし",
+		"Cmd_viewsettings_Indicator": "ステータスインジケーターの表示",
+		"Cmd_viewsettings_MaintenanceSchedule": "メンテナンススケジュールの表示",
+		"Cmd_viewsettings_Notification": "通知",
+		"Cmd_viewsettings_Language": "言語",
 		"Cmd_create_Success": "テキストチャンネル {0} へサーバーステータスメッセージを送信しました。\n以後このメッセージは自動的に更新されます。",
 		"Cmd_create_OldMessagesWillNoLongerBeUpdated": "以前送信した古いメッセージは更新されなくなります。"
 	},
@@ -139,6 +142,16 @@
 				"auto_delete": {
 					"name": "自動削除",
 					"description": "通知メッセージが送信されてから一定時間経過後に自動削除するかどうかを設定します。 (0 で無効化"
+				}
+			}
+		},
+		"setscheduledisplay": {
+			"name": "setscheduledisplay",
+			"description": "サーバーステータスメッセージにメンテナンススケジュールを表示するかどうかを設定します。",
+			"options": {
+				"enable": {
+					"name": "有効",
+					"description": "True: 有効 / False: 無効"
 				}
 			}
 		},

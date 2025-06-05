@@ -68,22 +68,25 @@
 		"CmdMsg_CooldownWarning": "The interval between command executions is too short.\nPlease wait a while and try again.",
 		"CmdMsg_FailedToGetConfig": "Failed to retrieve config.\nPlease wait a while and try again.\n(If this problem persists, please report it to the developer.)",
 		"CmdMsg_FailedToUpdateConfig": "Failed to update config.\nPlease wait a while and try again.\n(If this problem persists, please report it to the developer.)",
+		"CmdMsg_FailedToGetServerStatus": "Failed to get server status,\nPlease wait a while and try again.\n(If this problem persists, please report it to the developer.)",
 		"CmdMsg_FailedToGetMaintenanceSchedule": "Could not retrieve maintenance schedule,\nPlease wait a while and try again.\n(If this problem persists, please report it to the developer.)",
-		"Cmd_setlanguage_Success": "Set server status message language to `{0}` (`{1}`).",
 		"Cmd_setindicator_Success": "Server status indicator display has been set to `{0}`.",
+		"Cmd_setlanguage_Success": "Set server status message language to `{0}` (`{1}`).",
 		"Cmd_setnotification_Success": "Server status notification message set to `{0}`.",
 		"Cmd_setnotification_Channel": "Text Channel",
 		"Cmd_setnotification_Mention": "Mention",
 		"Cmd_setnotification_AutoDelete": "Auto Delete",
 		"Cmd_setnotification_AutoDelete_Seconds": "{0} seconds",
 		"Cmd_setnotification_RoleIsNotMentionable": "Mentioning the specified role is not allowed.",
-		"Cmd_showsettings_CurrentSettings": "Current Settings",
-		"Cmd_showsettings_ServerStatusMessage": "Server Status Message",
-		"Cmd_showsettings_ServerStatusMessage_Created": "Created",
-		"Cmd_showsettings_ServerStatusMessage_None": "None",
-		"Cmd_showsettings_Indicator": "Indicator",
-		"Cmd_showsettings_Notification": "Notifications",
-		"Cmd_showsettings_Language": "Language",
+		"Cmd_setscheduledisplay_Success": "Display of maintenance schedule in server status messages has been set to `{0}`.",
+		"Cmd_viewsettings_CurrentSettings": "Current Settings",
+		"Cmd_viewsettings_ServerStatusMessage": "Server Status Message",
+		"Cmd_viewsettings_ServerStatusMessage_Created": "Created",
+		"Cmd_viewsettings_ServerStatusMessage_None": "None",
+		"Cmd_viewsettings_Indicator": "Status Indicator Display",
+		"Cmd_viewsettings_MaintenanceSchedule": "Maintenance Schedule Display",
+		"Cmd_viewsettings_Notification": "Notifications",
+		"Cmd_viewsettings_Language": "Language",
 		"Cmd_create_Success": "A server status message has been sent to the text channel {0}.\nThis message will be updated automatically from now on.",
 		"Cmd_create_OldMessagesWillNoLongerBeUpdated": "Any old messages you have previously sent will no longer be updated."
 	},
@@ -139,6 +142,16 @@
 				"auto_delete": {
 					"name": "autodelete",
 					"description": "Set whether to automatically delete after a certain period of time. (0 disables)"
+				}
+			}
+		},
+		"setscheduledisplay": {
+			"name": "setscheduledisplay",
+			"description": "Sets whether maintenance schedules are displayed in server status messages.",
+			"options": {
+				"enable": {
+					"name": "enable",
+					"description": "True: Enable / False: Disable"
 				}
 			}
 		},

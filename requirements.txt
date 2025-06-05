@@ -2,7 +2,7 @@
 #    uv export -o requirements.txt --no-hashes
 aiohappyeyeballs==2.6.1
     # via aiohttp
-aiohttp==3.12.3
+aiohttp==3.12.6
     # via py-cord
 aiosignal==1.3.2
     # via aiohttp
@@ -51,7 +51,9 @@ pymongo==4.13.0
     # via r6sss-discord
 python-box==7.3.2
     # via r6sss-discord
-r6sss @ git+https://github.com/Milkeyyy/R6SSS_Python@93e0f6c525274343f1b3d771d31c123d3d4ba24e
+python-dotenv==1.1.0
+    # via r6sss-discord
+r6sss @ git+https://github.com/Milkeyyy/R6SSS_Python@e4081cf9f189c5e1e181835f3d525d081e1404b3
     # via r6sss-discord
 six==1.17.0
     # via r6sss-discord
