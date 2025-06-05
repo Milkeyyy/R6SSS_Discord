@@ -30,7 +30,7 @@ class ServerStatusEmbedManager(commands.Cog):
 		schedule_data = None  # 現在のメンテナンススケジュール情報
 		# 各言語のサーバーステータス埋め込みメッセージのリスト
 		# 言語コードをキーとする辞書 値はリスト (ステータスの埋め込みリスト, メンテナンススケジュールの埋め込みリスト)
-		status_embeds = {}
+		status_embeds: dict[str, list[list[discord.Embed]]] = {}
 		notif_embeds = []  # サーバーステータス通知埋め込みメッセージのリスト
 
 		# Heartbeatイベントを送信 (サーバーステータスの更新が開始されたことを報告)
@@ -158,10 +158,10 @@ class ServerStatusEmbedManager(commands.Cog):
 								# メンテナンススケジュールの埋め込みが生成されているかつ
 								# 表示設定が有効な場合はメンテナンススケジュールの埋め込みを追加する
 								if schedule_display and len(target_embeds) >= 2:  # noqa: PLR2004
-									await msg.edit(embeds=target_embeds[0])
+									await msg.edit(embeds=target_embeds[0] + target_embeds[1])
 								# メンテナンススケジュール埋め込みなし (ステータス埋め込みのみ)
 								else:
-									await msg.edit(embeds=target_embeds[0:1])
+									await msg.edit(embeds=target_embeds[0])
 							else:
 								logger.error("サーバーステータスメッセージの取得失敗: 言語 %s の埋め込みメッセージが存在しません", lang)
 						except Exception as e:
