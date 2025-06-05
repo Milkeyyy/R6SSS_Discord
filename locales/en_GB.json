@@ -79,14 +79,14 @@
 		"Cmd_setnotification_AutoDelete_Seconds": "{0} seconds",
 		"Cmd_setnotification_RoleIsNotMentionable": "Mentioning the specified role is not allowed.",
 		"Cmd_setscheduledisplay_Success": "Display of maintenance schedule in server status messages has been set to `{0}`.",
-		"Cmd_viewsettings_CurrentSettings": "現在の設定",
-		"Cmd_viewsettings_ServerStatusMessage": "サーバーステータスメッセージ",
-		"Cmd_viewsettings_ServerStatusMessage_Created": "作成済み",
-		"Cmd_viewsettings_ServerStatusMessage_None": "なし",
-		"Cmd_viewsettings_Indicator": "ステータスインジケーターの表示",
-		"Cmd_viewsettings_MaintenanceSchedule": "メンテナンススケジュールの表示",
-		"Cmd_viewsettings_Notification": "通知",
-		"Cmd_viewsettings_Language": "言語",
+		"Cmd_viewsettings_CurrentSettings": "Current Settings",
+		"Cmd_viewsettings_ServerStatusMessage": "Server Status Message",
+		"Cmd_viewsettings_ServerStatusMessage_Created": "Created",
+		"Cmd_viewsettings_ServerStatusMessage_None": "None",
+		"Cmd_viewsettings_Indicator": "Status Indicator Display",
+		"Cmd_viewsettings_MaintenanceSchedule": "Maintenance Schedule Display",
+		"Cmd_viewsettings_Notification": "Notifications",
+		"Cmd_viewsettings_Language": "Language",
 		"Cmd_create_Success": "A server status message has been sent to the text channel {0}.\nThis message will be updated automatically from now on.",
 		"Cmd_create_OldMessagesWillNoLongerBeUpdated": "Any old messages you have previously sent will no longer be updated."
 	},
@@ -147,11 +147,11 @@
 		},
 		"setscheduledisplay": {
 			"name": "setscheduledisplay",
-			"description": "Sets whether maintenance schedules are displayed in server status messages.",
+			"description": "サーバーステータスメッセージにメンテナンススケジュールを表示するかどうかを設定します。",
 			"options": {
 				"enable": {
-					"name": "enable",
-					"description": "True: Enable / False: Disable"
+					"name": "有効",
+					"description": "True: 有効 / False: 無効"
 				}
 			}
 		},
