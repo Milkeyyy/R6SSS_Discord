@@ -150,7 +150,7 @@
 			"description": "Sets whether maintenance schedules are displayed in server status messages.",
 			"options": {
 				"enable": {
-					"name": "Enabled",
+					"name": "enable",
 					"description": "True: Enable / False: Disable"
 				}
 			}
