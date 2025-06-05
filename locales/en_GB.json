@@ -145,6 +145,16 @@
 				}
 			}
 		},
+		"setscheduledisplay": {
+			"name": "setscheduledisplay",
+			"description": "Sets whether maintenance schedules are displayed in server status messages.",
+			"options": {
+				"enable": {
+					"name": "enable",
+					"description": "True: Enable / False: Disable"
+				}
+			}
+		},
 		"viewsettings": {
 			"name": "viewsettings",
 			"description": "Displays the current settings."
