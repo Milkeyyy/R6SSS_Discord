@@ -15,8 +15,10 @@ class Indicator(Enum):
 
 class Platform(Enum):
 	PC = "<:PC_Color:1263902627096428604>"
-	PLAYSTATION = "<:PlayStation_Color:1263902647346266112>"
-	XBOX = "<:Xbox_Color:1263902679092953132>"
+	PS4 = "<:PlayStation_Color:1263902647346266112>"
+	PS5 = PS4
+	XB1 = "<:Xbox_Color:1263902679092953132>"
+	XBSX = XB1
 
 
 class Status(Enum):
