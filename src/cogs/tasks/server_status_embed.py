@@ -12,6 +12,7 @@ from config import GuildConfigManager
 from kumasan import KumaSan
 from localizations import Localization
 from logger import logger
+from maintenance_schedule import MaintenanceScheduleManager
 from server_status import ServerStatusManager
 
 
@@ -38,9 +39,11 @@ class ServerStatusEmbedManager(commands.Cog):
 		logger.info("サーバーステータスの更新開始")
 
 		try:
-			# サーバーステータス情報を取得する
+			# サーバーステータス情報とメンテナンススケジュール情報を取得 (更新) する
 			status_data = await ServerStatusManager.get()
-			# 取得できなかった場合は処理を行わずにエラーを出力する
+			schedule_data = await MaintenanceScheduleManager.get()
+
+			# サーバーステータス情報を取得できなかった場合は処理を行わずにエラーを出力する
 			if status_data is None:
 				logger.error("- 更新中止: status_data is None")
 				await KumaSan.ping("pending", "サーバーステータスの更新中止: status_data is None")
