@@ -57,11 +57,17 @@ class ServerStatusEmbedManager(commands.Cog):
 				generated_status_embed = await embeds.ServerStatus.generate_embed(lang_code, status_data)
 				if generated_status_embed:
 					status_embeds[lang_code].append(generated_status_embed)
+				else:
+					logger.error("サーバーステータス埋め込みメッセージの生成に失敗: 言語 %s", lang_code)
+					continue
 
 				# メンテナンススケジュール情報の埋め込みメッセージを生成する
 				generated_schedule_embed = await embeds.MaintenanceSchedule.generate_embed(lang_code, schedule_data)
 				if generated_schedule_embed:
 					status_embeds[lang_code].append(generated_schedule_embed)
+				else:
+					logger.error("メンテナンススケジュール埋め込みメッセージの生成に失敗: 言語 %s", lang_code)
+					continue
 
 				# 以前のサーバーステータス情報が存在する場合はサーバーステータスの通知メッセージを生成する
 				if ServerStatusManager.previous_data is not None:
