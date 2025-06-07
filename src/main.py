@@ -400,31 +400,6 @@ async def testnotification(
 		await ctx.send_followup(embed=embeds.Notification.internal_error())
 
 
-@client.slash_command()
-@discord.guild_only()
-@discord.default_permissions(administrator=True)
-@commands.cooldown(2, 5)
-async def synccommands(ctx: discord.ApplicationContext) -> None:
-	try:
-		if await client.is_owner(ctx.user):
-			await ctx.defer(ephemeral=True)
-			Localization.localize_commands()
-			await client.sync_commands()
-			await ctx.send_followup(content="コマンドを同期しました。")
-		else:
-			await ctx.respond(
-				embed=embeds.Notification.error(
-					description=_("CmdMsg_DontHavePermission_Execution"),
-				),
-			)
-	except Exception:
-		logger.error(traceback.format_exc())
-		await ctx.send_followup(
-			embed=embeds.Notification.internal_error(),
-			ephemeral=True,
-		)
-
-
 # ログイン
 try:
 	# .envファイルが存在する場合はファイルから環境変数を読み込む
