@@ -38,6 +38,9 @@ This bot sends Rainbow Six Siege server status to Discord text channels.
 - `status`
   - Sends the current server status. (Does not auto-update)
 
+- `schedule`
+  - Sends the latest maintenance schedule. (Does not auto-update)
+
 
 ### Admin Commands
 These commands can only be executed by users with server administrator permissions.
