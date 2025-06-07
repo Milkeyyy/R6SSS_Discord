@@ -91,10 +91,6 @@
 		"Cmd_create_OldMessagesWillNoLongerBeUpdated": "以前送信した古いメッセージは更新されなくなります。"
 	},
 	"commands": {
-		"synccommands": {
-			"name": "synccommands",
-			"description": "Owner Only"
-		},
 		"about": {
 			"name": "about",
 			"description": "このBotについての情報を表示します。"
@@ -158,6 +154,10 @@
 		"viewsettings": {
 			"name": "viewsettings",
 			"description": "現在の設定内容を表示します。"
+		},
+		"schedule": {
+			"name": "schedule",
+			"description": "最新のメンテナンススケジュールを送信します。このコマンドで送信されたメンテナンススケジュールは自動更新されません。"
 		},
 		"status": {
 			"name": "status",
