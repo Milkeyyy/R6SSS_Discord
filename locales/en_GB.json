@@ -91,10 +91,6 @@
 		"Cmd_create_OldMessagesWillNoLongerBeUpdated": "Any old messages you have previously sent will no longer be updated."
 	},
 	"commands": {
-		"synccommands": {
-			"name": "synccommands",
-			"description": "Owner Only"
-		},
 		"about": {
 			"name": "about",
 			"description": "Displays information about this bot."
@@ -158,6 +154,10 @@
 		"viewsettings": {
 			"name": "viewsettings",
 			"description": "Displays the current settings."
+		},
+		"schedule": {
+			"name": "schedule",
+			"description": "Sends the latest maintenance schedule. This server status is not updated automatically."
 		},
 		"status": {
 			"name": "status",
