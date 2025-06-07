@@ -157,7 +157,7 @@
 		},
 		"schedule": {
 			"name": "schedule",
-			"description": "最新のメンテナンススケジュールを送信します。このコマンドで送信されたメンテナンススケジュールは自動更新されません。"
+			"description": "Sends the latest maintenance schedule. This server status is not updated automatically."
 		},
 		"status": {
 			"name": "status",
