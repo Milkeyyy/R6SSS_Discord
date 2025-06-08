@@ -73,10 +73,19 @@ async def on_ready() -> None:
 
 	# 内部エラー報告機能の初期化
 	try:
+		logger.info("デバッグ用サーバー/チャンネル取得")
 		debug_gd_id = getenv("DEBUG_GUILD_ID", "")
 		debug_ch_id = getenv("DEBUG_TEXT_CHANNEL_ID", "")
 		InternalErrorReporter.debug_guild = client.get_guild(int(debug_gd_id))
 		InternalErrorReporter.debug_channel = InternalErrorReporter.debug_guild.get_channel(debug_ch_id)
+		if InternalErrorReporter.debug_guild:
+			logger.info("- サーバー: %s (ID: %d)", InternalErrorReporter.debug_guild.name, InternalErrorReporter.debug_guild.id)
+		else:
+			logger.warning("- サーバーが見つかりません: %s", debug_gd_id)
+		if InternalErrorReporter.debug_channel:
+			logger.info("- チャンネル: %s (ID: %d)", InternalErrorReporter.debug_channel.name, InternalErrorReporter.debug_channel.id)
+		else:
+			logger.warning("- チャンネルが見つかりません: %s", debug_ch_id)
 	except Exception:
 		logger.error("内部エラー報告機能の初期化に失敗")
 		logger.error(traceback.format_exc())
