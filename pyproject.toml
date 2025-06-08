@@ -1,6 +1,6 @@
 [project]
 name = "r6sss-discord"
-version = "2.1.1"
+version = "2.2.0"
 description = "R6SSS Discord Bot"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -13,6 +13,7 @@ dependencies = [
     "python-dotenv>=1.1.0",
     "r6sss",
     "six>=1.17.0",
+    "uuid-utils>=0.11.0",
 ]
 
 [tool.uv.sources]

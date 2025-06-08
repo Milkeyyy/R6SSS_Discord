@@ -1,3 +1,4 @@
+import asyncio
 import traceback
 
 import discord
@@ -9,6 +10,7 @@ import icons
 import localizations
 from client import client
 from config import GuildConfigManager
+from db import DBManager
 from kumasan import KumaSan
 from localizations import Localization
 from logger import logger
@@ -32,6 +34,7 @@ class ServerStatusEmbedManager(commands.Cog):
 		# 言語コードをキーとする辞書 値はリスト (ステータスの埋め込みリスト, メンテナンススケジュールの埋め込みリスト)
 		status_embeds: dict[str, list[list[discord.Embed]]] = {}
 		notif_embeds = []  # サーバーステータス通知埋め込みメッセージのリスト
+		msg = None
 
 		# Heartbeatイベントを送信 (サーバーステータスの更新が開始されたことを報告)
 		await KumaSan.ping(state="up", message="サーバーステータスの更新開始")
@@ -116,6 +119,7 @@ class ServerStatusEmbedManager(commands.Cog):
 						logger.info("- 更新実行: #%s", ch_name)
 
 						e = ""
+						msg = None
 						try:
 							# 取得したテキストチャンネルからメッセージを取得する
 							msg = await ch.fetch_message(msg_id)
@@ -190,9 +194,16 @@ class ServerStatusEmbedManager(commands.Cog):
 							if notif_ch is not None:
 								for notif_embed in notif_embeds:
 									if notif_embed is not None:
-										notif_embed.description = f"\
+										# サーバーステータスメッセージが存在する場合は通知埋め込みにリンクを挿入する
+										if msg is not None:
+											notif_embed.description = f"\
 [**📶 {localizations.translate('Notification_Show_Server_Status', lang=lang)}**]\
 ({msg.jump_url})\n{notif_embed.description}"
+										# 存在しない場合は公式サービスステータスページのURLにする
+										else:
+											notif_embed.description = f"\
+[**📶 {localizations.translate('Notification_Show_Server_Status', lang=lang)}**]\
+({localizations.translate('Resources_OfficialServicerStatusPage')})\n{notif_embed.description}"
 								if len(notif_embeds) >= 1:
 									# 自動削除が有効の場合は削除までの時間を指定する
 									notif_delete_after_seconds = int(gc.server_status_notification.auto_delete)
@@ -258,6 +269,10 @@ class ServerStatusEmbedManager(commands.Cog):
 		logger.info("- クライアントの準備完了まで待機中")
 		await self.bot.wait_until_ready()
 		logger.info("- クライアントの準備完了")
+		logger.info("- データベースの接続待機中")
+		while not DBManager.connected:
+			await asyncio.sleep(1)
+		logger.info("- データベースの接続完了")
 		logger.info("定期更新開始")
 
 

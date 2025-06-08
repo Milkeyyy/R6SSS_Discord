@@ -8,6 +8,7 @@ from pycord.i18n import _
 import embeds
 from client import client
 from config import GuildConfigManager
+from internal_error_reporter import InternalErrorReporter
 from localizations import Localization
 from logger import logger
 
@@ -38,7 +39,12 @@ class SettingsCommands(commands.Cog):
 			# ギルドコンフィグを取得する
 			gc = await GuildConfigManager.get(ctx.guild.id)
 			if gc is None:
-				await ctx.send_followup(embed=embeds.Notification.internal_error(description=_("CmdMsg_FailedToGetConfig")))
+				await ctx.send_followup(
+					embed=embeds.Notification.internal_error(
+						description=_("CmdMsg_FailedToGetConfig"),
+						error_code=await InternalErrorReporter.report("FailedToGetGuildConfig"),
+					)
+				)
 				return
 
 			if locale in Localization.LOCALE_DATA:
@@ -67,7 +73,9 @@ class SettingsCommands(commands.Cog):
 				gc.server_status_message.language = "en_GB"
 				await GuildConfigManager.update(ctx.guild.id, gc)
 			logger.error(traceback.format_exc())
-			await ctx.send_followup(embed=embeds.Notification.internal_error())
+			await ctx.send_followup(
+				embed=embeds.Notification.internal_error(error_code=await InternalErrorReporter.report(traceback.format_exc()))
+			)
 
 	@commands.slash_command()
 	@discord.guild_only()
@@ -86,7 +94,12 @@ class SettingsCommands(commands.Cog):
 			# ギルドコンフィグを取得する
 			gc = await GuildConfigManager.get(ctx.guild.id)
 			if gc is None:
-				await ctx.send_followup(embed=embeds.Notification.internal_error(description=_("CmdMsg_FailedToGetConfig")))
+				await ctx.send_followup(
+					embed=embeds.Notification.internal_error(
+						description=_("CmdMsg_FailedToGetConfig"),
+						error_code=await InternalErrorReporter.report("FailedToGetGuildConfig"),
+					)
+				)
 				return
 
 			gc.server_status_message.status_indicator = enable
@@ -104,7 +117,9 @@ class SettingsCommands(commands.Cog):
 				gc.server_status_message.status_indicator = False
 				await GuildConfigManager.update(ctx.guild.id, gc)
 			logger.error(traceback.format_exc())
-			await ctx.send_followup(embed=embeds.Notification.internal_error())
+			await ctx.send_followup(
+				embed=embeds.Notification.internal_error(error_code=await InternalErrorReporter.report(traceback.format_exc()))
+			)
 
 	@commands.slash_command()
 	@discord.guild_only()
@@ -129,7 +144,12 @@ class SettingsCommands(commands.Cog):
 			# ギルドコンフィグを取得する
 			gc = await GuildConfigManager.get(ctx.guild.id)
 			if gc is None:
-				await ctx.send_followup(embed=embeds.Notification.internal_error(description=_("CmdMsg_FailedToGetConfig")))
+				await ctx.send_followup(
+					embed=embeds.Notification.internal_error(
+						description=_("CmdMsg_FailedToGetConfig"),
+						error_code=await InternalErrorReporter.report("FailedToGetGuildConfig"),
+					)
+				)
 				return
 
 			# 有効化
@@ -207,7 +227,9 @@ class SettingsCommands(commands.Cog):
 				gc.server_status_notification.auto_delete = 0
 				await GuildConfigManager.update(ctx.guild.id, gc)
 			logger.error(traceback.format_exc())
-			await ctx.send_followup(embed=embeds.Notification.internal_error())
+			await ctx.send_followup(
+				embed=embeds.Notification.internal_error(error_code=await InternalErrorReporter.report(traceback.format_exc()))
+			)
 
 	@commands.slash_command()
 	@discord.guild_only()
@@ -226,7 +248,12 @@ class SettingsCommands(commands.Cog):
 			# ギルドコンフィグを取得する
 			gc = await GuildConfigManager.get(ctx.guild.id)
 			if gc is None:
-				await ctx.send_followup(embed=embeds.Notification.internal_error(description=_("CmdMsg_FailedToGetConfig")))
+				await ctx.send_followup(
+					embed=embeds.Notification.internal_error(
+						description=_("CmdMsg_FailedToGetConfig"),
+						error_code=await InternalErrorReporter.report("FailedToGetGuildConfig"),
+					)
+				)
 				return
 
 			gc.server_status_message.maintenance_schedule = enable
@@ -244,7 +271,9 @@ class SettingsCommands(commands.Cog):
 				gc.server_status_message.maintenance_schedule = True
 				await GuildConfigManager.update(ctx.guild.id, gc)
 			logger.error(traceback.format_exc())
-			await ctx.send_followup(embed=embeds.Notification.internal_error())
+			await ctx.send_followup(
+				embed=embeds.Notification.internal_error(error_code=await InternalErrorReporter.report(traceback.format_exc()))
+			)
 
 	@commands.slash_command()
 	@discord.guild_only()
@@ -258,17 +287,27 @@ class SettingsCommands(commands.Cog):
 			# ギルドコンフィグを取得する
 			gc = await GuildConfigManager.get(ctx.guild.id)
 			if gc is None:
-				await ctx.send_followup(embed=embeds.Notification.internal_error(description=_("CmdMsg_FailedToGetConfig")))
+				await ctx.send_followup(
+					embed=embeds.Notification.internal_error(
+						description=_("CmdMsg_FailedToGetConfig"),
+						error_code=await InternalErrorReporter.report("FailedToGetGuildConfig"),
+					)
+				)
 				return
 
 			# 埋め込みメッセージを生成
 			embed = discord.Embed(title=":gear: " + _("Cmd_viewsettings_CurrentSettings"))
+
 			# 作成されたサーバーステータスメッセージ(とそのテキストチャンネル)を取得する
 			status_msg_ch = client.get_channel(int(gc.server_status_message.channel_id))
 			if status_msg_ch:
-				status_msg = await status_msg_ch.fetch_message(int(gc.server_status_message.message_id))
+				try:
+					status_msg = await status_msg_ch.fetch_message(int(gc.server_status_message.message_id))
+				except discord.errors.NotFound:
+					status_msg = None
 			else:
 				status_msg = None
+
 			embed.add_field(
 				name=f":envelope: {_('Cmd_viewsettings_ServerStatusMessage')}",
 				value=f"[**{_('Cmd_viewsettings_ServerStatusMessage_Created')}**]({status_msg.jump_url})"
@@ -276,6 +315,7 @@ class SettingsCommands(commands.Cog):
 				else f"**{_('Cmd_viewsettings_ServerStatusMessage_None')}**",
 				inline=False,
 			)
+
 			# メンテナンススケジュールの表示
 			embed.add_field(
 				name=f":calendar: {_('Cmd_viewsettings_MaintenanceSchedule')}",
@@ -324,7 +364,9 @@ class SettingsCommands(commands.Cog):
 			await ctx.send_followup(embed=embed)
 		except Exception:
 			logger.error(traceback.format_exc())
-			await ctx.send_followup(embed=embeds.Notification.internal_error())
+			await ctx.send_followup(
+				embed=embeds.Notification.internal_error(error_code=await InternalErrorReporter.report(traceback.format_exc()))
+			)
 
 
 def setup(bot: discord.Bot) -> None:

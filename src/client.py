@@ -3,7 +3,7 @@ import os
 from discord import Bot
 
 NAME = "R6SSS"
-VERSION = (2, 1, 1)
+VERSION = (2, 2, 0)
 VERSION_STRING = ".".join(map(str, VERSION))
 COPYRIGHT = "Copyright (C) 2025 Milkeyyy"
 
