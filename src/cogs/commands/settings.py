@@ -263,12 +263,17 @@ class SettingsCommands(commands.Cog):
 
 			# 埋め込みメッセージを生成
 			embed = discord.Embed(title=":gear: " + _("Cmd_viewsettings_CurrentSettings"))
+
 			# 作成されたサーバーステータスメッセージ(とそのテキストチャンネル)を取得する
 			status_msg_ch = client.get_channel(int(gc.server_status_message.channel_id))
 			if status_msg_ch:
-				status_msg = await status_msg_ch.fetch_message(int(gc.server_status_message.message_id))
+				try:
+					status_msg = await status_msg_ch.fetch_message(int(gc.server_status_message.message_id))
+				except discord.errors.NotFound:
+					status_msg = None
 			else:
 				status_msg = None
+
 			embed.add_field(
 				name=f":envelope: {_('Cmd_viewsettings_ServerStatusMessage')}",
 				value=f"[**{_('Cmd_viewsettings_ServerStatusMessage_Created')}**]({status_msg.jump_url})"
@@ -276,6 +281,7 @@ class SettingsCommands(commands.Cog):
 				else f"**{_('Cmd_viewsettings_ServerStatusMessage_None')}**",
 				inline=False,
 			)
+
 			# メンテナンススケジュールの表示
 			embed.add_field(
 				name=f":calendar: {_('Cmd_viewsettings_MaintenanceSchedule')}",
