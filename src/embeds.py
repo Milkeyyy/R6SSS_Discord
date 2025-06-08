@@ -58,7 +58,7 @@ class Notification:
 		)
 		# エラーコードが渡された場合は先頭に挿入する
 		if error_code:
-			embed.description = f"{embed.description}\n\n> Error Code\n> ```{error_code}```"
+			embed.description = f"{embed.description}\n\n> :pencil: Error Code\n> ```{error_code}```"
 		return embed
 
 	@classmethod
