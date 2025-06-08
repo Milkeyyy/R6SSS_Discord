@@ -3,6 +3,7 @@
 		"name": "English (United Kingdom)"
 	},
 	"strings": {
+		"Resources_OfficialServicerStatusPage": "https://www.ubisoft.com/ja-jp/game/rainbow-six/siege/status",
 		"True": "Enabled",
 		"False": "Disabled",
 		"No Issues": "No Issues",
