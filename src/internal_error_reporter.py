@@ -21,7 +21,9 @@ class InternalErrorReporter:
 			# エラーコードを生成
 			error_code = str(uuid.uuid7())
 			await cls.debug_channel.send(
-				embed=embeds.Notification.internal_error(description=f"エラーコード: `{error_code}`\n```{traceback_text}```")
+				embed=embeds.Notification.internal_error(
+					description=f"エラーコード\n```{error_code}```\nトレースバック\n```{traceback_text}```"
+				)
 			)
 			return error_code
 		except Exception:
