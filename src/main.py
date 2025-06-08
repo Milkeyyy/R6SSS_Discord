@@ -77,7 +77,7 @@ async def on_ready() -> None:
 		debug_gd_id = getenv("DEBUG_GUILD_ID", "")
 		debug_ch_id = getenv("DEBUG_TEXT_CHANNEL_ID", "")
 		InternalErrorReporter.debug_guild = client.get_guild(int(debug_gd_id))
-		InternalErrorReporter.debug_channel = InternalErrorReporter.debug_guild.get_channel(debug_ch_id)
+		InternalErrorReporter.debug_channel = InternalErrorReporter.debug_guild.fetch_channel(debug_ch_id)
 		if InternalErrorReporter.debug_guild:
 			logger.info("- サーバー: %s (ID: %d)", InternalErrorReporter.debug_guild.name, InternalErrorReporter.debug_guild.id)
 		else:
