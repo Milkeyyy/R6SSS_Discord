@@ -16,13 +16,11 @@ class DBManager:
 	_client: pymongo.AsyncMongoClient
 	db: pymongo.asynchronous.database.AsyncDatabase
 	col: pymongo.asynchronous.collection.AsyncCollection
-	event: asyncio.Event
 	connected: bool = False
 
 	@classmethod
 	async def connect(cls) -> None:
 		"""データベースへ接続する"""
-		cls.event = asyncio.Event()
 		try:
 			# データベース情報が設定されているかチェックする
 			db_uri = getenv("DB_URI")
@@ -49,7 +47,6 @@ class DBManager:
 
 			# 接続完了通知
 			cls.connected = True
-			cls.event.set()
 		except Exception:
 			logger.error("データベース接続失敗")
 			logger.error(traceback.format_exc())

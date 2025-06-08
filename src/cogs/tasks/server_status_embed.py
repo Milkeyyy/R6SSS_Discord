@@ -270,9 +270,8 @@ class ServerStatusEmbedManager(commands.Cog):
 		await self.bot.wait_until_ready()
 		logger.info("- クライアントの準備完了")
 		logger.info("- データベースの接続待機中")
-		while not DBManager.event:
-			pass
-		await DBManager.event.wait()
+		while not DBManager.connected:
+			await asyncio.sleep(1)
 		logger.info("- データベースの接続完了")
 		logger.info("定期更新開始")
 
