@@ -16,7 +16,7 @@ class DBManager:
 	_client: pymongo.AsyncMongoClient
 	db: pymongo.asynchronous.database.AsyncDatabase
 	col: pymongo.asynchronous.collection.AsyncCollection
-	event: asyncio.Event = asyncio.Event()
+	event: asyncio.Event
 	connected: bool = False
 
 	@classmethod
