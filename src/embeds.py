@@ -49,13 +49,17 @@ class Notification:
 		)
 
 	@classmethod
-	def internal_error(cls, description: str | None = None) -> discord.Embed:
+	def internal_error(cls, description: str | None = None, error_code: str | None = None) -> discord.Embed:
 		"""内部エラー発生時用埋め込みメッセージ"""
-		return discord.Embed(
+		embed = discord.Embed(
 			title=":closed_book: " + _("CmdMsg_InternalError"),
 			description=description if description else _("CmdMsg_InternalError_Description"),
 			colour=discord.Colour.from_rgb(205, 61, 66),
 		)
+		# エラーコードが渡された場合は先頭に挿入する
+		if error_code:
+			embed.description = f"Error Code\n```{error_code}```\n{embed.description}"
+		return embed
 
 	@classmethod
 	def get_by_comparison_result(
