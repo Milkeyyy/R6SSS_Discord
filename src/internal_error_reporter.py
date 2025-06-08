@@ -1,7 +1,6 @@
 import traceback
 
 import discord
-import discord.types
 import uuid_utils as uuid
 
 import embeds
