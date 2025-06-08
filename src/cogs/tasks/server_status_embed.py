@@ -1,3 +1,4 @@
+import asyncio
 import traceback
 
 import discord
@@ -9,6 +10,7 @@ import icons
 import localizations
 from client import client
 from config import GuildConfigManager
+from db import DBManager
 from kumasan import KumaSan
 from localizations import Localization
 from logger import logger
@@ -267,6 +269,9 @@ class ServerStatusEmbedManager(commands.Cog):
 		logger.info("- クライアントの準備完了まで待機中")
 		await self.bot.wait_until_ready()
 		logger.info("- クライアントの準備完了")
+		logger.info("- データベースの接続待機中")
+		await DBManager.event.wait()
+		logger.info("- データベースの接続完了")
 		logger.info("定期更新開始")
 
 
