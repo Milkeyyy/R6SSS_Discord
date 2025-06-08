@@ -243,11 +243,7 @@ async def create(
 
 			# サーバーステータス埋め込みメッセージ生成してを送信する (作成)
 			msg = await ch.send(
-				embeds=await embeds.ServerStatus.generate_embed(
-					gc.server_status_message.language,
-					status_data,
-					schedule_data,
-				),
+				embeds=await embeds.ServerStatus.generate_embed(gc.server_status_message.language, status_data),
 			)
 
 			# 送信したチャンネルとメッセージのIDをギルドデータへ保存する
