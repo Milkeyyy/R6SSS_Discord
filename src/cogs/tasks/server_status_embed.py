@@ -194,18 +194,18 @@ class ServerStatusEmbedManager(commands.Cog):
 
 							# 通知送信先テキストチャンネルが存在する場合は通知メッセージの送信を実行する
 							if notif_ch is not None:
-								for notif_embed in notif_embeds:
-									if notif_embed is not None:
-										# サーバーステータスメッセージが存在する場合は通知埋め込みにリンクを挿入する
-										if msg is not None:
-											notif_embed.description = f"\
-[**📶 {localizations.translate('Notification_Show_Server_Status', lang=lang)}**]\
-({msg.jump_url})\n{notif_embed.description}"
-										# 存在しない場合は公式サービスステータスページのURLにする
-										else:
-											notif_embed.description = f"\
-[**📶 {localizations.translate('Notification_Show_Server_Status', lang=lang)}**]\
-({localizations.translate('Resources_OfficialServicerStatusPage')})\n{notif_embed.description}"
+								# 								for notif_embed in notif_embeds:
+								# 									if notif_embed is not None:
+								# 										# サーバーステータスメッセージが存在する場合は通知埋め込みにリンクを挿入する
+								# 										if msg is not None:
+								# 											notif_embed.description = f"\
+								# [**📶 {localizations.translate('Notification_Show_Server_Status', lang=lang)}**]\
+								# ({msg.jump_url})\n{notif_embed.description}"
+								# 										# 存在しない場合は公式サービスステータスページのURLにする
+								# 										else:
+								# 											notif_embed.description = f"\
+								# [**📶 {localizations.translate('Notification_Show_Server_Status', lang=lang)}**]\
+								# ({localizations.translate('Resources_OfficialServicerStatusPage')})\n{notif_embed.description}"
 								if len(notif_embeds) >= 1:
 									# 自動削除が有効の場合は削除までの時間を指定する
 									notif_delete_after_seconds = int(gc.server_status_notification.auto_delete)
