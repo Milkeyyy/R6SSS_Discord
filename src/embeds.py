@@ -183,10 +183,9 @@ class Notification:
 		else:
 			embed = None
 
-		# 対象プラットフォームのフィールドを先頭へ挿入
+		# 対象プラットフォームのフィールドを末尾へ挿入
 		if embed is not None:
-			embed.fields.insert(
-				0,
+			embed.fields.append(
 				discord.EmbedField(
 					name=":video_game: " + localizations.translate("TargetPlatform", lang=lang),
 					value=target_platforms_text,
