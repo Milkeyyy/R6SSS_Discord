@@ -475,21 +475,23 @@ class MaintenanceSchedule:
 				# 埋め込みメッセージを一覧へ追加
 				embeds.append(embed)
 
+				logger.info("メンテナンススケジュール埋め込みメッセージ生成終了")
+				return embeds
+
 		# 予定されているメンテナンスがない場合の埋め込みメッセージ
-		else:
-			embed = discord.Embed(
-				colour=discord.colour.Colour.nitro_pink(),
-				title=":wrench::calendar: " + localizations.translate("MaintenanceSchedule", lang=locale),
-				description=localizations.translate(
-					"MaintenanceSchedule_NoMaintenanceScheduled",
-					lang=locale,
-				),
-				footer=discord.EmbedFooter(
-					"⚠️\n" + localizations.translate("MaintenanceSchedule_Notes", lang=locale),
-				),
-			)
-			# 埋め込みメッセージを一覧へ追加
-			embeds.append(embed)
+		embed = discord.Embed(
+			colour=discord.colour.Colour.nitro_pink(),
+			title=":wrench::calendar: " + localizations.translate("MaintenanceSchedule", lang=locale),
+			description=localizations.translate(
+				"MaintenanceSchedule_NoMaintenanceScheduled",
+				lang=locale,
+			),
+			footer=discord.EmbedFooter(
+				"⚠️\n" + localizations.translate("MaintenanceSchedule_Notes", lang=locale),
+			),
+		)
+		# 埋め込みメッセージを一覧へ追加
+		embeds.append(embed)
 
 		# メンテナンススケジュールの埋め込みメッセージを一覧へ追加して埋め込みメッセージ一覧を返す
 		logger.info("メンテナンススケジュール埋め込みメッセージ生成終了")
