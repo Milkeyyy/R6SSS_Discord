@@ -28,7 +28,7 @@ class App:
 	@classmethod
 	def load_pyproject(cls) -> None:
 		"""pyproject.toml からアプリの情報を読み込む"""
-		with Path("./pyproject.toml").open("rb", encoding="utf-8") as f:
+		with Path("./pyproject.toml").open("rb") as f:
 			d = tomllib.load(f)
 		cls.NAME = d["project"]["description"]
 		cls.VERSION = d["project"]["version"].split(".")
