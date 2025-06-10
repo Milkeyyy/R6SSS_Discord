@@ -49,7 +49,7 @@
 		"MaintenanceSchedule": "メンテナンススケジュール",
 		"MaintenanceSchedule_Notes": "この情報は Google Generative AI (Gemini) によって抽出されたものです。\n情報の正確性は保証されません。",
 		"MaintenanceSchedule_Downtime": "ダウンタイム",
-		"MaintenanceSchedule_Downtime_Minute": "分",
+		"MaintenanceSchedule_Downtime_Minute": "約 {0} 分",
 		"MaintenanceSchedule_PlannedMaintenance": "予定されているメンテナンス",
 		"MaintenanceSchedule_ScheduledDT": "予定日時",
 		"MaintenanceSchedule_TargetPlatform": "対象プラットフォーム",

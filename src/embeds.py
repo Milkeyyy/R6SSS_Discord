@@ -394,10 +394,9 @@ class MaintenanceSchedule:
 							)
 							+ "**",
 							value="- "
-							+ str(schedule_data.downtime)
-							+ " "
 							+ localizations.translate(
 								"MaintenanceSchedule_Downtime_Minute",
+								[str(schedule_data.downtime)],
 								lang=locale,
 							),
 						),
