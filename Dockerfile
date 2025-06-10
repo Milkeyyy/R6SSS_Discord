@@ -21,6 +21,7 @@ COPY src/*.py /code/src/
 COPY src/cogs/commands/*.py /code/src/cogs/commands/
 COPY src/cogs/tasks/*.py /code/src/cogs/tasks/
 COPY locales/*.json /code/locales/
+COPY pyproject.toml /code/
 
 # 
 CMD ["python", "/code/src/main.py"]

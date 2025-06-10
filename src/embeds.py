@@ -64,8 +64,9 @@ class Notification:
 	@classmethod
 	def get_by_comparison_result(
 		cls,
-		result: r6sss.comparison.ComparisonResult,
+		result: r6sss.types.ComparisonResult,
 		lang: str,
+		schedule_data: r6sss.types.MaintenanceSchedule | None = None,
 	) -> discord.Embed | None:
 		"""サーバーステータスの比較結果から通知用のEmbedを生成する"""
 		if ServerStatusManager.data is None or client.user is None:
@@ -94,33 +95,75 @@ class Notification:
 		embed = None
 
 		# メンテナンス開始
-		if result.detail == r6sss.comparison.ComparisonDetail.START_MAINTENANCE:
+		if result.detail == r6sss.types.ComparisonDetail.START_MAINTENANCE:
 			embed = discord.Embed(
-				color=discord.Colour.light_grey(),
+				color=discord.Colour.lighter_grey(),
 				title=localizations.translate("Title_Maintenance_Start", lang=lang),
-				# description="**" + localizations.translate("TargetPlatform", lang=lang) + ": " + target_platforms_text + "**",
 				author=embed_author,
 			)
 		# メンテナンス終了
-		elif result.detail == r6sss.comparison.ComparisonDetail.END_MAINTENANCE:
+		elif result.detail == r6sss.types.ComparisonDetail.END_MAINTENANCE:
 			embed = discord.Embed(
-				color=discord.Colour.light_grey(),
+				color=discord.Colour.lighter_grey(),
 				title=localizations.translate("Title_Maintenance_End", lang=lang),
-				# description="**" + localizations.translate("TargetPlatform", lang=lang) + ": " + target_platforms_text + "**",
 				author=embed_author,
 			)
 
-		# TODO: 計画メンテナンス開始/終了の場合の処理を実装する
+		# 計画メンテナンス開始
+		elif result.detail == r6sss.types.ComparisonDetail.SCHEDULED_MAINTENANCE_START:
+			embed = discord.Embed(
+				color=discord.Colour.blue(),
+				title=localizations.translate("Title_ScheduledMaintenance_Start", lang=lang),
+				author=embed_author,
+			)
+			if schedule_data is not None:
+				# メンテナンススケジュールの情報を追加する
+				embed.fields.append(  # ダウンタイム
+					discord.EmbedField(
+						name=":clock3: " + localizations.translate("MaintenanceSchedule_Downtime", lang=lang),
+						value=localizations.translate("MaintenanceSchedule_Downtime_Minute", [str(schedule_data.downtime)], lang=lang),
+					),
+				)
+				embed.fields.append(  # パッチノート
+					discord.EmbedField(
+						name=":notepad_spiral: " + localizations.translate("MaintenanceSchedule_PatchNotes", lang=lang),
+						value=schedule_data.patchnotes
+						if schedule_data.patchnotes.strip() != ""
+						else localizations.translate("None", lang=lang),
+					),
+				)
+		# 計画メンテナンス終了
+		elif result.detail == r6sss.types.ComparisonDetail.SCHEDULED_MAINTENANCE_END:
+			embed = discord.Embed(
+				color=discord.Colour.blue(),
+				title=localizations.translate("Title_ScheduledMaintenance_End", lang=lang),
+				author=embed_author,
+			)
+			if schedule_data is not None:
+				# メンテナンススケジュールの情報を追加する
+				embed.fields.append(  # ダウンタイム
+					discord.EmbedField(
+						name=":clock3: " + localizations.translate("MaintenanceSchedule_Downtime", lang=lang),
+						value=localizations.translate("MaintenanceSchedule_Downtime_Minute", [str(schedule_data.downtime)], lang=lang),
+					),
+				)
+				embed.fields.append(  # パッチノート
+					discord.EmbedField(
+						name=":notepad_spiral: " + localizations.translate("MaintenanceSchedule_PatchNotes", lang=lang),
+						value=schedule_data.patchnotes
+						if schedule_data.patchnotes.strip() != ""
+						else localizations.translate("None", lang=lang),
+					),
+				)
 
 		# すべての機能の問題が解消
-		elif result.detail == r6sss.comparison.ComparisonDetail.ALL_FEATURES_OUTAGE_RESOLVED:
+		elif result.detail == r6sss.types.ComparisonDetail.ALL_FEATURES_OUTAGE_RESOLVED:
 			embed = discord.Embed(
 				color=discord.Colour.green(),
 				title=localizations.translate(
 					"Title_AllFeaturesOutageResolved",
 					lang=lang,
 				),
-				# description="**" + localizations.translate("TargetPlatform", lang=lang) + ": " + target_platforms_text + "**",
 				author=embed_author,
 			)
 			embed.add_field(
@@ -131,23 +174,22 @@ class Notification:
 				value="- " + "\n- ".join(result.resolved_impacted_features),
 			)
 		# すべての機能で問題が発生中
-		elif result.detail == r6sss.comparison.ComparisonDetail.ALL_FEATURES_OUTAGE:
+		elif result.detail == r6sss.types.ComparisonDetail.ALL_FEATURES_OUTAGE:
 			embed = discord.Embed(
 				color=discord.Colour.red(),
 				title=localizations.translate("Title_AllFeaturesOutage", lang=lang),
-				# description="**" + localizations.translate("TargetPlatform", lang=lang) + ": " + target_platforms_text + "**",
 				author=embed_author,
 			)
 			embed.add_field(
 				name=localizations.translate("Detail_ImpactedFeatures", lang=lang),
 				value="- " + "\n- ".join(impacted_features_list),
 			)
+
 		# 一部の機能で問題が発生中
-		elif result.detail == r6sss.comparison.ComparisonDetail.SOME_FEATURES_OUTAGE:
+		elif result.detail == r6sss.types.ComparisonDetail.SOME_FEATURES_OUTAGE:
 			embed = discord.Embed(
 				color=discord.Colour.yellow(),
 				title=localizations.translate("Title_SomeFeaturesOutage", lang=lang),
-				# description="**" + localizations.translate("TargetPlatform", lang=lang) + ": " + target_platforms_text + "**",
 				author=embed_author,
 			)
 			embed.add_field(
@@ -155,14 +197,13 @@ class Notification:
 				value="- " + "\n- ".join(impacted_features_list),
 			)
 		# 一部の機能で問題が解消 (影響を受ける機能が変わった)
-		elif result.detail == r6sss.comparison.ComparisonDetail.SOME_FEATURES_OUTAGE_RESOLVED:
+		elif result.detail == r6sss.types.ComparisonDetail.SOME_FEATURES_OUTAGE_RESOLVED:
 			embed = discord.Embed(
 				color=discord.Colour.yellow(),
 				title=localizations.translate(
 					"Title_SomeFeaturesOutageResolved",
 					lang=lang,
 				),
-				# description="**" + localizations.translate("TargetPlatform", lang=lang) + ": " + target_platforms_text + "**",
 				author=embed_author,
 			)
 			embed.add_field(
@@ -179,10 +220,9 @@ class Notification:
 		else:
 			embed = None
 
-		# 対象プラットフォームのフィールドを先頭へ挿入
+		# 対象プラットフォームのフィールドを末尾へ挿入
 		if embed is not None:
-			embed.fields.insert(
-				0,
+			embed.fields.append(
 				discord.EmbedField(
 					name=":video_game: " + localizations.translate("TargetPlatform", lang=lang),
 					value=target_platforms_text,
@@ -391,10 +431,9 @@ class MaintenanceSchedule:
 							)
 							+ "**",
 							value="- "
-							+ str(schedule_data.downtime)
-							+ " "
 							+ localizations.translate(
 								"MaintenanceSchedule_Downtime_Minute",
+								[str(schedule_data.downtime)],
 								lang=locale,
 							),
 						),
