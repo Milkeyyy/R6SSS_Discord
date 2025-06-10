@@ -397,6 +397,7 @@ async def testnotification(
 				)
 
 			status_data = ServerStatusManager.data
+			schedule_data = MaintenanceScheduleManager.data
 
 			# サーバーステータスが None の場合はエラーメッセージを返す
 			if status_data is None:
@@ -412,6 +413,7 @@ async def testnotification(
 			compare_result = r6sss.compare_server_status(
 				status_data,
 				status_list,
+				schedule_data,
 			)
 
 			# 通知メッセージを送信
@@ -419,7 +421,7 @@ async def testnotification(
 			for result in compare_result:
 				await ctx.channel.send(
 					content=f"Test notification message\nType: `{result.detail}`",
-					embed=embeds.Notification.get_by_comparison_result(result, "ja"),
+					embed=embeds.Notification.get_by_comparison_result(result, "ja", schedule_data),
 				)
 		else:
 			await ctx.respond(

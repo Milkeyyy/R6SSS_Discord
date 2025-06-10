@@ -74,9 +74,11 @@ class ServerStatusEmbedManager(commands.Cog):
 
 				# 以前のサーバーステータス情報が存在する場合はサーバーステータスの通知メッセージを生成する
 				if ServerStatusManager.previous_data is not None:
-					compare_result = r6sss.compare_server_status(ServerStatusManager.previous_data, status_data)
+					compare_result = r6sss.compare_server_status(ServerStatusManager.previous_data, status_data, schedule_data)
 					# ステータスの比較結果一覧から通知用の埋め込みメッセージを生成する
-					notif_embeds = [embeds.Notification.get_by_comparison_result(result, lang_code) for result in compare_result]
+					notif_embeds = [
+						embeds.Notification.get_by_comparison_result(result, lang_code, schedule_data) for result in compare_result
+					]
 
 			# 各ギルドの埋め込みメッセージIDチェック、存在する場合はメッセージを更新する
 			for guild in client.guilds:
