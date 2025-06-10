@@ -5,8 +5,7 @@
 Discordのテキストチャンネルにレインボーシックス シージ エックスのサーバーステータスを送信してくれるBotです。
 
 
-<img src="https://github.com/user-attachments/assets/f65b79d4-a494-426d-a969-79df679309f8" width="40%" />
-<img src="https://github.com/user-attachments/assets/e09cd902-1807-4781-8c83-96613592938b" width="40%" />
+<img src="https://github.com/user-attachments/assets/e8c49ff2-32ad-49e2-ba60-85ba642fed07" width="40%" />
 
 ---
 
