@@ -1,4 +1,3 @@
-import asyncio
 import sys
 import traceback
 from os import getenv

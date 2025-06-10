@@ -18,8 +18,8 @@ import discord.types
 import r6sss
 from pycord.i18n import _
 
-import client as app
 import embeds
+from app import App
 from client import client
 from config import GuildConfigManager
 from db import DBManager
@@ -54,16 +54,16 @@ async def on_connect() -> None:
 @client.event
 async def on_ready() -> None:
 	logger.info("---------------------------------------")
-	logger.info(f" {app.NAME} - Version {app.VERSION_STRING}")
+	logger.info(f" {App.NAME} - Version {App.VERSION_STRING}")
 	logger.info(f" using Pycord {discord.__version__}")
-	logger.info(f" Developed by {app.DEVELOPER_NAME}")
-	logger.info(f" {app.COPYRIGHT}")
+	logger.info(f" Developed by {App.DEVELOPER_NAME}")
+	logger.info(f" {App.COPYRIGHT}")
 	logger.info("---------------------------------------")
 	logger.info("")
 
 	# ステータス表示を更新
 	await client.change_presence(
-		activity=discord.Game(name=f"Type /create | v{app.VERSION_STRING}"),
+		activity=discord.Game(name=f"Type /create | v{App.VERSION_STRING}"),
 	)
 	logger.info(
 		"%s へログインしました！ (ID: %s)",
@@ -266,9 +266,6 @@ async def create(
 					),
 				)
 
-			# メンテナンススケジュールを取得する
-			schedule_data = MaintenanceScheduleManager.data
-
 			# サーバーステータス埋め込みメッセージ生成してを送信する (作成)
 			msg = await ch.send(
 				embeds=await embeds.ServerStatus.generate_embed(gc.server_status_message.language, status_data),
@@ -345,28 +342,28 @@ async def ping(ctx: discord.ApplicationContext) -> None:
 async def about(ctx: discord.ApplicationContext) -> None:
 	try:
 		embed = discord.Embed(color=discord.Colour.blue())
-		embed.set_author(name=app.NAME, icon_url=client.user.display_avatar.url)
-		embed.set_footer(text=app.COPYRIGHT)
+		embed.set_author(name=App.NAME, icon_url=client.user.display_avatar.url)
+		embed.set_footer(text=App.COPYRIGHT)
 		embed.add_field(
 			name="Version",
-			value=f"`{app.VERSION_STRING}` ([`{app.get_git_commit_hash()[0:7]}`]\
-({app.GITHUB_REPO_URL}/commit/{app.get_git_commit_hash()}))",
+			value=f"`{App.VERSION_STRING}` ([`{App.get_git_commit_hash()[0:7]}`]\
+({App.GITHUB_REPO_URL}/commit/{App.get_git_commit_hash()}))",
 		)
 		embed.add_field(
 			name="Source",
-			value=f"[GitHub]({app.GITHUB_REPO_URL})",
+			value=f"[GitHub]({App.GITHUB_REPO_URL})",
 			inline=False,
 		)
 		embed.add_field(
 			name="Developer",
-			value=f"- {app.DEVELOPER_NAME}\n\
-  - [Website]({app.DEVELOPER_WEBSITE_URL})\n\
-  - [Twitter]({app.DEVELOPER_TWITTER_URL})",
+			value=f"- {App.DEVELOPER_NAME}\n\
+  - [Website]({App.DEVELOPER_WEBSITE_URL})\n\
+  - [Twitter]({App.DEVELOPER_TWITTER_URL})",
 			inline=True,
 		)
 		embed.add_field(
 			name="Other Services",
-			value=f"- [Bluesky Bot]({app.BLUESKY_BOT_URL})\n- [Twitter Bot]({app.TWITTER_BOT_URL})",
+			value=f"- [Bluesky Bot]({App.BLUESKY_BOT_URL})\n- [Twitter Bot]({App.TWITTER_BOT_URL})",
 			inline=True,
 		)
 		await ctx.respond(embed=embed)

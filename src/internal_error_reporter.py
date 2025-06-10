@@ -25,8 +25,9 @@ class InternalErrorReporter:
 					description=f"エラーコード\n```{error_code}```\nトレースバック\n```{traceback_text}```"
 				)
 			)
-			return error_code
 		except Exception:
 			logger.error("内部エラー報告失敗")
 			logger.error(traceback.format_exc())
 			return None
+		else:
+			return error_code

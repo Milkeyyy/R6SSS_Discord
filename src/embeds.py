@@ -8,7 +8,6 @@ import icons
 import localizations
 from client import client
 from logger import logger
-from maintenance_schedule import MaintenanceScheduleManager
 from server_status import ServerStatusManager
 
 
