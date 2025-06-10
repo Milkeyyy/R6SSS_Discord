@@ -2,7 +2,7 @@
 
 > **日本語 / Japanese** | [英語 / English](./README.md)
 
-Discordのテキストチャンネルにレインボーシックス シージのサーバーステータスを送信してくれるBotです。
+Discordのテキストチャンネルにレインボーシックス シージ エックスのサーバーステータスを送信してくれるBotです。
 
 
 <img src="https://github.com/user-attachments/assets/f65b79d4-a494-426d-a969-79df679309f8" width="40%" />
