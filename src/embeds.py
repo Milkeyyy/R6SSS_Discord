@@ -64,7 +64,7 @@ class Notification:
 	@classmethod
 	def get_by_comparison_result(
 		cls,
-		result: r6sss.comparison.ComparisonResult,
+		result: r6sss.types.ComparisonResult,
 		lang: str,
 	) -> discord.Embed | None:
 		"""サーバーステータスの比較結果から通知用のEmbedを生成する"""
@@ -94,7 +94,11 @@ class Notification:
 		embed = None
 
 		# メンテナンス開始
-		if result.detail == r6sss.comparison.ComparisonDetail.START_MAINTENANCE:
+		if result.detail == r6sss.types.ComparisonDetail.START_MAINTENANCE:
+			# 計画メンテナンスの実施時間内か判定 計画メンテナンスの時間内なら専用の埋め込みメッセージにする
+			if schedule_data:
+				if datetime.datetime.now(tz=datetime.UTC).timestamp() <= (schedule_data.date.timestamp() + (schedule_data.downtime * 60)):
+					
 			embed = discord.Embed(
 				color=discord.Colour.light_grey(),
 				title=localizations.translate("Title_Maintenance_Start", lang=lang),
@@ -102,7 +106,7 @@ class Notification:
 				author=embed_author,
 			)
 		# メンテナンス終了
-		elif result.detail == r6sss.comparison.ComparisonDetail.END_MAINTENANCE:
+		elif result.detail == r6sss.types.ComparisonDetail.END_MAINTENANCE:
 			embed = discord.Embed(
 				color=discord.Colour.light_grey(),
 				title=localizations.translate("Title_Maintenance_End", lang=lang),
@@ -113,7 +117,7 @@ class Notification:
 		# TODO: 計画メンテナンス開始/終了の場合の処理を実装する
 
 		# すべての機能の問題が解消
-		elif result.detail == r6sss.comparison.ComparisonDetail.ALL_FEATURES_OUTAGE_RESOLVED:
+		elif result.detail == r6sss.types.ComparisonDetail.ALL_FEATURES_OUTAGE_RESOLVED:
 			embed = discord.Embed(
 				color=discord.Colour.green(),
 				title=localizations.translate(
@@ -131,7 +135,7 @@ class Notification:
 				value="- " + "\n- ".join(result.resolved_impacted_features),
 			)
 		# すべての機能で問題が発生中
-		elif result.detail == r6sss.comparison.ComparisonDetail.ALL_FEATURES_OUTAGE:
+		elif result.detail == r6sss.types.ComparisonDetail.ALL_FEATURES_OUTAGE:
 			embed = discord.Embed(
 				color=discord.Colour.red(),
 				title=localizations.translate("Title_AllFeaturesOutage", lang=lang),
@@ -143,7 +147,7 @@ class Notification:
 				value="- " + "\n- ".join(impacted_features_list),
 			)
 		# 一部の機能で問題が発生中
-		elif result.detail == r6sss.comparison.ComparisonDetail.SOME_FEATURES_OUTAGE:
+		elif result.detail == r6sss.types.ComparisonDetail.SOME_FEATURES_OUTAGE:
 			embed = discord.Embed(
 				color=discord.Colour.yellow(),
 				title=localizations.translate("Title_SomeFeaturesOutage", lang=lang),
@@ -155,7 +159,7 @@ class Notification:
 				value="- " + "\n- ".join(impacted_features_list),
 			)
 		# 一部の機能で問題が解消 (影響を受ける機能が変わった)
-		elif result.detail == r6sss.comparison.ComparisonDetail.SOME_FEATURES_OUTAGE_RESOLVED:
+		elif result.detail == r6sss.types.ComparisonDetail.SOME_FEATURES_OUTAGE_RESOLVED:
 			embed = discord.Embed(
 				color=discord.Colour.yellow(),
 				title=localizations.translate(
