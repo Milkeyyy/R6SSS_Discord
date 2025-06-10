@@ -65,7 +65,7 @@ class Localization:
 
 		try:
 			if cls.LOCALE_DATA is not None:
-				return cls.LOCALE_DATA[lang]["strings"][text].format(values)
+				return cls.LOCALE_DATA[lang]["strings"][text].format(*values)
 		except KeyError as e:
 			logger.error("Translate Error - KeyError: %s", str(e))
 			return text
@@ -76,6 +76,4 @@ class Localization:
 
 def translate(text: str, values: list | None = None, lang: str = "en_GB") -> str:
 	"""指定されたキーのテキストを取得する"""
-	if values is None:
-		values = []
 	return Localization.translate(text, values, lang)
