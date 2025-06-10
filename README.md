@@ -4,7 +4,7 @@
 
 > This README was translated using Google Gemini.
 
-This bot sends Rainbow Six Siege server status to Discord text channels.
+This bot sends Rainbow Six Siege X server status to Discord text channels.
 
 
 <img src="https://github.com/user-attachments/assets/f65b79d4-a494-426d-a969-79df679309f8" width="40%" />
