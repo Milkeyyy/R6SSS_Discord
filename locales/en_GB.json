@@ -3,8 +3,10 @@
 		"name": "English (United Kingdom)"
 	},
 	"strings": {
+		"Resources_OfficialServicerStatusPage": "https://www.ubisoft.com/en-gb/game/rainbow-six/siege/status",
 		"True": "Enabled",
 		"False": "Disabled",
+		"None": "None",
 		"No Issues": "No Issues",
 		"Maintenance": "Maintenance",
 		"Unplanned Issues": "Unplanned Issues",
@@ -48,7 +50,7 @@
 		"MaintenanceSchedule": "Maintenance Schedule",
 		"MaintenanceSchedule_Notes": "This information was extracted by Google Generative AI (Gemini).\nAccuracy of the information is not guaranteed.",
 		"MaintenanceSchedule_Downtime": "Downtime",
-		"MaintenanceSchedule_Downtime_Minute": "mins",
+		"MaintenanceSchedule_Downtime_Minute": "About {0} min",
 		"MaintenanceSchedule_PlannedMaintenance": "Planned Maintenance",
 		"MaintenanceSchedule_ScheduledDT": "Scheduled Date",
 		"MaintenanceSchedule_TargetPlatform": "Target Platform",
