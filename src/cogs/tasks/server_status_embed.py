@@ -140,6 +140,7 @@ class ServerStatusEmbedManager(commands.Cog):
 								guild=guild,
 								description=localizations.translate(
 									"OwnerAnnounce_Warning_UpdateServerStatusMessage_Error_Forbidden",
+									[guild.name, ch.mention],
 									lang=lang,
 								),
 								lang=lang,
