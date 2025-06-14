@@ -8,7 +8,7 @@ from pycord.i18n import _
 import embeds
 from client import client
 from config import GuildConfigManager
-from internal_error_reporter import InternalErrorReporter
+from internal_error_reporter import DebugLogger
 from localizations import Localization
 from logger import logger
 
@@ -42,7 +42,7 @@ class SettingsCommands(commands.Cog):
 				await ctx.send_followup(
 					embed=embeds.Notification.internal_error(
 						description=_("CmdMsg_FailedToGetConfig"),
-						error_code=await InternalErrorReporter.report("FailedToGetGuildConfig"),
+						error_code=await DebugLogger.report_internal_error("FailedToGetGuildConfig"),
 					)
 				)
 				return
@@ -74,7 +74,7 @@ class SettingsCommands(commands.Cog):
 				await GuildConfigManager.update(ctx.guild.id, gc)
 			logger.error(traceback.format_exc())
 			await ctx.send_followup(
-				embed=embeds.Notification.internal_error(error_code=await InternalErrorReporter.report(traceback.format_exc()))
+				embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
 			)
 
 	@commands.slash_command()
@@ -97,7 +97,7 @@ class SettingsCommands(commands.Cog):
 				await ctx.send_followup(
 					embed=embeds.Notification.internal_error(
 						description=_("CmdMsg_FailedToGetConfig"),
-						error_code=await InternalErrorReporter.report("FailedToGetGuildConfig"),
+						error_code=await DebugLogger.report_internal_error("FailedToGetGuildConfig"),
 					)
 				)
 				return
@@ -118,7 +118,7 @@ class SettingsCommands(commands.Cog):
 				await GuildConfigManager.update(ctx.guild.id, gc)
 			logger.error(traceback.format_exc())
 			await ctx.send_followup(
-				embed=embeds.Notification.internal_error(error_code=await InternalErrorReporter.report(traceback.format_exc()))
+				embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
 			)
 
 	@commands.slash_command()
@@ -147,7 +147,7 @@ class SettingsCommands(commands.Cog):
 				await ctx.send_followup(
 					embed=embeds.Notification.internal_error(
 						description=_("CmdMsg_FailedToGetConfig"),
-						error_code=await InternalErrorReporter.report("FailedToGetGuildConfig"),
+						error_code=await DebugLogger.report_internal_error("FailedToGetGuildConfig"),
 					)
 				)
 				return
@@ -228,7 +228,7 @@ class SettingsCommands(commands.Cog):
 				await GuildConfigManager.update(ctx.guild.id, gc)
 			logger.error(traceback.format_exc())
 			await ctx.send_followup(
-				embed=embeds.Notification.internal_error(error_code=await InternalErrorReporter.report(traceback.format_exc()))
+				embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
 			)
 
 	@commands.slash_command()
@@ -251,7 +251,7 @@ class SettingsCommands(commands.Cog):
 				await ctx.send_followup(
 					embed=embeds.Notification.internal_error(
 						description=_("CmdMsg_FailedToGetConfig"),
-						error_code=await InternalErrorReporter.report("FailedToGetGuildConfig"),
+						error_code=await DebugLogger.report_internal_error("FailedToGetGuildConfig"),
 					)
 				)
 				return
@@ -272,7 +272,7 @@ class SettingsCommands(commands.Cog):
 				await GuildConfigManager.update(ctx.guild.id, gc)
 			logger.error(traceback.format_exc())
 			await ctx.send_followup(
-				embed=embeds.Notification.internal_error(error_code=await InternalErrorReporter.report(traceback.format_exc()))
+				embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
 			)
 
 	@commands.slash_command()
@@ -290,7 +290,7 @@ class SettingsCommands(commands.Cog):
 				await ctx.send_followup(
 					embed=embeds.Notification.internal_error(
 						description=_("CmdMsg_FailedToGetConfig"),
-						error_code=await InternalErrorReporter.report("FailedToGetGuildConfig"),
+						error_code=await DebugLogger.report_internal_error("FailedToGetGuildConfig"),
 					)
 				)
 				return
@@ -365,7 +365,7 @@ class SettingsCommands(commands.Cog):
 		except Exception:
 			logger.error(traceback.format_exc())
 			await ctx.send_followup(
-				embed=embeds.Notification.internal_error(error_code=await InternalErrorReporter.report(traceback.format_exc()))
+				embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
 			)
 
 

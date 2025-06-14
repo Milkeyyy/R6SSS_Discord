@@ -7,12 +7,12 @@ import embeds
 from logger import logger
 
 
-class InternalErrorReporter:
+class DebugLogger:
 	debug_guild: discord.Guild | None = None
 	debug_channel: discord.TextChannel | None = None
 
 	@classmethod
-	async def report(cls, traceback_text: str) -> str | None:
+	async def report_internal_error(cls, traceback_text: str) -> str | None:
 		"""内部エラーを報告してエラーコードを返す 失敗した場合は None を返す"""
 		try:
 			if cls.debug_guild is None or cls.debug_channel is None:
