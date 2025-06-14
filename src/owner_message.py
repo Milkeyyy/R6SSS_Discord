@@ -27,9 +27,9 @@ class GuildOwnerAnnounceUtil:
 			return True
 
 	@classmethod
-	async def send_warning(cls, guild: discord.Guild, title: str = "", description: str = "") -> bool:
+	async def send_warning(cls, guild: discord.Guild, lang: str, title: str = "", description: str = "") -> bool:
 		"""指定したギルドのオーナーへ警告メッセージを送信する"""
 		return await cls.send_message_to_guild_owner(
 			guild=guild,
-			embeds=[embeds.Notification.warning(title=title, description=description)],
+			embeds=[embeds.Notification.warning(title=title, description=description, lang=lang)],
 		)

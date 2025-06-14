@@ -142,6 +142,7 @@ class ServerStatusEmbedManager(commands.Cog):
 									"OwnerAnnounce_Warning_UpdateServerStatusMessage_Error_Forbidden",
 									lang=lang,
 								),
+								lang=lang,
 							)
 
 						# 既存のサーバーステータスメッセージの取得に失敗した場合はコンフィグをリセットして処理をスキップする
