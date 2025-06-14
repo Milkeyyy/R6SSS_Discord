@@ -271,17 +271,33 @@ async def create(
 				msg = await ch.send(
 					embeds=await embeds.ServerStatus.generate_embed(gc.server_status_message.language, status_data),
 				)
-			# テキストチャンネルを閲覧する権限がない場合
 			except discord.errors.Forbidden as e:
 				logger.info("サーバーステータスメッセージ作成失敗 - %s", str(e))
-				await ctx.send_followup(
-					embed=embeds.Notification.error(
-						description=_(
-							"Cmd_create_Error_MissingAccess",
-							ch.mention,
+				# Missing Access (テキストチャンネルを閲覧する権限なし)
+				if e.code == 50001:
+					await ctx.send_followup(
+						embed=embeds.Notification.error(
+							description=_(
+								"Cmd_create_Error_MissingAccess",
+								ch.mention,
+							),
 						),
-					),
-				)
+					)
+				# Missing Permission (メッセージを送信する権限なし)
+				elif e.code == 50013:
+					await ctx.send_followup(
+						embed=embeds.Notification.error(
+							description=_(
+								"CmdMsg_DontHavePermission_SendMessage",
+								ch.mention,
+							),
+						),
+					)
+				# それ以外
+				else:
+					await ctx.send_followup(
+						embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
+					)
 				return
 
 			# 送信したチャンネルとメッセージのIDをギルドデータへ保存する
@@ -290,25 +306,11 @@ async def create(
 			# ギルドコンフィグを保存
 			await GuildConfigManager.update(ctx.guild.id, gc)
 
-		except Exception as e:
-			# 権限エラー
-			if isinstance(e, discord.errors.ApplicationCommandInvokeError) and str(
-				e,
-			).endswith("Missing Permissions"):
-				await ctx.send_followup(
-					embed=embeds.Notification.error(
-						description=_(
-							"CmdMsg_DontHavePermission_SendMessage",
-							ch.mention,
-						),
-					),
-				)
-			# それ以外のエラー
-			else:
-				logger.error(traceback.format_exc())
-				await ctx.send_followup(
-					embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
-				)
+		except Exception:
+			logger.error(traceback.format_exc())
+			await ctx.send_followup(
+				embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
+			)
 			return
 		else:
 			logger.info("サーバーステータスメッセージ新規作成: ギルド: %s | チャンネル: %s", ctx.guild.name, ch.name)
