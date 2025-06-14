@@ -15,6 +15,7 @@ from kumasan import KumaSan
 from localizations import Localization
 from logger import logger
 from maintenance_schedule import MaintenanceScheduleManager
+from owner_message import GuildOwnerAnnounceUtil
 from server_status import ServerStatusManager
 
 
@@ -33,7 +34,7 @@ class ServerStatusEmbedManager(commands.Cog):
 		# 各言語のサーバーステータス埋め込みメッセージのリスト
 		# 言語コードをキーとする辞書 値はリスト (ステータスの埋め込みリスト, メンテナンススケジュールの埋め込みリスト)
 		status_embeds: dict[str, list[list[discord.Embed]]] = {}
-		notif_embeds = []  # サーバーステータス通知埋め込みメッセージのリスト
+		notif_embeds = {}  # サーバーステータス通知埋め込みメッセージのリスト
 		msg = None
 
 		# Heartbeatイベントを送信 (サーバーステータスの更新が開始されたことを報告)
@@ -55,6 +56,7 @@ class ServerStatusEmbedManager(commands.Cog):
 			# 各言語のサーバーステータス情報埋め込みメッセージと通知メッセージを生成する
 			for lang_code in Localization.EXISTS_LOCALE_LIST:
 				status_embeds[lang_code] = []
+				notif_embeds[lang_code] = []
 
 				# サーバーステータス情報の埋め込みメッセージを生成する
 				generated_status_embed = await embeds.ServerStatus.generate_embed(lang_code, status_data)
@@ -76,7 +78,7 @@ class ServerStatusEmbedManager(commands.Cog):
 				if ServerStatusManager.previous_data is not None:
 					compare_result = r6sss.compare_server_status(ServerStatusManager.previous_data, status_data, schedule_data)
 					# ステータスの比較結果一覧から通知用の埋め込みメッセージを生成する
-					notif_embeds = [
+					notif_embeds[lang_code] = [
 						embeds.Notification.get_by_comparison_result(result, lang_code, schedule_data) for result in compare_result
 					]
 
@@ -110,7 +112,7 @@ class ServerStatusEmbedManager(commands.Cog):
 						# チャンネルが存在しない場合はギルドデータのチャンネルIDとメッセージIDをリセットする
 						if ch is None:
 							logger.info("更新スキップ: テキストチャンネルの取得失敗")
-							logger.info("- 設定リセット実行")
+							logger.info("- サーバーステータスメッセージ設定リセット実行")
 							gc.server_status_message.channel_id = "0"
 							gc.server_status_message.message_id = "0"
 							# ギルドコンフィグを保存
@@ -125,14 +127,30 @@ class ServerStatusEmbedManager(commands.Cog):
 						try:
 							# 取得したテキストチャンネルからメッセージを取得する
 							msg = await ch.fetch_message(msg_id)
+						# メッセージが存在しない (削除されている) 場合
 						except discord.errors.NotFound as err:
 							logger.info(" - メッセージの取得失敗 (%s)", str(err))
 							msg = None
+						# メッセージを取得する権限がない (チャンネルへのアクセス権がない) 場合
+						except discord.errors.Forbidden as err:
+							logger.info(" - メッセージの取得失敗 (%s)", str(err))
+							msg = None
+							# 権限がない場合はギルドのオーナーへ警告メッセージを送信する
+							await GuildOwnerAnnounceUtil.send_warning(
+								guild=guild,
+								description=localizations.translate(
+									"OwnerAnnounce_Warning_UpdateServerStatusMessage_Error_Forbidden",
+									[guild.name, ch.mention],
+									lang=lang,
+								),
+								lang=lang,
+							)
 
 						# 既存のサーバーステータスメッセージの取得に失敗した場合はコンフィグをリセットして処理をスキップする
 						if msg is None:
 							logger.info("- 更新中止: メッセージの取得失敗")
-							logger.info("ギルド %s のメッセージ (ID: %s) の取得に失敗", guild.name, str(msg_id))
+							logger.info("- ギルド %s のメッセージ (ID: %s) の取得に失敗", guild.name, str(msg_id))
+							logger.info("- サーバーステータスメッセージ設定リセット実行")
 							# メッセージが存在しない(削除されている)場合はギルドデータのチャンネルIDとメッセージIDをリセットする
 							gc.server_status_message.channel_id = "0"
 							gc.server_status_message.message_id = "0"
@@ -184,7 +202,7 @@ class ServerStatusEmbedManager(commands.Cog):
 					try:
 						# 通知埋め込みメッセージの個数が1以上かつ
 						# 通知メッセージの送信先が設定されている場合は通知メッセージを送信する
-						if len(notif_embeds) >= 1 and notif_ch_id != 0:
+						if len(notif_embeds[lang]) >= 1 and notif_ch_id != 0:
 							# 通知メッセージを送信するチャンネルを取得
 							notif_ch = guild.get_channel(notif_ch_id)
 							notif_role = guild.get_role(notif_role_id)
@@ -205,34 +223,35 @@ class ServerStatusEmbedManager(commands.Cog):
 								# 										else:
 								# 											notif_embed.description = f"\
 								# [**📶 {localizations.translate('Notification_Show_Server_Status', lang=lang)}**]\
-								# ({localizations.translate('Resources_OfficialServicerStatusPage')})\n{notif_embed.description}"
-								if len(notif_embeds) >= 1:
-									# 自動削除が有効の場合は削除までの時間を指定する
-									notif_delete_after_seconds = int(gc.server_status_notification.auto_delete)
-									if notif_delete_after_seconds > 0:
-										await notif_ch.send(
-											content=localizations.translate(
-												"Notification_Server_Status_Updated",
-												lang=lang,
-											)
-											+ "\n"
-											+ notif_role_mention,
-											embeds=notif_embeds,
-											delete_after=notif_delete_after_seconds,
+								# ({localizations.translate('Resources_OfficialServiceStatusPage')})\n{notif_embed.description}"
+
+								# 自動削除が有効の場合は削除までの時間を指定する
+								notif_delete_after_seconds = int(gc.server_status_notification.auto_delete)
+
+								if notif_delete_after_seconds > 0:
+									await notif_ch.send(
+										content=localizations.translate(
+											"Notification_Server_Status_Updated",
+											lang=lang,
 										)
-									# 自動削除が無効の場合は削除までの時間を指定しない
-									else:
-										# 通知メッセージを送信する
-										logger.info("サーバーステータス通知メッセージ送信 - チャンネル: %s", notif_ch.name)
-										await notif_ch.send(
-											content=localizations.translate(
-												"Notification_Server_Status_Updated",
-												lang=lang,
-											)
-											+ "\n"
-											+ notif_role_mention,
-											embeds=notif_embeds,
+										+ "\n"
+										+ notif_role_mention,
+										embeds=notif_embeds[lang],
+										delete_after=notif_delete_after_seconds,
+									)
+								# 自動削除が無効の場合は削除までの時間を指定しない
+								else:
+									# 通知メッセージを送信する
+									logger.info("サーバーステータス通知メッセージ送信 - チャンネル: %s", notif_ch.name)
+									await notif_ch.send(
+										content=localizations.translate(
+											"Notification_Server_Status_Updated",
+											lang=lang,
 										)
+										+ "\n"
+										+ notif_role_mention,
+										embeds=notif_embeds[lang],
+									)
 							# 通知メッセージの送信先が存在しない場合は通知設定をリセットする
 							else:
 								logger.info("サーバーステータス通知メッセージ送信スキップ: チャンネルが存在しません")

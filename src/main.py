@@ -6,7 +6,6 @@ from os import getenv
 from pathlib import Path
 
 import discord
-import discord.types.guild
 from discord.commands import Option
 from discord.ext import commands
 
@@ -14,7 +13,6 @@ try:
 	from dotenv import load_dotenv
 except ImportError:
 	pass
-import discord.types
 import r6sss
 from pycord.i18n import _
 
@@ -23,7 +21,7 @@ from app import App
 from client import client
 from config import GuildConfigManager
 from db import DBManager
-from internal_error_reporter import InternalErrorReporter
+from debug_logger import DebugLogger
 from localizations import Localization
 from logger import logger
 from maintenance_schedule import MaintenanceScheduleManager
@@ -76,14 +74,14 @@ async def on_ready() -> None:
 		logger.info("デバッグ用サーバー/チャンネル取得")
 		debug_gd_id = getenv("DEBUG_GUILD_ID", "")
 		debug_ch_id = getenv("DEBUG_TEXT_CHANNEL_ID", "")
-		InternalErrorReporter.debug_guild = client.get_guild(int(debug_gd_id))
-		InternalErrorReporter.debug_channel = await InternalErrorReporter.debug_guild.fetch_channel(debug_ch_id)
-		if InternalErrorReporter.debug_guild:
-			logger.info("- サーバー: %s (ID: %d)", InternalErrorReporter.debug_guild.name, InternalErrorReporter.debug_guild.id)
+		DebugLogger.debug_guild = client.get_guild(int(debug_gd_id))
+		DebugLogger.debug_channel = await DebugLogger.debug_guild.fetch_channel(debug_ch_id)
+		if DebugLogger.debug_guild:
+			logger.info("- サーバー: %s (ID: %d)", DebugLogger.debug_guild.name, DebugLogger.debug_guild.id)
 		else:
 			logger.warning("- サーバーが見つかりません: %s", debug_gd_id)
-		if InternalErrorReporter.debug_channel:
-			logger.info("- チャンネル: %s (ID: %d)", InternalErrorReporter.debug_channel.name, InternalErrorReporter.debug_channel.id)
+		if DebugLogger.debug_channel:
+			logger.info("- チャンネル: %s (ID: %d)", DebugLogger.debug_channel.name, DebugLogger.debug_channel.id)
 		else:
 			logger.warning("- チャンネルが見つかりません: %s", debug_ch_id)
 	except Exception:
@@ -101,6 +99,7 @@ async def on_ready() -> None:
 @client.event
 async def on_guild_join(guild: discord.Guild) -> None:
 	logger.info("ギルド参加: %s (%d)", guild.name, guild.id)
+	await DebugLogger.log(f"ギルド参加\n- ギルド: `{guild.name}`\n- ID: `{guild.id}`")
 	# 参加したギルドのコンフィグを作成する
 	await GuildConfigManager.create(guild.id)
 
@@ -109,6 +108,7 @@ async def on_guild_join(guild: discord.Guild) -> None:
 @client.event
 async def on_guild_remove(guild: discord.Guild) -> None:
 	logger.info("ギルド脱退: %s (%d)", guild.name, guild.id)
+	await DebugLogger.log(f"ギルド脱退\n- ギルド: `{guild.name}`\n- ID: `{guild.id}`")
 	# 脱退したギルドのコンフィグを削除する
 	await GuildConfigManager.delete(guild.id)
 
@@ -165,7 +165,7 @@ async def status(ctx: discord.ApplicationContext) -> None:
 			await ctx.send_followup(
 				embed=embeds.Notification.internal_error(
 					description=_("CmdMsg_FailedToGetConfig"),
-					error_code=await InternalErrorReporter.report("FailedToGetGuildConfig"),
+					error_code=await DebugLogger.report_internal_error("FailedToGetGuildConfig"),
 				),
 			)
 			return
@@ -177,7 +177,7 @@ async def status(ctx: discord.ApplicationContext) -> None:
 			await ctx.send_followup(
 				embed=embeds.Notification.internal_error(
 					description=_("CmdMsg_FailedToGetServerStatus"),
-					error_code=await InternalErrorReporter.report("FailedToGetServerStatus"),
+					error_code=await DebugLogger.report_internal_error("FailedToGetServerStatus"),
 				),
 			)
 			return
@@ -189,7 +189,7 @@ async def status(ctx: discord.ApplicationContext) -> None:
 	except Exception:
 		logger.error(traceback.format_exc())
 		await ctx.send_followup(
-			embed=embeds.Notification.internal_error(error_code=await InternalErrorReporter.report(traceback.format_exc()))
+			embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
 		)
 
 
@@ -218,7 +218,7 @@ async def schedule(ctx: discord.ApplicationContext) -> None:
 	except Exception:
 		logger.error(traceback.format_exc())
 		await ctx.send_followup(
-			embed=embeds.Notification.internal_error(error_code=await InternalErrorReporter.report(traceback.format_exc()))
+			embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
 		)
 
 
@@ -240,7 +240,7 @@ async def create(
 			await ctx.send_followup(
 				embed=embeds.Notification.internal_error(
 					description=_("CmdMsg_FailedToGetConfig"),
-					error_code=await InternalErrorReporter.report("FailedToGetGuildConfig"),
+					error_code=await DebugLogger.report_internal_error("FailedToGetGuildConfig"),
 				),
 			)
 			return
@@ -262,14 +262,43 @@ async def create(
 				await ctx.send_followup(
 					embed=embeds.Notification.internal_error(
 						description=_("CmdMsg_FailedToGetServerStatus"),
-						error_code=await InternalErrorReporter.report("FailedToGetServerStatus"),
+						error_code=await DebugLogger.report_internal_error("FailedToGetServerStatus"),
 					),
 				)
 
 			# サーバーステータス埋め込みメッセージ生成してを送信する (作成)
-			msg = await ch.send(
-				embeds=await embeds.ServerStatus.generate_embed(gc.server_status_message.language, status_data),
-			)
+			try:
+				msg = await ch.send(
+					embeds=await embeds.ServerStatus.generate_embed(gc.server_status_message.language, status_data),
+				)
+			except discord.errors.Forbidden as e:
+				logger.info("サーバーステータスメッセージ作成失敗 - %s", str(e))
+				# Missing Access (テキストチャンネルを閲覧する権限なし)
+				if e.code == 50001:
+					await ctx.send_followup(
+						embed=embeds.Notification.error(
+							description=_(
+								"Cmd_create_Error_MissingAccess",
+								ch.mention,
+							),
+						),
+					)
+				# Missing Permission (メッセージを送信する権限なし)
+				elif e.code == 50013:
+					await ctx.send_followup(
+						embed=embeds.Notification.error(
+							description=_(
+								"CmdMsg_DontHavePermission_SendMessage",
+								ch.mention,
+							),
+						),
+					)
+				# それ以外
+				else:
+					await ctx.send_followup(
+						embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
+					)
+				return
 
 			# 送信したチャンネルとメッセージのIDをギルドデータへ保存する
 			gc.server_status_message.channel_id = str(ch.id)
@@ -277,27 +306,15 @@ async def create(
 			# ギルドコンフィグを保存
 			await GuildConfigManager.update(ctx.guild.id, gc)
 
-		except Exception as e:
-			# 権限エラー
-			if isinstance(e, discord.errors.ApplicationCommandInvokeError) and str(
-				e,
-			).endswith("Missing Permissions"):
-				await ctx.send_followup(
-					embed=embeds.Notification.error(
-						description=_(
-							"CmdMsg_DontHavePermission_SendMessage",
-							ch.mention,
-						),
-					),
-				)
-			# それ以外のエラー
-			else:
-				logger.error(traceback.format_exc())
-				await ctx.send_followup(
-					embed=embeds.Notification.internal_error(error_code=await InternalErrorReporter.report(traceback.format_exc()))
-				)
+		except Exception:
+			logger.error(traceback.format_exc())
+			await ctx.send_followup(
+				embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
+			)
 			return
 		else:
+			logger.info("サーバーステータスメッセージ新規作成: ギルド: %s | チャンネル: %s", ctx.guild.name, ch.name)
+			await DebugLogger.log(f"サーバーステータスメッセージ新規作成\n- ギルド: `{ctx.guild.name}`\n- チャンネル: `{ch.name}`")
 			# 作成成功メッセージを送信する
 			await ctx.send_followup(
 				embed=embeds.Notification.success(
@@ -312,7 +329,7 @@ async def create(
 			await GuildConfigManager.update(ctx.guild.id, gc)
 		logger.error(traceback.format_exc())
 		await ctx.send_followup(
-			embed=embeds.Notification.internal_error(error_code=await InternalErrorReporter.report(traceback.format_exc()))
+			embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
 		)
 
 
@@ -332,7 +349,7 @@ async def ping(ctx: discord.ApplicationContext) -> None:
 	except Exception:
 		logger.error(traceback.format_exc())
 		await ctx.send_followup(
-			embed=embeds.Notification.internal_error(error_code=await InternalErrorReporter.report(traceback.format_exc()))
+			embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
 		)
 
 
@@ -370,7 +387,7 @@ async def about(ctx: discord.ApplicationContext) -> None:
 	except Exception:
 		logger.error(traceback.format_exc())
 		await ctx.send_followup(
-			embed=embeds.Notification.internal_error(error_code=await InternalErrorReporter.report(traceback.format_exc()))
+			embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
 		)
 
 
@@ -429,7 +446,7 @@ async def testnotification(
 	except Exception:
 		logger.error(traceback.format_exc())
 		await ctx.send_followup(
-			embed=embeds.Notification.internal_error(error_code=await InternalErrorReporter.report(traceback.format_exc()))
+			embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
 		)
 
 

@@ -3,7 +3,7 @@
 		"name": "日本語 / Japanese"
 	},
 	"strings": {
-		"Resources_OfficialServicerStatusPage": "https://www.ubisoft.com/ja-jp/game/rainbow-six/siege/status",
+		"Resources_OfficialServiceStatusPage": "https://www.ubisoft.com/ja-jp/game/rainbow-six/siege/status",
 		"True": "有効",
 		"False": "無効",
 		"None": "なし",
@@ -90,7 +90,9 @@
 		"Cmd_viewsettings_Notification": "通知",
 		"Cmd_viewsettings_Language": "言語",
 		"Cmd_create_Success": "テキストチャンネル {0} へサーバーステータスメッセージを送信しました。\n以後このメッセージは自動的に更新されます。",
-		"Cmd_create_OldMessagesWillNoLongerBeUpdated": "以前送信した古いメッセージは更新されなくなります。"
+		"Cmd_create_OldMessagesWillNoLongerBeUpdated": "以前送信した古いメッセージは更新されなくなります。",
+		"Cmd_create_Error_MissingAccess": "テキストチャンネル {0} を閲覧する権限がありません！",
+		"OwnerAnnounce_Warning_UpdateServerStatusMessage_Error_Forbidden": "サーバー `{0}` のテキストチャンネル {1} へ作成されたサーバーステータスメッセージの更新に失敗しました。\nR6SSS に作成先のテキストチャンネルを閲覧する権限が付与されているか確認してから、再度 `/create` コマンドで作成を行ってください。"
 	},
 	"commands": {
 		"about": {
