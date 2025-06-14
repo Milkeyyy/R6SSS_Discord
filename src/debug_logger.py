@@ -12,6 +12,18 @@ class DebugLogger:
 	debug_channel: discord.TextChannel | None = None
 
 	@classmethod
+	async def log(cls, text: str) -> None:
+		"""デバッグログを送信する"""
+		if cls.debug_guild is None or cls.debug_channel is None:
+			logger.warning("デバッグログ記録中止 - デバッグ用サーバーまたはチャンネルが設定されていません")
+			return
+		try:
+			await cls.debug_channel.send(text)
+		except Exception:
+			logger.error("デバッグログ送信失敗")
+			logger.error(traceback.format_exc())
+
+	@classmethod
 	async def report_internal_error(cls, traceback_text: str) -> str | None:
 		"""内部エラーを報告してエラーコードを返す 失敗した場合は None を返す"""
 		try:
