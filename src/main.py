@@ -99,6 +99,7 @@ async def on_ready() -> None:
 @client.event
 async def on_guild_join(guild: discord.Guild) -> None:
 	logger.info("ギルド参加: %s (%d)", guild.name, guild.id)
+	await DebugLogger.log(f"ギルド参加\n- ギルド: `{guild.name}`\n- ID: `{guild.id}`")
 	# 参加したギルドのコンフィグを作成する
 	await GuildConfigManager.create(guild.id)
 
@@ -107,6 +108,7 @@ async def on_guild_join(guild: discord.Guild) -> None:
 @client.event
 async def on_guild_remove(guild: discord.Guild) -> None:
 	logger.info("ギルド脱退: %s (%d)", guild.name, guild.id)
+	await DebugLogger.log(f"ギルド脱退\n- ギルド: `{guild.name}`\n- ID: `{guild.id}`")
 	# 脱退したギルドのコンフィグを削除する
 	await GuildConfigManager.delete(guild.id)
 
@@ -310,7 +312,7 @@ async def create(
 			return
 		else:
 			logger.info("サーバーステータスメッセージ新規作成: ギルド: %s | チャンネル: %s", ctx.guild.name, ch.name)
-
+			await DebugLogger.log(f"サーバーステータスメッセージ新規作成\n- ギルド: `{ctx.guild.name}`\n- チャンネル: `{ch.name}`")
 			# 作成成功メッセージを送信する
 			await ctx.send_followup(
 				embed=embeds.Notification.success(
