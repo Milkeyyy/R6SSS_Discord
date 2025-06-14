@@ -6,7 +6,6 @@ from os import getenv
 from pathlib import Path
 
 import discord
-import discord.types.guild
 from discord.commands import Option
 from discord.ext import commands
 
@@ -14,7 +13,6 @@ try:
 	from dotenv import load_dotenv
 except ImportError:
 	pass
-import discord.types
 import r6sss
 from pycord.i18n import _
 
@@ -23,7 +21,7 @@ from app import App
 from client import client
 from config import GuildConfigManager
 from db import DBManager
-from internal_error_reporter import DebugLogger
+from debug_logger import DebugLogger
 from localizations import Localization
 from logger import logger
 from maintenance_schedule import MaintenanceScheduleManager
