@@ -8,7 +8,7 @@ from pycord.i18n import _
 import embeds
 from client import client
 from config import GuildConfigManager
-from internal_error_reporter import DebugLogger
+from debug_logger import DebugLogger
 from localizations import Localization
 from logger import logger
 
