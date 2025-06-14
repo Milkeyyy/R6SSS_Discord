@@ -15,6 +15,7 @@ from kumasan import KumaSan
 from localizations import Localization
 from logger import logger
 from maintenance_schedule import MaintenanceScheduleManager
+from owner_message import GuildOwnerAnnounceUtil
 from server_status import ServerStatusManager
 
 
@@ -111,7 +112,7 @@ class ServerStatusEmbedManager(commands.Cog):
 						# チャンネルが存在しない場合はギルドデータのチャンネルIDとメッセージIDをリセットする
 						if ch is None:
 							logger.info("更新スキップ: テキストチャンネルの取得失敗")
-							logger.info("- 設定リセット実行")
+							logger.info("- サーバーステータスメッセージ設定リセット実行")
 							gc.server_status_message.channel_id = "0"
 							gc.server_status_message.message_id = "0"
 							# ギルドコンフィグを保存
@@ -126,14 +127,28 @@ class ServerStatusEmbedManager(commands.Cog):
 						try:
 							# 取得したテキストチャンネルからメッセージを取得する
 							msg = await ch.fetch_message(msg_id)
+						# メッセージが存在しない (削除されている) 場合
 						except discord.errors.NotFound as err:
 							logger.info(" - メッセージの取得失敗 (%s)", str(err))
 							msg = None
+						# メッセージを取得する権限がない (チャンネルへのアクセス権がない) 場合
+						except discord.errors.Forbidden as err:
+							logger.info(" - メッセージの取得失敗 (%s)", str(err))
+							msg = None
+							# 権限がない場合はギルドのオーナーへ警告メッセージを送信する
+							await GuildOwnerAnnounceUtil.send_warning(
+								guild=guild,
+								description=localizations.translate(
+									"OwnerAnnounce_Warning_UpdateServerStatusMessage_Error_Forbidden",
+									lang=lang,
+								),
+							)
 
 						# 既存のサーバーステータスメッセージの取得に失敗した場合はコンフィグをリセットして処理をスキップする
 						if msg is None:
 							logger.info("- 更新中止: メッセージの取得失敗")
-							logger.info("ギルド %s のメッセージ (ID: %s) の取得に失敗", guild.name, str(msg_id))
+							logger.info("- ギルド %s のメッセージ (ID: %s) の取得に失敗", guild.name, str(msg_id))
+							logger.info("- サーバーステータスメッセージ設定リセット実行")
 							# メッセージが存在しない(削除されている)場合はギルドデータのチャンネルIDとメッセージIDをリセットする
 							gc.server_status_message.channel_id = "0"
 							gc.server_status_message.message_id = "0"
