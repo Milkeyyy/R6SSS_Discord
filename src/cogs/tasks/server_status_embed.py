@@ -1,4 +1,5 @@
 import asyncio
+import time
 import traceback
 
 import discord
@@ -41,6 +42,7 @@ class ServerStatusEmbedManager(commands.Cog):
 		await KumaSan.ping(state="up", message="サーバーステータスの更新開始")
 
 		logger.info("サーバーステータスの更新開始")
+		start_time = time.perf_counter()
 
 		try:
 			# サーバーステータス情報とメンテナンススケジュール情報を取得 (更新) する
@@ -273,7 +275,10 @@ class ServerStatusEmbedManager(commands.Cog):
 			logger.error(traceback.format_exc())
 			await KumaSan.ping(state="pending", message="サーバーステータスの更新エラー: " + str(e))
 
+		end_time = time.perf_counter()
+		p_time = f"{(end_time - start_time):.2f}"
 		logger.info("サーバーステータスの更新完了")
+		logger.info("- 処理時間: %s s", p_time)
 
 		await KumaSan.ping(state="up", message="サーバーステータスの更新完了")
 
