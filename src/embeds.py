@@ -80,6 +80,8 @@ class Notification:
 
 		# 影響を受ける機能の名称を翻訳する
 		impacted_features_list = [localizations.translate("Status_" + f, lang=lang) for f in result.impacted_features]
+		# 影響を受けていた機能の名称を翻訳する
+		resolved_impacted_features_list = [localizations.translate("Status_" + f, lang=lang) for f in result.resolved_impacted_features]
 
 		# 対象プラットフォームの一覧テキストを生成
 		# 全プラットフォームの場合は専用のテキストにする
@@ -171,7 +173,7 @@ class Notification:
 					"Detail_ImpactedFeatures_After",
 					lang=lang,
 				),
-				value="- " + "\n- ".join(result.resolved_impacted_features),
+				value="- " + "\n- ".join(resolved_impacted_features_list),
 			)
 		# すべての機能で問題が発生中
 		elif result.detail == r6sss.types.ComparisonDetail.ALL_FEATURES_OUTAGE:
@@ -208,7 +210,7 @@ class Notification:
 			)
 			embed.add_field(
 				name=localizations.translate("Detail_ImpactedFeatures", lang=lang),
-				value="- " + "\n- ".join(result.resolved_impacted_features),
+				value="- " + "\n- ".join(resolved_impacted_features_list),
 			)
 			embed.add_field(
 				name=localizations.translate(
