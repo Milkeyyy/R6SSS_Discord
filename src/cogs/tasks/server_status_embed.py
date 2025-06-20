@@ -281,9 +281,10 @@ class ServerStatusEmbedManager(commands.Cog):
 			await KumaSan.ping(state="pending", message="サーバーステータスの更新エラー: " + str(e))
 
 		end_time = time.perf_counter()
-		p_time = f"{(end_time - start_time):.2f}"
+		p_time = end_time - start_time
+		p_time_str = f"{(end_time - start_time):.2f}"
 		logger.info("サーバーステータスの更新完了")
-		logger.info("- 処理時間: %s s", p_time)
+		logger.info("- 処理時間: %s s", p_time_str)
 
 		await KumaSan.ping(state="up", message="サーバーステータスの更新完了", ping=str(p_time * 1000))  # ミリ秒に直して渡す
 
