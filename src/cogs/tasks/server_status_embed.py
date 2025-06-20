@@ -1,4 +1,5 @@
 import asyncio
+import time
 import traceback
 
 import discord
@@ -41,11 +42,14 @@ class ServerStatusEmbedManager(commands.Cog):
 		await KumaSan.ping(state="up", message="サーバーステータスの更新開始")
 
 		logger.info("サーバーステータスの更新開始")
+		start_time = time.perf_counter()
 
 		try:
 			# サーバーステータス情報とメンテナンススケジュール情報を取得 (更新) する
 			status_data = await ServerStatusManager.get()
 			schedule_data = await MaintenanceScheduleManager.get()
+			if schedule_data is None:
+				schedule_data = {}
 
 			# サーバーステータス情報を取得できなかった場合は処理を行わずにエラーを出力する
 			if status_data is None:
@@ -67,7 +71,7 @@ class ServerStatusEmbedManager(commands.Cog):
 					continue
 
 				# メンテナンススケジュール情報の埋め込みメッセージを生成する
-				generated_schedule_embed = await embeds.MaintenanceSchedule.generate_embed(lang_code, schedule_data)
+				generated_schedule_embed = await embeds.MaintenanceSchedule.generate_embed(lang_code, schedule_data.get(lang_code))
 				if generated_schedule_embed:
 					status_embeds[lang_code].append(generated_schedule_embed)
 				else:
@@ -76,10 +80,13 @@ class ServerStatusEmbedManager(commands.Cog):
 
 				# 以前のサーバーステータス情報が存在する場合はサーバーステータスの通知メッセージを生成する
 				if ServerStatusManager.previous_data is not None:
-					compare_result = r6sss.compare_server_status(ServerStatusManager.previous_data, status_data, schedule_data)
+					compare_result = r6sss.compare_server_status(
+						ServerStatusManager.previous_data, status_data, schedule_data.get(lang_code)
+					)
 					# ステータスの比較結果一覧から通知用の埋め込みメッセージを生成する
 					notif_embeds[lang_code] = [
-						embeds.Notification.get_by_comparison_result(result, lang_code, schedule_data) for result in compare_result
+						embeds.Notification.get_by_comparison_result(result, lang_code, schedule_data.get(lang_code))
+						for result in compare_result
 					]
 
 			# 各ギルドの埋め込みメッセージIDチェック、存在する場合はメッセージを更新する
@@ -273,7 +280,10 @@ class ServerStatusEmbedManager(commands.Cog):
 			logger.error(traceback.format_exc())
 			await KumaSan.ping(state="pending", message="サーバーステータスの更新エラー: " + str(e))
 
+		end_time = time.perf_counter()
+		p_time = f"{(end_time - start_time):.2f}"
 		logger.info("サーバーステータスの更新完了")
+		logger.info("- 処理時間: %s s", p_time)
 
 		await KumaSan.ping(state="up", message="サーバーステータスの更新完了")
 

@@ -212,6 +212,18 @@ async def schedule(ctx: discord.ApplicationContext) -> None:
 
 		# メンテナンススケジュールを取得する
 		schedule_data = MaintenanceScheduleManager.data
+		if schedule_data is None:
+			logger.warning("メンテナンススケジュールの取得失敗: data is None")
+			logger.warning(str(schedule_data))
+			await ctx.send_followup(embeds=embeds.Notification.error(description=_("CmdMsg_FailedToGetMaintenanceSchedule")))
+			return
+
+		schedule_data = schedule_data.get(gc.server_status_message.language)
+		if schedule_data is None:
+			logger.warning("メンテナンススケジュールの取得失敗: 指定された言語に該当するスケジュールが存在しません")
+			logger.warning(str(schedule_data))
+			await ctx.send_followup(embeds=embeds.Notification.error(description=_("CmdMsg_FailedToGetMaintenanceSchedule")))
+			return
 
 		# 埋め込みメッセージを生成して送信する
 		await ctx.send_followup(embeds=await embeds.MaintenanceSchedule.generate_embed(gc.server_status_message.language, schedule_data))
@@ -412,6 +424,14 @@ async def testnotification(
 
 			status_data = ServerStatusManager.data
 			schedule_data = MaintenanceScheduleManager.data
+
+			if schedule_data is not None:
+				schedule_data = schedule_data.get("ja")
+			if schedule_data is None:
+				logger.warning("メンテナンススケジュールの取得失敗: 指定された言語に該当するスケジュールが存在しません")
+				logger.warning(str(schedule_data))
+				await ctx.send_followup(embeds=embeds.Notification.error(description=_("CmdMsg_FailedToGetMaintenanceSchedule")))
+				return
 
 			# サーバーステータスが None の場合はエラーメッセージを返す
 			if status_data is None:
