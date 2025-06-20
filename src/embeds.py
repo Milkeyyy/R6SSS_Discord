@@ -266,7 +266,7 @@ class ServerStatus:
 			]
 
 		# 各プラットフォームごとの埋め込みメッセージを作成
-		embed = discord.Embed(color=embed_settings["PC"][0])  # 色は白で固定
+		embed = discord.Embed()
 		embed.title = icons.R6SSS.ICON.value + " Rainbow Six Siege X Server Status"
 		embed.description = (
 			"🕒 "
@@ -277,6 +277,7 @@ class ServerStatus:
 		embed.set_footer(
 			text="⚠️\n" + localizations.translate("NotAffiliatedWithOrRndorsedBy", lang=locale),
 		)
+		embed.colour = ServerStatusManager.colour
 
 		status_index = -1
 		for status in status_data:
