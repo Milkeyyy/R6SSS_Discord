@@ -285,7 +285,7 @@ class ServerStatusEmbedManager(commands.Cog):
 		logger.info("サーバーステータスの更新完了")
 		logger.info("- 処理時間: %s s", p_time)
 
-		await KumaSan.ping(state="up", message="サーバーステータスの更新完了", ping=str(p_time))
+		await KumaSan.ping(state="up", message="サーバーステータスの更新完了", ping=str(p_time * 1000))  # ミリ秒に直して渡す
 
 	@update_server_status.after_loop
 	async def after_update_server_status(self) -> None:
