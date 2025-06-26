@@ -219,11 +219,6 @@ async def schedule(ctx: discord.ApplicationContext) -> None:
 			return
 
 		schedule_data = schedule_data.get(gc.server_status_message.language)
-		if schedule_data is None:
-			logger.warning("メンテナンススケジュールの取得失敗: 指定された言語に該当するスケジュールが存在しません")
-			logger.warning(str(schedule_data))
-			await ctx.send_followup(embeds=embeds.Notification.error(description=_("CmdMsg_FailedToGetMaintenanceSchedule")))
-			return
 
 		# 埋め込みメッセージを生成して送信する
 		await ctx.send_followup(embeds=await embeds.MaintenanceSchedule.generate_embed(gc.server_status_message.language, schedule_data))
