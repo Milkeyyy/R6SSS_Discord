@@ -2,22 +2,32 @@
 
 > **日本語 / Japanese** | [英語 / English](./README.md)
 
-Discordのテキストチャンネルにレインボーシックス シージ エックスのサーバーステータスを送信してくれるBotです。
+Discord のテキストチャンネルにレインボーシックス シージ エックスのサーバーステータスを送信してくれるBotです。
+
+定期的に更新されるサーバーステータスメッセージを作成することもできます。
 
 
 <img src="https://github.com/user-attachments/assets/e8c49ff2-32ad-49e2-ba60-85ba642fed07" width="40%" />
 
 ---
 
-[**[Botをサーバーへ招待する]**](https://discord.com/oauth2/authorize?client_id=990497421488451615)
+### [**[Botをサーバーへ招待する]**](https://discord.com/oauth2/authorize?client_id=990497421488451615)
+
 
 ### 稼働状況
+
 [![Status](http://status.milkeyyy.com/api/badge/21/status?style=for-the-badge)](https://status.milkeyyy.com/)
 
+
 ### サポート Discord サーバー
+
 [![Discord](https://img.shields.io/discord/889239399550844978?style=for-the-badge&label=Discord&logo=discord&logoColor=white)](https://discord.gg/bMf9dDjndC)
 
+
 ### Discord 以外の Bot はこちら
+
+メンテナンスの開始時など、ステータスに変化があった際に自動的に投稿を行います。
+
 [![Bluesky](https://badgen.org/img/bluesky/r6sss.milkeyyy.com/followers?style=for-the-badge&label=Bluesky)](https://bsky.app/profile/r6sss.milkeyyy.com)
 
 [![Twitter](https://img.shields.io/badge/@R6SSS__JP-blue?style=for-the-badge&label=Twitter&labelColor=gray&logo=data:image/svg%2bxml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbDpzcGFjZT0icHJlc2VydmUiIHZpZXdCb3g9IjAgMCAyNDggMjA0Ij4KICA8cGF0aCBmaWxsPSIjMWQ5YmYwIiBkPSJNMjIxLjk1IDUxLjI5Yy4xNSAyLjE3LjE1IDQuMzQuMTUgNi41MyAwIDY2LjczLTUwLjggMTQzLjY5LTE0My42OSAxNDMuNjl2LS4wNGMtMjcuNDQuMDQtNTQuMzEtNy44Mi03Ny40MS0yMi42NCAzLjk5LjQ4IDggLjcyIDEyLjAyLjczIDIyLjc0LjAyIDQ0LjgzLTcuNjEgNjIuNzItMjEuNjYtMjEuNjEtLjQxLTQwLjU2LTE0LjUtNDcuMTgtMzUuMDcgNy41NyAxLjQ2IDE1LjM3IDEuMTYgMjIuOC0uODctMjMuNTYtNC43Ni00MC41MS0yNS40Ni00MC41MS00OS41di0uNjRjNy4wMiAzLjkxIDE0Ljg4IDYuMDggMjIuOTIgNi4zMkMxMS41OCA2My4zMSA0Ljc0IDMzLjc5IDE4LjE0IDEwLjcxYzI1LjY0IDMxLjU1IDYzLjQ3IDUwLjczIDEwNC4wOCA1Mi43Ni00LjA3LTE3LjU0IDEuNDktMzUuOTIgMTQuNjEtNDguMjUgMjAuMzQtMTkuMTIgNTIuMzMtMTguMTQgNzEuNDUgMi4xOSAxMS4zMS0yLjIzIDIyLjE1LTYuMzggMzIuMDctMTIuMjYtMy43NyAxMS42OS0xMS42NiAyMS42Mi0yMi4yIDI3LjkzIDEwLjAxLTEuMTggMTkuNzktMy44NiAyOS03Ljk1LTYuNzggMTAuMTYtMTUuMzIgMTkuMDEtMjUuMiAyNi4xNnoiLz4KPC9zdmc+)
@@ -58,6 +68,9 @@ Discordのテキストチャンネルにレインボーシックス シージ �
   - 指定できる言語
 	- 日本語 / Japanese
 	- 英語 / English
+
+- `setscheduledisplay <有効/無効>`
+  - サーバーステータスメッセージにメンテナンススケジュールを表示するかどうかを設定します。
 
 - `setnotification <有効/無効> [テキストチャンネル] [ロール] [自動削除]`
   - サーバーステータスに変化があった際に送信される通知を設定します。
