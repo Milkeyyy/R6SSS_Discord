@@ -32,7 +32,7 @@ class KumaSan:
 				result.status_code,
 				result.elapsed.seconds,
 			)
-		except httpx.TimeoutException:
+		except Exception:
 			logger.warning(
 				"Heartbeat send failed - State: %s | Msg: %s | Ping: %s ",
 				state,

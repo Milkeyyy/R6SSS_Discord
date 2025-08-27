@@ -1,11 +1,11 @@
 [project]
 name = "r6sss-discord"
-version = "2.5.1"
+version = "2.5.2"
 description = "R6SSS Discord Bot"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "httpx==0.27.*",
+    "httpx",
     "py-cord==2.6.*",
     "pycord-i18n==1.2.*",
     "pymongo>=4.13.0",
