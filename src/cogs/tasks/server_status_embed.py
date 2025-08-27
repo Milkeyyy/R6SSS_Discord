@@ -46,8 +46,20 @@ class ServerStatusEmbedManager(commands.Cog):
 
 		try:
 			# サーバーステータス情報とメンテナンススケジュール情報を取得 (更新) する
-			status_data = await ServerStatusManager.get()
-			schedule_data = await MaintenanceScheduleManager.get()
+			try:
+				status_data = await ServerStatusManager.get()
+			except Exception:
+				logger.error("サーバーステータスの取得に失敗")
+				logger.error(traceback.format_exc())
+				status_data = None
+
+			try:
+				schedule_data = await MaintenanceScheduleManager.get()
+			except Exception:
+				logger.error("メンテナンススケジュールの取得に失敗")
+				logger.error(traceback.format_exc())
+				schedule_data = None
+
 			if schedule_data is None:
 				schedule_data = {}
 
