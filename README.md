@@ -1,6 +1,6 @@
 # R6SSS Discord Bot
 
-> [日本語 / Japanese](./README.ja.md) | **English**
+> [日本語 / Japanese](./README-ja.md) | **English**
 
 > This README was translated using Google Gemini.
 
