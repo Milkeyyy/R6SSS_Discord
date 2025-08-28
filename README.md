@@ -17,6 +17,7 @@ You can also create a server status message that updates periodically.
 ### Status
 
 [![Status](http://status.milkeyyy.com/api/badge/21/status?style=for-the-badge)](https://status.milkeyyy.com/)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FMilkeyyy%2FR6SSS_Discord.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FMilkeyyy%2FR6SSS_Discord?ref=badge_shield)
 
 ### Support Discord Server
 
@@ -80,3 +81,7 @@ These commands can only be run by users with administrator permissions.
 ## Terms of Service & Privacy Policy
 - [Terms of Service](./TERMS-OF-SERVICE.md)
 - [Privacy Policy](./PRIVACY-POLICY.md)
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FMilkeyyy%2FR6SSS_Discord.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FMilkeyyy%2FR6SSS_Discord?ref=badge_large)
