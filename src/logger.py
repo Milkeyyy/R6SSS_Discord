@@ -14,6 +14,11 @@ stream_formatter = logging.Formatter(
 stream_handler = logging.StreamHandler()
 stream_handler.setFormatter(stream_formatter)
 
+log_file_path = Path("./logs/app.log")
+if not log_file_path.exists():
+	log_file_path.parent.mkdir(exist_ok=True)
+	log_file_path.touch(exist_ok=True)
+
 rotating_handler = logging.handlers.RotatingFileHandler(r"./logs/app.log", mode="a", maxBytes=100 * 1024, backupCount=10, encoding="utf-8")
 rotating_handler.setLevel(logging.DEBUG)
 rotating_handler.setFormatter(stream_formatter)
