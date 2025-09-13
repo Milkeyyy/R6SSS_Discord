@@ -94,7 +94,7 @@
 		"Cmd_create_Error_MissingAccess": "The bot does not have permission to view the text channel {0}!",
 		"OwnerAnnounce_Warning_UpdateServerStatusMessage_Error_Forbidden": "Failed to update the server status message created in the text channel {1} ​​of the server `{0}`.\nPlease make sure that R6SSS has permission to view the text channel you are creating, and then create it again with the `/create` command.",
 		"DonationEmbed_Title": "Support R6SSS?",
-		"DonationEmbed_Description": "Thank you for using R6SSS!\nThe development and server costs for this bot are supported by your donations.\n\nIf you enjoy this bot, please consider supporting its future development!\n### - [GitHub Sponsors](https://github.com/sponsors/Milkeyyy)\n### - [Ko-fi](https://ko-fi.com/milkeyyy)\n\n(Your contribution will be used for server maintenance and to motivate further development.)"
+		"DonationEmbed_Description": "Thank you for using R6SSS!\nThe development and server costs for this bot are supported by your donations.\n\nIf you enjoy this bot, please consider supporting its future development!\n### - [GitHub Sponsors](https://github.com/sponsors/Milkeyyy)\n\n(Your contribution will be used for server maintenance and to motivate further development.)"
 	},
 	"commands": {
 		"about": {

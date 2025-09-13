@@ -94,7 +94,7 @@
 		"Cmd_create_Error_MissingAccess": "テキストチャンネル {0} を閲覧する権限がありません！",
 		"OwnerAnnounce_Warning_UpdateServerStatusMessage_Error_Forbidden": "サーバー `{0}` のテキストチャンネル {1} へ作成されたサーバーステータスメッセージの更新に失敗しました。\nR6SSS に作成先のテキストチャンネルを閲覧する権限が付与されているか確認してから、再度 `/create` コマンドで作成を行ってください。",
 		"DonationEmbed_Title": "R6SSS の開発を応援しませんか？",
-		"DonationEmbed_Description": "いつも R6SSS をご利用いただき、ありがとうございます！\nこのBotの開発やサーバーの運営は、皆さまからのご支援によって支えられています。\n\nもしよろしければ、今後の開発の応援をお願いいたします！\n### - [GitHub Sponsors](https://github.com/sponsors/Milkeyyy)\n### - [Ko-fi](https://ko-fi.com/milkeyyy)\n\n(いただいたご支援は、サーバー維持費や開発のモチベーション維持に活用させていただきます。)"
+		"DonationEmbed_Description": "いつも R6SSS をご利用いただき、ありがとうございます！\nこのBotの開発やサーバーの運営は、皆さまからのご支援によって支えられています。\n\nもしよろしければ、今後の開発の応援をお願いいたします！\n### - [GitHub Sponsors](https://github.com/sponsors/Milkeyyy)\n\n(いただいたご支援は、サーバー維持費や開発のモチベーション維持に活用させていただきます。)"
 	},
 	"commands": {
 		"about": {
