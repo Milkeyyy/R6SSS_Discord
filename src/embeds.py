@@ -499,3 +499,14 @@ class MaintenanceSchedule:
 		# メンテナンススケジュールの埋め込みメッセージを一覧へ追加して埋め込みメッセージ一覧を返す
 		logger.info("メンテナンススケジュール埋め込みメッセージ生成終了")
 		return embeds
+
+
+class Donation:
+	@classmethod
+	async def donation(cls) -> discord.Embed:
+		embed = discord.Embed(
+			colour=discord.colour.Colour.nitro_pink(),
+			title=":pink_heart: " + _("DonationEmbed_Title"),
+			description=_("DonationEmbed_Description"),
+		)
+		return embed

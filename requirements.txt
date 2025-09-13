@@ -18,7 +18,7 @@ chardet==5.2.0
     # via mbstrdecoder
 datetimerange==2.3.1
     # via r6sss
-dnspython==2.7.0
+dnspython==2.8.0
     # via pymongo
 frozenlist==1.7.0
     # via
@@ -55,7 +55,7 @@ py-cord==2.6.1
     #   r6sss-discord
 pycord-i18n==1.2.1
     # via r6sss-discord
-pymongo==4.14.1
+pymongo==4.15.0
     # via r6sss-discord
 python-box==7.3.2
     # via r6sss-discord
