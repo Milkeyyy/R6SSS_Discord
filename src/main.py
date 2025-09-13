@@ -324,9 +324,12 @@ async def create(
 			await DebugLogger.log(f"サーバーステータスメッセージ新規作成\n- ギルド: `{ctx.guild.name}`\n- チャンネル: `{ch.name}`")
 			# 作成成功メッセージを送信する
 			await ctx.send_followup(
-				embed=embeds.Notification.success(
-					description=_("Cmd_create_Success", ch.mention) + additional_msg,
-				),
+				embeds=[
+					embeds.Notification.success(
+						description=_("Cmd_create_Success", ch.mention) + additional_msg,
+					),
+					await embeds.Donation.donation(),
+				],
 			)
 	except Exception:
 		# 設定をリセット
@@ -390,7 +393,7 @@ async def about(ctx: discord.ApplicationContext) -> None:
 			value=f"- [Bluesky Bot]({App.BLUESKY_BOT_URL})\n- [Twitter Bot]({App.TWITTER_BOT_URL})",
 			inline=True,
 		)
-		await ctx.respond(embed=embed)
+		await ctx.respond(embeds=[embed, await embeds.Donation.donation()])
 	except Exception:
 		logger.error(traceback.format_exc())
 		await ctx.send_followup(
