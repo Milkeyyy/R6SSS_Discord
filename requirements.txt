@@ -6,7 +6,7 @@ aiohttp==3.12.15
     # via py-cord
 aiosignal==1.4.0
     # via aiohttp
-anyio==4.10.0
+anyio==4.11.0
     # via httpx
 attrs==25.3.0
     # via aiohttp
@@ -55,7 +55,7 @@ py-cord==2.6.1
     #   r6sss-discord
 pycord-i18n==1.2.1
     # via r6sss-discord
-pymongo==4.15.0
+pymongo==4.15.1
     # via r6sss-discord
 python-box==7.3.2
     # via r6sss-discord
