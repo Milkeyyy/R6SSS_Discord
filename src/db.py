@@ -5,8 +5,6 @@ from os import getenv
 import pymongo
 import pymongo.asynchronous.collection
 import pymongo.asynchronous.database
-import pymongo.collection
-import pymongo.database
 
 from logger import logger
 
