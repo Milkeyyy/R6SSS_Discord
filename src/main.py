@@ -33,21 +33,6 @@ parser.add_argument("--dev", action="store_true")  # 開発モード
 args = parser.parse_args()
 
 
-# Bot接続時のイベント
-@client.event
-async def on_connect() -> None:
-	# 言語データを読み込む
-	Localization.load_locale_data()
-	# Cogs の読み込み
-	client.load_extensions("cogs.commands.settings", "cogs.tasks.server_status_embed")
-	# コマンドの同期とローカライズ
-	if client.auto_sync_commands:
-		logger.info("コマンドを同期")
-		Localization.localize_commands()
-		await client.sync_commands()
-	logger.info("接続完了")
-
-
 # Bot起動時のイベント
 @client.event
 async def on_ready() -> None:
@@ -488,6 +473,13 @@ try:
 			load_dotenv(env_path)
 		except NameError:
 			pass
+
+	# 言語データを読み込む
+	Localization.load_locale_data()
+	# Cogs の読み込み
+	client.load_extensions("cogs.commands", "cogs.tasks")
+	# コマンドのローカライズ
+	Localization.localize_commands()
 
 	# ログイン
 	client.run(getenv("CLIENT_TOKEN"))
