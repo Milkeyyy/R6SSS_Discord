@@ -22,6 +22,7 @@ from client import client
 from config import GuildConfigManager
 from db import DBManager
 from debug_logger import DebugLogger
+from kumasan import KumaSan
 from localizations import Localization
 from logger import logger
 from maintenance_schedule import MaintenanceScheduleManager
@@ -78,6 +79,8 @@ async def on_ready() -> None:
 
 	# ギルドデータのチェックを実行
 	await GuildConfigManager.load()
+
+	await KumaSan.ping(state="up", message="ログイン完了")
 
 
 # サーバー参加時のイベント
