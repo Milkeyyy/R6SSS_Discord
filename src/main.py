@@ -144,10 +144,21 @@ async def on_application_command_error(
 	logger.error("アプリケーションコマンド実行エラー")
 	logger.error(ex)
 	# クールダウン
-	if str(ex).startswith("You are on cooldown"):
+	if isinstance(ex, commands.CommandOnCooldown):
 		await ctx.respond(
-			embed=embeds.Notification.warning(description=_("CmdMsg_CooldownWarning")),
+			embed=embeds.Notification.warning(description=_("CmdMsg_CooldownWarning", int(ex.retry_after))),
 			ephemeral=True,
+		)
+	# 実行者がオーナーではない
+	elif isinstance(ex, commands.NotOwner):
+		await ctx.respond(embed=embeds.Notification.error(description=_("CmdMsg_NotOwner")), ephemeral=True)
+	# その他
+	else:
+		# 内部エラーを報告してメッセージを送信する
+		await ctx.respond(
+			embed=embeds.Notification.internal_error(
+				error_code=await DebugLogger.report_internal_error("Exception: " + str(ex) + "\n\n" + traceback.format_exc())
+			)
 		)
 
 
