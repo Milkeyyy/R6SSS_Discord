@@ -480,7 +480,7 @@ try:
 	# 言語データを読み込む
 	Localization.load_locale_data()
 	# Cogs の読み込み
-	client.load_extensions("cogs.commands", "cogs.tasks")
+	client.load_extensions("cogs.commands.settings", "cogs.tasks.server_status_embed")
 	# コマンドのローカライズ
 	Localization.localize_commands()
 
