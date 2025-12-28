@@ -48,7 +48,7 @@
 		"Embed_Unknown_Desc": "サーバーステータスを取得できませんでした。\nボットの稼働状況については[こちら](https://status.milkeyyy.com/)を参照してください。",
 		"Platform_All": "全てのプラットフォーム",
 		"MaintenanceSchedule": "メンテナンススケジュール",
-		"MaintenanceSchedule_Notes": "この情報は Google Generative AI (Gemini) によって抽出されたものです。\n情報の正確性は保証されません。",
+		"MaintenanceSchedule_Notes": "この情報には AI によって抽出された情報が含まれる場合があります。\n情報の正確性は保証されません。",
 		"MaintenanceSchedule_Downtime": "ダウンタイム",
 		"MaintenanceSchedule_Downtime_Minute": "約 {0} 分",
 		"MaintenanceSchedule_PlannedMaintenance": "予定されているメンテナンス",
