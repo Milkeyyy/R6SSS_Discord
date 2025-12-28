@@ -127,7 +127,7 @@ class ServerStatusEmbedManager(commands.Cog):
 					# テキストチャンネルとメッセージIDが両方とも設定されている場合は更新処理を実行する
 					if ch_id != 0 and msg_id != 0:
 						# IDからテキストチャンネルを取得する
-						ch = guild.get_channel(ch_id)
+						ch = await guild.get_or_fetch(discord.TextChannel, ch_id)
 						# チャンネルが存在しない場合はギルドデータのチャンネルIDとメッセージIDをリセットする
 						if ch is None:
 							logger.info("更新スキップ: テキストチャンネルの取得失敗")
@@ -223,30 +223,16 @@ class ServerStatusEmbedManager(commands.Cog):
 						# 通知メッセージの送信先が設定されている場合は通知メッセージを送信する
 						if len(notif_embeds[lang]) >= 1 and notif_ch_id != 0:
 							# 通知メッセージを送信するチャンネルを取得
-							notif_ch = guild.get_channel(notif_ch_id)
-							notif_role = guild.get_role(notif_role_id)
+							notif_ch = await guild.get_or_fetch(discord.TextChannel, notif_ch_id)
+							notif_role = await guild.get_or_fetch(discord.Role, notif_role_id)
 
 							# メンションするロールが設定済みかつメンションが可能な場合はメンション用のテキストを設定
 							notif_role_mention = (notif_role.mention if notif_role.mentionable else "") if notif_role is not None else ""
 
 							# 通知送信先テキストチャンネルが存在する場合は通知メッセージの送信を実行する
 							if notif_ch is not None:
-								# 								for notif_embed in notif_embeds:
-								# 									if notif_embed is not None:
-								# 										# サーバーステータスメッセージが存在する場合は通知埋め込みにリンクを挿入する
-								# 										if msg is not None:
-								# 											notif_embed.description = f"\
-								# [**📶 {localizations.translate('Notification_Show_Server_Status', lang=lang)}**]\
-								# ({msg.jump_url})\n{notif_embed.description}"
-								# 										# 存在しない場合は公式サービスステータスページのURLにする
-								# 										else:
-								# 											notif_embed.description = f"\
-								# [**📶 {localizations.translate('Notification_Show_Server_Status', lang=lang)}**]\
-								# ({localizations.translate('Resources_OfficialServiceStatusPage')})\n{notif_embed.description}"
-
 								# 自動削除が有効の場合は削除までの時間を指定する
 								notif_delete_after_seconds = int(gc.server_status_notification.auto_delete)
-
 								if notif_delete_after_seconds > 0:
 									await notif_ch.send(
 										content=localizations.translate(

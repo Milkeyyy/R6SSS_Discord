@@ -60,10 +60,12 @@ async def on_ready() -> None:
 		logger.info("デバッグ用サーバー/チャンネル取得")
 		debug_gd_id = getenv("DEBUG_GUILD_ID", "")
 		debug_ch_id = getenv("DEBUG_TEXT_CHANNEL_ID", "")
+		# サーバーを取得
 		DebugLogger.debug_guild = client.get_guild(int(debug_gd_id))
-		DebugLogger.debug_channel = await DebugLogger.debug_guild.fetch_channel(debug_ch_id)
-		if DebugLogger.debug_guild:
+		if DebugLogger.debug_guild is not None:
 			logger.info("- サーバー: %s (ID: %d)", DebugLogger.debug_guild.name, DebugLogger.debug_guild.id)
+			# テキストチャンネルを取得
+			DebugLogger.debug_channel = await DebugLogger.debug_guild.get_or_fetch(discord.TextChannel, int(debug_ch_id))
 		else:
 			logger.warning("- サーバーが見つかりません: %s", debug_gd_id)
 		if DebugLogger.debug_channel:
@@ -157,6 +159,10 @@ async def on_application_command_error(
 @commands.cooldown(2, 5)
 async def status(ctx: discord.ApplicationContext) -> None:
 	await ctx.defer(ephemeral=False)
+
+	if ctx.guild is None:
+		raise Exception("ctx.guild is None")
+
 	try:
 		# ギルドコンフィグを取得する
 		gc = await GuildConfigManager.get(ctx.guild.id)
@@ -198,6 +204,10 @@ async def status(ctx: discord.ApplicationContext) -> None:
 @commands.cooldown(2, 5)
 async def schedule(ctx: discord.ApplicationContext) -> None:
 	await ctx.defer(ephemeral=False)
+
+	if ctx.guild is None:
+		raise Exception("ctx.guild is None")
+
 	try:
 		# ギルドコンフィグを取得する
 		gc = await GuildConfigManager.get(ctx.guild.id)
@@ -238,6 +248,9 @@ async def create(
 ) -> None:
 	await ctx.defer(ephemeral=True)
 
+	if ctx.guild is None:
+		raise Exception("ctx.guild is None")
+
 	gc = None
 	try:
 		# ギルドコンフィグを取得する
@@ -258,7 +271,11 @@ async def create(
 		# テキストチャンネルのID
 		ch_id = channel.id if channel else ctx.channel_id
 		# IDからテキストチャンネルを取得する
-		ch = ctx.guild.get_channel(ch_id)
+		ch = await ctx.guild.get_or_fetch(discord.TextChannel, ch_id)
+
+		if ch is None:
+			await ctx.send_followup(embed=embeds.Notification.error(description=_("CmdMsg_TextChannelNotFound")))
+			return
 
 		try:
 			# サーバーステータスを取得する
