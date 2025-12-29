@@ -291,13 +291,15 @@ async def create(
 
 			embed_list = await embeds.ServerStatus.generate_embed(gc.server_status_message.language, status_data)
 
-			# メンテナンススケジュールを取得する
-			schedule_data = MaintenanceScheduleManager.data
-			if schedule_data is not None:
-				schedule_data = schedule_data.get(gc.server_status_message.language)
+			# メンテナンススケジュールの表示が有効の場合のみ埋め込みを追加する
+			if gc.server_status_message.maintenance_schedule:
+				# メンテナンススケジュールを取得する
+				schedule_data = MaintenanceScheduleManager.data
+				if schedule_data is not None:
+					schedule_data = schedule_data.get(gc.server_status_message.language)
 
-			# メンテナンススケジュールの埋め込みを生成してリストへ追加する
-			embed_list.extend(await embeds.MaintenanceSchedule.generate_embed(gc.server_status_message.language, schedule_data))
+				# メンテナンススケジュールの埋め込みを生成してリストへ追加する
+				embed_list.extend(await embeds.MaintenanceSchedule.generate_embed(gc.server_status_message.language, schedule_data))
 
 			# サーバーステータス埋め込みメッセージ生成してを送信する (作成)
 			try:
