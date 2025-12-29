@@ -289,10 +289,20 @@ async def create(
 					),
 				)
 
+			embed_list = await embeds.ServerStatus.generate_embed(gc.server_status_message.language, status_data)
+
+			# メンテナンススケジュールを取得する
+			schedule_data = MaintenanceScheduleManager.data
+			if schedule_data is not None:
+				schedule_data = schedule_data.get(gc.server_status_message.language)
+
+			# メンテナンススケジュールの埋め込みを生成してリストへ追加する
+			embed_list.extend(await embeds.MaintenanceSchedule.generate_embed(gc.server_status_message.language, schedule_data))
+
 			# サーバーステータス埋め込みメッセージ生成してを送信する (作成)
 			try:
 				msg = await ch.send(
-					embeds=await embeds.ServerStatus.generate_embed(gc.server_status_message.language, status_data),
+					embeds=embed_list,
 				)
 			except discord.errors.Forbidden as e:
 				logger.info("サーバーステータスメッセージ作成失敗 - %s", str(e))
