@@ -148,11 +148,11 @@ class ServerStatusEmbedManager(commands.Cog):
 							msg = await ch.fetch_message(msg_id)
 						# メッセージが存在しない (削除されている) 場合
 						except discord.errors.NotFound as err:
-							logger.info(" - メッセージの取得失敗 (%s)", str(err))
+							logger.info(" - メッセージの取得失敗 - NotFound (%s)", str(err))
 							msg = None
 						# メッセージを取得する権限がない (チャンネルへのアクセス権がない) 場合
 						except discord.errors.Forbidden as err:
-							logger.info(" - メッセージの取得失敗 (%s)", str(err))
+							logger.info(" - メッセージの取得失敗 - Forbidden (%s)", str(err))
 							msg = None
 							# 権限がない場合はギルドのオーナーへ警告メッセージを送信する
 							await GuildOwnerAnnounceUtil.send_warning(
@@ -164,6 +164,10 @@ class ServerStatusEmbedManager(commands.Cog):
 								),
 								lang=lang,
 							)
+						except discord.errors.HTTPException as err:
+							logger.error(traceback.format_exc())
+							logger.error(" - メッセージの取得失敗 - HTTPException (Status: %d / %s)", err.status, str(err))
+							msg = None
 
 						# 既存のサーバーステータスメッセージの取得に失敗した場合はコンフィグをリセットして処理をスキップする
 						if msg is None:
