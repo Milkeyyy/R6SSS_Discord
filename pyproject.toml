@@ -60,3 +60,8 @@ max-complexity = 30
 [tool.ruff.lint.pylint]
 max-args = 6
 max-branches = 30
+
+[dependency-groups]
+dev = [
+    "pip-licenses>=5.5.0",
+]

@@ -77,6 +77,44 @@ These commands can only be run by users with administrator permissions.
   >
   > <img src="https://github.com/user-attachments/assets/baf3e13d-647b-4feb-a77d-88f28f074d32" width="40%" />
 
+
+## Open Source Licenses
+
+| Name              | License                                                 |
+|-------------------|---------------------------------------------------------|
+| DateTimeRange     | MIT License                                             |
+| aiohappyeyeballs  | Python Software Foundation License                      |
+| aiohttp           | Apache-2.0 AND MIT                                      |
+| aiosignal         | Apache Software License                                 |
+| anyio             | MIT                                                     |
+| attrs             | MIT                                                     |
+| certifi           | Mozilla Public License 2.0 (MPL 2.0)                    |
+| chardet           | GNU Lesser General Public License v2 or later (LGPLv2+) |
+| dnspython         | ISC License (ISCL)                                      |
+| frozenlist        | Apache-2.0                                              |
+| h11               | MIT License                                             |
+| httpcore          | BSD-3-Clause                                            |
+| httpx             | BSD License                                             |
+| idna              | BSD License                                             |
+| mbstrdecoder      | MIT License                                             |
+| multidict         | Apache License 2.0                                      |
+| packaging         | Apache Software License; BSD License                    |
+| propcache         | Apache Software License                                 |
+| py-cord           | MIT                                                     |
+| pycord-i18n       | MIT License                                             |
+| pymongo           | Apache Software License                                 |
+| python-box        | MIT License                                             |
+| python-dateutil   | Apache Software License; BSD License                    |
+| python-dotenv     | BSD-3-Clause                                            |
+| pytz              | MIT License                                             |
+| six               | MIT License                                             |
+| sniffio           | Apache Software License; MIT License                    |
+| typepy            | MIT License                                             |
+| typing_extensions | PSF-2.0                                                 |
+| uuid_utils        | BSD License                                             |
+| yarl              | Apache Software License                                 |
+
+
 ## Terms of Service & Privacy Policy
 - [Terms of Service](./TERMS-OF-SERVICE.md)
 - [Privacy Policy](./PRIVACY-POLICY.md)
