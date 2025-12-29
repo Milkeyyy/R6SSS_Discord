@@ -9,7 +9,7 @@ class App:
 	VERSION_STRING: str
 	COPYRIGHT: str = "Copyright (C) 2025 Milkeyyy"
 
-	GITHUB_REPO_URL: str = "https://github.com/Milkeyyy/R6SSS_Discord"
+	GITHUB_REPO_URL: str = "https://gitlab.com/Milkeyyy/R6SSS_Discord"
 	BLUESKY_BOT_URL: str = "https://bsky.app/profile/r6sss.milkeyyy.com"
 	TWITTER_BOT_URL: str = "https://twitter.com/R6SSS_JP"
 
