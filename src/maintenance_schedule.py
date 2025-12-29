@@ -5,7 +5,8 @@ from r6sss.types import MaintenanceSchedule
 
 
 class MaintenanceScheduleManager:
-	data: dict[str, MaintenanceSchedule] | None
+	data: dict[str, MaintenanceSchedule] | None = None
+	previous_data: dict[str, MaintenanceSchedule] | None = None
 	LOCALE_LIST: ClassVar[list[str]] = ["ja", "en"]
 	LOCALE_MAP: ClassVar[dict[str, str]] = {"en_GB": "en", "en_US": "en"}
 
@@ -19,5 +20,7 @@ class MaintenanceScheduleManager:
 		for k, v in cls.LOCALE_MAP.items():
 			if v in data:
 				data[k] = data[v]
+
+		cls.previous_data = cls.data
 		cls.data = data
 		return cls.data

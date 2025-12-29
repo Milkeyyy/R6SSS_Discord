@@ -26,6 +26,60 @@ class ServerStatusEmbedManager(commands.Cog):
 		self.server_status_update_loop_is_running: bool = False
 		self.update_server_status.start()
 
+	def _check_data_changed(
+		self,
+		status_data: list[r6sss.types.Status] | None,
+		schedule_data: dict[str, r6sss.types.MaintenanceSchedule] | None,
+	) -> bool:
+		"""データに変更があったかどうかを確認する"""
+		# 初回実行時
+		if ServerStatusManager.previous_data is None or MaintenanceScheduleManager.previous_data is None:
+			return True
+
+		# Noneチェック
+		if status_data is None or schedule_data is None:
+			return True
+
+		# サーバーステータスの比較
+		# 要素数が異なる場合は変更あり
+		if len(ServerStatusManager.previous_data) != len(status_data):
+			return True
+
+		for i, status in enumerate(status_data):
+			prev = ServerStatusManager.previous_data[i]
+			# 必要なフィールドのみ比較
+			if (
+				prev.platform != status.platform
+				or prev.connectivity != status.connectivity
+				or prev.maintenance != status.maintenance
+				or prev.authentication != status.authentication
+				or prev.matchmaking != status.matchmaking
+				or prev.purchase != status.purchase
+			):
+				return True
+
+		# メンテナンススケジュールの比較
+		# 言語数が異なる場合は変更あり
+		if len(MaintenanceScheduleManager.previous_data) != len(schedule_data):
+			return True
+
+		for lang, schedule in schedule_data.items():
+			prev_schedule = MaintenanceScheduleManager.previous_data.get(lang)
+			if prev_schedule is None:
+				return True
+
+			if (
+				prev_schedule.title != schedule.title
+				or prev_schedule.detail != schedule.detail
+				or prev_schedule.downtime != schedule.downtime
+				or prev_schedule.date != schedule.date
+				or [p.name for p in prev_schedule.platforms] != [p.name for p in schedule.platforms]
+				or prev_schedule.patchnotes != schedule.patchnotes
+			):
+				return True
+
+		return False
+
 	# 2分毎にサーバーステータスを更新する
 	@tasks.loop(minutes=2)
 	async def update_server_status(self) -> None:  # noqa: PLR0915
@@ -67,6 +121,12 @@ class ServerStatusEmbedManager(commands.Cog):
 			if status_data is None:
 				logger.error("- 更新中止: status_data is None")
 				await KumaSan.ping("pending", "サーバーステータスの更新中止: status_data is None")
+				return
+
+			# データに変更がない場合は処理をスキップする
+			if not self._check_data_changed(status_data, schedule_data):
+				logger.info("サーバーステータスおよびメンテナンススケジュールの変更がないため更新をスキップします")
+				await KumaSan.ping("up", "サーバーステータスの更新スキップ: 変更なし")
 				return
 
 			# 各言語のサーバーステータス情報埋め込みメッセージと通知メッセージを生成する
@@ -141,45 +201,8 @@ class ServerStatusEmbedManager(commands.Cog):
 						ch_name = ch.name
 						logger.info("- 更新実行: #%s", ch_name)
 
-						e = ""
-						msg = None
-						try:
-							# 取得したテキストチャンネルからメッセージを取得する
-							msg = await ch.fetch_message(msg_id)
-						# メッセージが存在しない (削除されている) 場合
-						except discord.errors.NotFound as err:
-							logger.info(" - メッセージの取得失敗 - NotFound (%s)", str(err))
-							msg = None
-						# メッセージを取得する権限がない (チャンネルへのアクセス権がない) 場合
-						except discord.errors.Forbidden as err:
-							logger.info(" - メッセージの取得失敗 - Forbidden (%s)", str(err))
-							msg = None
-							# 権限がない場合はギルドのオーナーへ警告メッセージを送信する
-							await GuildOwnerAnnounceUtil.send_warning(
-								guild=guild,
-								description=localizations.translate(
-									"OwnerAnnounce_Warning_UpdateServerStatusMessage_Error_Forbidden",
-									[guild.name, ch.mention],
-									lang=lang,
-								),
-								lang=lang,
-							)
-						except discord.errors.HTTPException as err:
-							logger.error(traceback.format_exc())
-							logger.error(" - メッセージの取得失敗 - HTTPException (Status: %d / %s)", err.status, str(err))
-							msg = None
-
-						# 既存のサーバーステータスメッセージの取得に失敗した場合はコンフィグをリセットして処理をスキップする
-						if msg is None:
-							logger.info("- 更新中止: メッセージの取得失敗")
-							logger.info("- ギルド %s のメッセージ (ID: %s) の取得に失敗", guild.name, str(msg_id))
-							logger.info("- サーバーステータスメッセージ設定リセット実行")
-							# メッセージが存在しない(削除されている)場合はギルドデータのチャンネルIDとメッセージIDをリセットする
-							gc.server_status_message.channel_id = "0"
-							gc.server_status_message.message_id = "0"
-							# ギルドデータを保存
-							await GuildConfigManager.update(guild.id, gc)
-							continue
+						# メッセージオブジェクトを取得 (APIリクエストなし)
+						msg = ch.get_partial_message(msg_id)
 
 						# ステータスインジケーターが有効かつインジケーターに変化があった場合は
 						# 元の名前を保持して先頭にインジケーターを追加または置換する
@@ -195,7 +218,7 @@ class ServerStatusEmbedManager(commands.Cog):
 							ch_name = ch_name[1:] if len(ch_name) >= ch_name_min_count else ""
 							try:
 								# チャンネル名を更新する
-								await msg.channel.edit(
+								await ch.edit(
 									name=ServerStatusManager.indicator + ch_name,
 								)
 							except Exception as e:
@@ -208,13 +231,45 @@ class ServerStatusEmbedManager(commands.Cog):
 						try:
 							# 既存のサーバーステータス埋め込みメッセージを新しいものに編集する
 							if target_embeds is not None:
-								# メンテナンススケジュールの埋め込みが生成されているかつ
-								# 表示設定が有効な場合はメンテナンススケジュールの埋め込みを追加する
-								if schedule_display and len(target_embeds) >= 2:  # noqa: PLR2004
-									await msg.edit(embeds=target_embeds[0] + target_embeds[1])
-								# メンテナンススケジュール埋め込みなし (ステータス埋め込みのみ)
-								else:
-									await msg.edit(embeds=target_embeds[0])
+								try:
+									# メンテナンススケジュールの埋め込みが生成されているかつ
+									# 表示設定が有効な場合はメンテナンススケジュールの埋め込みを追加する
+									if schedule_display and len(target_embeds) >= 2:  # noqa: PLR2004
+										await msg.edit(embeds=target_embeds[0] + target_embeds[1])
+									# メンテナンススケジュール埋め込みなし (ステータス埋め込みのみ)
+									else:
+										await msg.edit(embeds=target_embeds[0])
+
+								# メッセージが存在しない (削除されている) 場合
+								except discord.errors.NotFound as err:
+									logger.info(" - メッセージの編集失敗 - NotFound (%s)", str(err))
+									logger.info("- 更新中止: メッセージの取得失敗")
+									logger.info("- ギルド %s のメッセージ (ID: %s) の取得に失敗", guild.name, str(msg_id))
+									logger.info("- サーバーステータスメッセージ設定リセット実行")
+									# メッセージが存在しない(削除されている)場合はギルドデータのチャンネルIDとメッセージIDをリセットする
+									gc.server_status_message.channel_id = "0"
+									gc.server_status_message.message_id = "0"
+									# ギルドデータを保存
+									await GuildConfigManager.update(guild.id, gc)
+									continue
+
+								# メッセージを取得する権限がない (チャンネルへのアクセス権がない) 場合
+								except discord.errors.Forbidden as err:
+									logger.info(" - メッセージの編集失敗 - Forbidden (%s)", str(err))
+									# 権限がない場合はギルドのオーナーへ警告メッセージを送信する
+									await GuildOwnerAnnounceUtil.send_warning(
+										guild=guild,
+										description=localizations.translate(
+											"OwnerAnnounce_Warning_UpdateServerStatusMessage_Error_Forbidden",
+											[guild.name, ch.mention],
+											lang=lang,
+										),
+										lang=lang,
+									)
+								except discord.errors.HTTPException as err:
+									logger.error(traceback.format_exc())
+									logger.error(" - メッセージの編集失敗 - HTTPException (Status: %d / %s)", err.status, str(err))
+
 							else:
 								logger.error("サーバーステータスメッセージの取得失敗: 言語 %s の埋め込みメッセージが存在しません", lang)
 						except Exception as e:
