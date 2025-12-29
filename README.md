@@ -78,7 +78,7 @@ These commands can only be run by users with administrator permissions.
   > <img src="https://github.com/user-attachments/assets/baf3e13d-647b-4feb-a77d-88f28f074d32" width="40%" />
 
 
-## [Open Source Licenses](./OSS.rst)
+## [Open Source Licenses](./OSS.md)
 
 
 ## Terms of Service & Privacy Policy
