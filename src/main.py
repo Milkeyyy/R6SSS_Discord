@@ -266,7 +266,7 @@ async def create(
 
 		additional_msg = ""
 		if gc.server_status_message.message_id != "0":
-			additional_msg = f"\n({_('Cmd_create_OldMessagesWillNoLongerBeUpdated')})"
+			additional_msg = f"\n> {_('Cmd_create_OldMessagesWillNoLongerBeUpdated')}"
 
 		# テキストチャンネルのID
 		ch_id = channel.id if channel else ctx.channel_id

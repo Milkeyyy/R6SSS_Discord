@@ -116,7 +116,9 @@ class SettingsCommands(commands.Cog):
 				await ctx.send_followup(embed=embeds.Notification.error(description=_("CmdMsg_FailedToUpdateConfig")))
 				return
 
-			await ctx.send_followup(embed=embeds.Notification.success(description=_("Cmd_setindicator_Success", _(str(enable)))))
+			await ctx.send_followup(
+				embed=embeds.Notification.success(description=_("Cmd_setindicator_Success_" + str(enable), _(str(enable))))
+			)
 		except Exception:
 			# 設定をリセット
 			if gc is not None:
