@@ -7,6 +7,7 @@ from pycord.i18n import _
 
 import embeds
 from client import client
+from cogs.tasks.server_status_embed import ServerStatusEmbedManager
 from config import GuildConfigManager
 from debug_logger import DebugLogger
 from localizations import Localization
@@ -54,6 +55,9 @@ class SettingsCommands(commands.Cog):
 				gc.server_status_message.language = locale
 			else:
 				gc.server_status_message.language = "en_GB"
+
+			# サーバーステータス埋め込みメッセージを更新する
+			await client.get_cog("ServerStatusEmbedManager").update(ctx.guild, None, gc, None)
 
 			# ギルドコンフィグを更新
 			if not (await GuildConfigManager.update(ctx.guild.id, gc)):
@@ -109,6 +113,9 @@ class SettingsCommands(commands.Cog):
 				return
 
 			gc.server_status_message.status_indicator = enable
+
+			# サーバーステータス埋め込みメッセージを更新する
+			await client.get_cog("ServerStatusEmbedManager").update(ctx.guild, None, gc, None)
 
 			# ギルドコンフィグを更新
 			if not (await GuildConfigManager.update(ctx.guild.id, gc)):
@@ -271,6 +278,9 @@ class SettingsCommands(commands.Cog):
 				return
 
 			gc.server_status_message.maintenance_schedule = enable
+
+			# サーバーステータス埋め込みメッセージを更新する
+			await client.get_cog("ServerStatusEmbedManager").update(ctx.guild, None, gc, None)
 
 			# ギルドコンフィグを更新
 			if not (await GuildConfigManager.update(ctx.guild.id, gc)):
