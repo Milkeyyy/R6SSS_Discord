@@ -131,6 +131,25 @@ async def on_application_command_error(
 	ctx: discord.ApplicationContext,
 	ex: discord.DiscordException,
 ) -> None:
+	full_command_name = ctx.command.qualified_name
+	gn = None
+	if ctx.guild is not None:
+		gn = ctx.guild.name
+		logger.info(
+			"アプリケーションコマンド実行 - %s | ギルド: %s (%d) | 実行者: %s (%s)",
+			full_command_name,
+			ctx.guild.name,
+			ctx.guild.id,
+			ctx.user,
+			ctx.user.id,
+		)
+	else:
+		logger.info(
+			"アプリケーションコマンド実行 - %s | DM | 実行者: %s (%s)",
+			full_command_name,
+			ctx.user,
+			ctx.user.id,
+		)
 	logger.error("アプリケーションコマンド実行エラー")
 	logger.error(ex)
 	# クールダウン
@@ -147,7 +166,8 @@ async def on_application_command_error(
 		# 内部エラーを報告してメッセージを送信する
 		await ctx.respond(
 			embed=embeds.Notification.internal_error(
-				error_code=await DebugLogger.report_internal_error("Exception: " + str(ex) + "\n\n" + traceback.format_exc())
+				description=f"Command: `{full_command_name}`\n{'DM' if gn is None else f'Guild: {gn} (`{ctx.guild.id}`)'}\nUser: {ctx.user} ({ctx.user.id})",
+				error_code=await DebugLogger.report_internal_error("Exception: " + str(ex) + "\n\n" + traceback.format_exc()),
 			)
 		)
 
