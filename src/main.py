@@ -22,6 +22,7 @@ from client import client
 from config import GuildConfigManager
 from db import DBManager
 from debug_logger import DebugLogger
+from kumasan import KumaSan
 from localizations import Localization
 from logger import logger
 from maintenance_schedule import MaintenanceScheduleManager
@@ -31,21 +32,6 @@ from server_status import ServerStatusManager
 parser = argparse.ArgumentParser()
 parser.add_argument("--dev", action="store_true")  # 開発モード
 args = parser.parse_args()
-
-
-# Bot接続時のイベント
-@client.event
-async def on_connect() -> None:
-	# 言語データを読み込む
-	Localization.load_locale_data()
-	# Cogs の読み込み
-	client.load_extensions("cogs.commands.settings", "cogs.tasks.server_status_embed")
-	# コマンドの同期とローカライズ
-	if client.auto_sync_commands:
-		logger.info("コマンドを同期")
-		Localization.localize_commands()
-		await client.sync_commands()
-	logger.info("接続完了")
 
 
 # Bot起動時のイベント
@@ -74,10 +60,12 @@ async def on_ready() -> None:
 		logger.info("デバッグ用サーバー/チャンネル取得")
 		debug_gd_id = getenv("DEBUG_GUILD_ID", "")
 		debug_ch_id = getenv("DEBUG_TEXT_CHANNEL_ID", "")
+		# サーバーを取得
 		DebugLogger.debug_guild = client.get_guild(int(debug_gd_id))
-		DebugLogger.debug_channel = await DebugLogger.debug_guild.fetch_channel(debug_ch_id)
-		if DebugLogger.debug_guild:
+		if DebugLogger.debug_guild is not None:
 			logger.info("- サーバー: %s (ID: %d)", DebugLogger.debug_guild.name, DebugLogger.debug_guild.id)
+			# テキストチャンネルを取得
+			DebugLogger.debug_channel = await DebugLogger.debug_guild.get_or_fetch(discord.TextChannel, int(debug_ch_id))
 		else:
 			logger.warning("- サーバーが見つかりません: %s", debug_gd_id)
 		if DebugLogger.debug_channel:
@@ -93,6 +81,8 @@ async def on_ready() -> None:
 
 	# ギルドデータのチェックを実行
 	await GuildConfigManager.load()
+
+	await KumaSan.ping(state="up", message="ログイン完了")
 
 
 # サーバー参加時のイベント
@@ -141,13 +131,44 @@ async def on_application_command_error(
 	ctx: discord.ApplicationContext,
 	ex: discord.DiscordException,
 ) -> None:
+	full_command_name = ctx.command.qualified_name
+	gn = None
+	if ctx.guild is not None:
+		gn = ctx.guild.name
+		logger.info(
+			"アプリケーションコマンド実行 - %s | ギルド: %s (%d) | 実行者: %s (%s)",
+			full_command_name,
+			ctx.guild.name,
+			ctx.guild.id,
+			ctx.user,
+			ctx.user.id,
+		)
+	else:
+		logger.info(
+			"アプリケーションコマンド実行 - %s | DM | 実行者: %s (%s)",
+			full_command_name,
+			ctx.user,
+			ctx.user.id,
+		)
 	logger.error("アプリケーションコマンド実行エラー")
 	logger.error(ex)
 	# クールダウン
-	if str(ex).startswith("You are on cooldown"):
+	if isinstance(ex, commands.CommandOnCooldown):
 		await ctx.respond(
-			embed=embeds.Notification.warning(description=_("CmdMsg_CooldownWarning")),
+			embed=embeds.Notification.warning(description=_("CmdMsg_CooldownWarning", int(ex.retry_after))),
 			ephemeral=True,
+		)
+	# 実行者がオーナーではない
+	elif isinstance(ex, commands.NotOwner):
+		await ctx.respond(embed=embeds.Notification.error(description=_("CmdMsg_NotOwner")), ephemeral=True)
+	# その他
+	else:
+		# 内部エラーを報告してメッセージを送信する
+		await ctx.respond(
+			embed=embeds.Notification.internal_error(
+				description=f"Command: `{full_command_name}`\n{'DM' if gn is None else f'Guild: {gn} (`{ctx.guild.id}`)'}\nUser: {ctx.user} ({ctx.user.id})",
+				error_code=await DebugLogger.report_internal_error("Exception: " + str(ex) + "\n\n" + traceback.format_exc()),
+			)
 		)
 
 
@@ -158,6 +179,10 @@ async def on_application_command_error(
 @commands.cooldown(2, 5)
 async def status(ctx: discord.ApplicationContext) -> None:
 	await ctx.defer(ephemeral=False)
+
+	if ctx.guild is None:
+		raise Exception("ctx.guild is None")
+
 	try:
 		# ギルドコンフィグを取得する
 		gc = await GuildConfigManager.get(ctx.guild.id)
@@ -199,6 +224,10 @@ async def status(ctx: discord.ApplicationContext) -> None:
 @commands.cooldown(2, 5)
 async def schedule(ctx: discord.ApplicationContext) -> None:
 	await ctx.defer(ephemeral=False)
+
+	if ctx.guild is None:
+		raise Exception("ctx.guild is None")
+
 	try:
 		# ギルドコンフィグを取得する
 		gc = await GuildConfigManager.get(ctx.guild.id)
@@ -239,6 +268,9 @@ async def create(
 ) -> None:
 	await ctx.defer(ephemeral=True)
 
+	if ctx.guild is None:
+		raise Exception("ctx.guild is None")
+
 	gc = None
 	try:
 		# ギルドコンフィグを取得する
@@ -254,12 +286,16 @@ async def create(
 
 		additional_msg = ""
 		if gc.server_status_message.message_id != "0":
-			additional_msg = f"\n({_('Cmd_create_OldMessagesWillNoLongerBeUpdated')})"
+			additional_msg = f"\n> {_('Cmd_create_OldMessagesWillNoLongerBeUpdated')}"
 
 		# テキストチャンネルのID
 		ch_id = channel.id if channel else ctx.channel_id
 		# IDからテキストチャンネルを取得する
-		ch = ctx.guild.get_channel(ch_id)
+		ch = await ctx.guild.get_or_fetch(discord.TextChannel, ch_id)
+
+		if ch is None:
+			await ctx.send_followup(embed=embeds.Notification.error(description=_("CmdMsg_TextChannelNotFound")))
+			return
 
 		try:
 			# サーバーステータスを取得する
@@ -273,10 +309,22 @@ async def create(
 					),
 				)
 
+			embed_list = await embeds.ServerStatus.generate_embed(gc.server_status_message.language, status_data)
+
+			# メンテナンススケジュールの表示が有効の場合のみ埋め込みを追加する
+			if gc.server_status_message.maintenance_schedule:
+				# メンテナンススケジュールを取得する
+				schedule_data = MaintenanceScheduleManager.data
+				if schedule_data is not None:
+					schedule_data = schedule_data.get(gc.server_status_message.language)
+
+				# メンテナンススケジュールの埋め込みを生成してリストへ追加する
+				embed_list.extend(await embeds.MaintenanceSchedule.generate_embed(gc.server_status_message.language, schedule_data))
+
 			# サーバーステータス埋め込みメッセージ生成してを送信する (作成)
 			try:
 				msg = await ch.send(
-					embeds=await embeds.ServerStatus.generate_embed(gc.server_status_message.language, status_data),
+					embeds=embed_list,
 				)
 			except discord.errors.Forbidden as e:
 				logger.info("サーバーステータスメッセージ作成失敗 - %s", str(e))
@@ -477,6 +525,13 @@ try:
 			load_dotenv(env_path)
 		except NameError:
 			pass
+
+	# 言語データを読み込む
+	Localization.load_locale_data()
+	# Cogs の読み込み
+	client.load_extensions("cogs.commands.settings", "cogs.tasks.server_status_embed")
+	# コマンドのローカライズ
+	Localization.localize_commands()
 
 	# ログイン
 	client.run(getenv("CLIENT_TOKEN"))

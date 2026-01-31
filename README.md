@@ -48,7 +48,7 @@ These bots automatically post updates when the server status changes, such as at
 These commands can only be run by users with administrator permissions.
 
 - `create [text_channel]`
-  - Creates a server status message in the specified text channel that **automatically updates every 2 minutes**.
+  - Create a server status that **automatically updates when the status changes** in the specified text channel.
     - The sent server status will continue to be updated until **the message is deleted** or **a new server status is created with the `create` command**.
     - If `text_channel` is not specified, it will be created in the channel where the command was executed.
 
@@ -77,6 +77,14 @@ These commands can only be run by users with administrator permissions.
   >
   > <img src="https://github.com/user-attachments/assets/baf3e13d-647b-4feb-a77d-88f28f074d32" width="40%" />
 
+
+## [Open Source Licenses](./OSS.md)
+
+
 ## Terms of Service & Privacy Policy
 - [Terms of Service](./TERMS-OF-SERVICE.md)
 - [Privacy Policy](./PRIVACY-POLICY.md)
+
+---
+
+Copyright (C) 2026 Milkeyyy

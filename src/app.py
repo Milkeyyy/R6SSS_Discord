@@ -7,7 +7,7 @@ class App:
 	NAME: str
 	VERSION: tuple[int, int, int]
 	VERSION_STRING: str
-	COPYRIGHT: str = "Copyright (C) 2025 Milkeyyy"
+	COPYRIGHT: str = "Copyright (C) 2026 Milkeyyy"
 
 	GITHUB_REPO_URL: str = "https://github.com/Milkeyyy/R6SSS_Discord"
 	BLUESKY_BOT_URL: str = "https://bsky.app/profile/r6sss.milkeyyy.com"

@@ -1,3 +1,4 @@
+import copy
 from typing import ClassVar
 
 from box import Box
@@ -30,9 +31,9 @@ class GuildConfigManager:
 	@classmethod
 	def generate_default_guild_data(cls, guild_id: str | int) -> dict:
 		"""初期ギルドコンフィグを生成して返す"""
-		d = cls.DEFAULT_DB_DATA.copy()
+		d = copy.deepcopy(cls.DEFAULT_DB_DATA)
 		d["guild_id"] = str(guild_id)
-		d["config"] = cls.DEFAULT_GUILD_DATA.copy()
+		d["config"] = copy.deepcopy(cls.DEFAULT_GUILD_DATA)
 		return d
 
 	@classmethod
@@ -70,7 +71,7 @@ class GuildConfigManager:
 							"config": (
 								await cls._check_dict_items(
 									gd.get("config"),
-									cls.DEFAULT_GUILD_DATA.copy(),
+									copy.deepcopy(cls.DEFAULT_GUILD_DATA),
 								)
 							),
 						},
