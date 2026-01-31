@@ -84,3 +84,5 @@ These commands can only be run by users with administrator permissions.
 ## Terms of Service & Privacy Policy
 - [Terms of Service](./TERMS-OF-SERVICE.md)
 - [Privacy Policy](./PRIVACY-POLICY.md)
+
+Copyright (C) 2026 Milkeyyy
