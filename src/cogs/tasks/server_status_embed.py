@@ -39,7 +39,10 @@ class ServerStatusEmbedManager(commands.Cog):
 			return True
 
 		# Noneチェック
-		if status_data is None or schedule_data is None:
+		if (status_data is None) != (ServerStatusManager.previous_data is None):
+			return True
+
+		if (schedule_data is None) != (MaintenanceScheduleManager.previous_data is None):
 			return True
 
 		# サーバーステータスの比較
