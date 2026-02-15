@@ -1,19 +1,19 @@
 [project]
 name = "r6sss-discord"
-version = "2.5.7"
+version = "2.5.8"
 description = "R6SSS Discord Bot"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "httpx",
-    "py-cord>=2.7.0",
+    "httpx>=0.28.1",
+    "py-cord>=2.7.1",
     "pycord-i18n>=1.2.1",
-    "pymongo>=4.15.5",
+    "pymongo>=4.16.0",
     "python-box>=7.3.2",
     "python-dotenv>=1.2.1",
-    "r6sss",
+    "r6sss>=0.1.0",
     "six>=1.17.0",
-    "uuid-utils>=0.12.0",
+    "uuid-utils>=0.14.0",
 ]
 
 [tool.uv.sources]
@@ -63,5 +63,5 @@ max-branches = 30
 
 [dependency-groups]
 dev = [
-    "pip-licenses>=5.5.0",
+    "pip-licenses>=5.5.1",
 ]

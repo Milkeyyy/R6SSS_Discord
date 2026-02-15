@@ -35,16 +35,19 @@ class ServerStatusEmbedManager(commands.Cog):
 	) -> bool:
 		"""データに変更があったかどうかを確認する"""
 		# 初回実行時
-		if ServerStatusManager.previous_data is None or MaintenanceScheduleManager.previous_data is None:
+		if ServerStatusManager.previous_data is None:
+			logger.info("初回実行: 以前のデータが存在しません")
 			return True
 
 		# Noneチェック
-		if status_data is None or schedule_data is None:
+		if (status_data is None) != (ServerStatusManager.previous_data is None):
+			logger.info("変更検知: サーバーステータスのデータの有無が変化しました")
 			return True
 
 		# サーバーステータスの比較
 		# 要素数が異なる場合は変更あり
 		if len(ServerStatusManager.previous_data) != len(status_data):
+			logger.info("変更検知: サーバーステータスの要素数が変化しました")
 			return True
 
 		for i, status in enumerate(status_data):
@@ -58,18 +61,50 @@ class ServerStatusEmbedManager(commands.Cog):
 				or prev.matchmaking != status.matchmaking
 				or prev.purchase != status.purchase
 			):
+				logger.info("変更検知: サーバーステータス (%s)", status.platform)
+				if prev.platform != status.platform:
+					logger.info("- Platform: %s -> %s", prev.platform, status.platform)
+				if prev.connectivity != status.connectivity:
+					logger.info("- Connectivity: %s -> %s", prev.connectivity, status.connectivity)
+				if prev.maintenance != status.maintenance:
+					logger.info("- Maintenance: %s -> %s", prev.maintenance, status.maintenance)
+				if prev.authentication != status.authentication:
+					logger.info("- Authentication: %s -> %s", prev.authentication, status.authentication)
+				if prev.matchmaking != status.matchmaking:
+					logger.info("- Matchmaking: %s -> %s", prev.matchmaking, status.matchmaking)
+				if prev.purchase != status.purchase:
+					logger.info("- Purchase: %s -> %s", prev.purchase, status.purchase)
 				return True
 
 		# メンテナンススケジュールの比較
+		# Noneの場合は空の辞書として扱う
+		prev_schedules = MaintenanceScheduleManager.previous_data or {}
+		schedules = schedule_data or {}
+
 		# 言語数が異なる場合は変更あり
-		if len(MaintenanceScheduleManager.previous_data) != len(schedule_data):
+		if len(prev_schedules) != len(schedules):
+			logger.info("変更検知: メンテナンススケジュールの言語数が変化しました")
 			return True
 
-		for lang, schedule in schedule_data.items():
-			prev_schedule = MaintenanceScheduleManager.previous_data.get(lang)
-			if prev_schedule is None:
+		# 各言語のメンテナンススケジュールの比較
+		for lang, schedule in schedules.items():
+			# 言語キーが存在しない場合は追加とみなす
+			if lang not in prev_schedules:
+				logger.info("変更検知: メンテナンススケジュールに新規言語 (%s) が追加されました", lang)
 				return True
 
+			prev_schedule = prev_schedules[lang]
+
+			# 両方ともNoneの場合は変更なし
+			if prev_schedule is None and schedule is None:
+				continue
+
+			# 片方だけNoneの場合は変更あり
+			if (prev_schedule is None) != (schedule is None):
+				logger.info("変更検知: メンテナンススケジュールの有無が変化しました (%s)", lang)
+				return True
+
+			# ここに来る時点で両方ともNoneではないので比較を行う
 			if (
 				prev_schedule.title != schedule.title
 				or prev_schedule.detail != schedule.detail
@@ -78,6 +113,19 @@ class ServerStatusEmbedManager(commands.Cog):
 				or [p.name for p in prev_schedule.platforms] != [p.name for p in schedule.platforms]
 				or prev_schedule.patchnotes != schedule.patchnotes
 			):
+				logger.info("変更検知: メンテナンススケジュール (%s)", lang)
+				if prev_schedule.title != schedule.title:
+					logger.info("- Title changed")
+				if prev_schedule.detail != schedule.detail:
+					logger.info("- Detail changed")
+				if prev_schedule.downtime != schedule.downtime:
+					logger.info("- Downtime changed")
+				if prev_schedule.date != schedule.date:
+					logger.info("- Date changed")
+				if [p.name for p in prev_schedule.platforms] != [p.name for p in schedule.platforms]:
+					logger.info("- Platforms changed")
+				if prev_schedule.patchnotes != schedule.patchnotes:
+					logger.info("- Patchnotes changed")
 				return True
 
 		return False

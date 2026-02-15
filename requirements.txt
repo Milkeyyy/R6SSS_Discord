@@ -2,25 +2,25 @@
 #    uv export -o requirements.txt --no-hashes --no-dev
 aiohappyeyeballs==2.6.1
     # via aiohttp
-aiohttp==3.12.15
+aiohttp==3.13.3
     # via py-cord
 aiosignal==1.4.0
     # via aiohttp
-anyio==4.11.0
+anyio==4.12.1
     # via httpx
-attrs==25.3.0
+attrs==25.4.0
     # via aiohttp
-certifi==2025.8.3
+certifi==2026.1.4
     # via
     #   httpcore
     #   httpx
 chardet==5.2.0
     # via mbstrdecoder
-datetimerange==2.3.1
+datetimerange==2.3.2
     # via r6sss
 dnspython==2.8.0
     # via pymongo
-frozenlist==1.7.0
+frozenlist==1.8.0
     # via
     #   aiohttp
     #   aiosignal
@@ -32,30 +32,30 @@ httpx==0.28.1
     # via
     #   r6sss
     #   r6sss-discord
-idna==3.10
+idna==3.11
     # via
     #   anyio
     #   httpx
     #   yarl
 mbstrdecoder==1.1.4
     # via typepy
-multidict==6.6.4
+multidict==6.7.1
     # via
     #   aiohttp
     #   yarl
-packaging==25.0
+packaging==26.0
     # via typepy
-propcache==0.3.2
+propcache==0.4.1
     # via
     #   aiohttp
     #   yarl
-py-cord==2.7.0
+py-cord==2.7.1
     # via
     #   pycord-i18n
     #   r6sss-discord
 pycord-i18n==1.2.1
     # via r6sss-discord
-pymongo==4.15.5
+pymongo==4.16.0
     # via r6sss-discord
 python-box==7.3.2
     # via r6sss-discord
@@ -73,8 +73,6 @@ six==1.17.0
     # via
     #   python-dateutil
     #   r6sss-discord
-sniffio==1.3.1
-    # via anyio
 typepy==1.3.4
     # via datetimerange
 typing-extensions==4.15.0
@@ -82,7 +80,7 @@ typing-extensions==4.15.0
     #   aiosignal
     #   anyio
     #   py-cord
-uuid-utils==0.12.0
+uuid-utils==0.14.0
     # via r6sss-discord
-yarl==1.20.1
+yarl==1.22.0
     # via aiohttp
