@@ -7,6 +7,7 @@ from pycord.i18n import _
 
 import embeds
 from client import client
+from cogs.tasks.server_status_embed import ServerStatusEmbedManager
 from config import GuildConfigManager
 from debug_logger import DebugLogger
 from localizations import Localization
@@ -34,6 +35,9 @@ class SettingsCommands(commands.Cog):
 		"""サーバーステータスメッセージの言語を設定するコマンド"""
 		await ctx.defer(ephemeral=True)
 
+		if ctx.guild is None:
+			raise Exception("ctx.guild is None")
+
 		gc = None
 		try:
 			# ギルドコンフィグを取得する
@@ -51,6 +55,9 @@ class SettingsCommands(commands.Cog):
 				gc.server_status_message.language = locale
 			else:
 				gc.server_status_message.language = "en_GB"
+
+			# サーバーステータス埋め込みメッセージを更新する
+			await client.get_cog("ServerStatusEmbedManager").update(ctx.guild, None, gc, None)
 
 			# ギルドコンフィグを更新
 			if not (await GuildConfigManager.update(ctx.guild.id, gc)):
@@ -89,6 +96,9 @@ class SettingsCommands(commands.Cog):
 		"""サーバーステータスメッセージが送信されているテキストチャンネルの名前の先頭に表示するインジケーターを設定するコマンド"""
 		await ctx.defer(ephemeral=True)
 
+		if ctx.guild is None:
+			raise Exception("ctx.guild is None")
+
 		gc = None
 		try:
 			# ギルドコンフィグを取得する
@@ -104,13 +114,18 @@ class SettingsCommands(commands.Cog):
 
 			gc.server_status_message.status_indicator = enable
 
+			# サーバーステータス埋め込みメッセージを更新する
+			await client.get_cog("ServerStatusEmbedManager").update(ctx.guild, None, gc, None)
+
 			# ギルドコンフィグを更新
 			if not (await GuildConfigManager.update(ctx.guild.id, gc)):
 				# コンフィグの更新に失敗した場合はエラーメッセージを返す
 				await ctx.send_followup(embed=embeds.Notification.error(description=_("CmdMsg_FailedToUpdateConfig")))
 				return
 
-			await ctx.send_followup(embed=embeds.Notification.success(description=_("Cmd_setindicator_Success", _(str(enable)))))
+			await ctx.send_followup(
+				embed=embeds.Notification.success(description=_("Cmd_setindicator_Success_" + str(enable), _(str(enable))))
+			)
 		except Exception:
 			# 設定をリセット
 			if gc is not None:
@@ -136,6 +151,9 @@ class SettingsCommands(commands.Cog):
 		"""サーバーステータスに変化があった際に送信される通知を設定するコマンド"""
 		await ctx.defer(ephemeral=True)
 
+		if ctx.guild is None:
+			raise Exception("ctx.guild is None")
+
 		gc = None
 		try:
 			# 設定完了埋め込みメッセージを生成
@@ -158,7 +176,7 @@ class SettingsCommands(commands.Cog):
 				ch_id = ctx.channel_id if channel is None else channel.id
 
 				# 指定されたチャンネルが存在するかチェックする
-				ch = client.get_channel(ch_id)
+				ch = await client.get_or_fetch(discord.TextChannel, ch_id)
 				# 見つからない場合はエラーメッセージを送信する
 				if ch is None:
 					await ctx.send_followup(embed=embeds.Notification.error(description=_("CmdMsg_TextChannelNotFound")))
@@ -243,6 +261,9 @@ class SettingsCommands(commands.Cog):
 		"""サーバーステータスメッセージにメンテナンススケジュール情報を表示するかどうかを設定するコマンド"""
 		await ctx.defer(ephemeral=True)
 
+		if ctx.guild is None:
+			raise Exception("ctx.guild is None")
+
 		gc = None
 		try:
 			# ギルドコンフィグを取得する
@@ -257,6 +278,9 @@ class SettingsCommands(commands.Cog):
 				return
 
 			gc.server_status_message.maintenance_schedule = enable
+
+			# サーバーステータス埋め込みメッセージを更新する
+			await client.get_cog("ServerStatusEmbedManager").update(ctx.guild, None, gc, None)
 
 			# ギルドコンフィグを更新
 			if not (await GuildConfigManager.update(ctx.guild.id, gc)):
@@ -282,6 +306,9 @@ class SettingsCommands(commands.Cog):
 	async def viewsettings(self, ctx: discord.ApplicationContext) -> None:
 		await ctx.defer(ephemeral=True)
 
+		if ctx.guild is None:
+			raise Exception("ctx.guild is None")
+
 		gc = None
 		try:
 			# ギルドコンフィグを取得する
@@ -299,7 +326,7 @@ class SettingsCommands(commands.Cog):
 			embed = discord.Embed(title=":gear: " + _("Cmd_viewsettings_CurrentSettings"))
 
 			# 作成されたサーバーステータスメッセージ(とそのテキストチャンネル)を取得する
-			status_msg_ch = client.get_channel(int(gc.server_status_message.channel_id))
+			status_msg_ch = await client.get_or_fetch(discord.TextChannel, int(gc.server_status_message.channel_id))
 			if status_msg_ch:
 				try:
 					status_msg = await status_msg_ch.fetch_message(int(gc.server_status_message.message_id))
@@ -335,7 +362,7 @@ class SettingsCommands(commands.Cog):
 				inline=False,
 			)
 			# 通知
-			notif_ch = client.get_channel(int(gc.server_status_notification.channel_id))
+			notif_ch = await client.get_or_fetch(discord.TextChannel, int(gc.server_status_notification.channel_id))
 			if notif_ch is not None:
 				# 有効
 				notif_settings_text = f"`{_('True')}`"
