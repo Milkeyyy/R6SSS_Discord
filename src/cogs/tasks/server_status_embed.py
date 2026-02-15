@@ -35,17 +35,13 @@ class ServerStatusEmbedManager(commands.Cog):
 	) -> bool:
 		"""データに変更があったかどうかを確認する"""
 		# 初回実行時
-		if ServerStatusManager.previous_data is None or MaintenanceScheduleManager.previous_data is None:
+		if ServerStatusManager.previous_data is None:
 			logger.info("初回実行: 以前のデータが存在しません")
 			return True
 
 		# Noneチェック
 		if (status_data is None) != (ServerStatusManager.previous_data is None):
 			logger.info("変更検知: サーバーステータスのデータの有無が変化しました")
-			return True
-
-		if (schedule_data is None) != (MaintenanceScheduleManager.previous_data is None):
-			logger.info("変更検知: メンテナンススケジュールのデータの有無が変化しました")
 			return True
 
 		# サーバーステータスの比較
@@ -81,13 +77,18 @@ class ServerStatusEmbedManager(commands.Cog):
 				return True
 
 		# メンテナンススケジュールの比較
+		# Noneの場合は空の辞書として扱う
+		prev_schedules = MaintenanceScheduleManager.previous_data or {}
+		schedules = schedule_data or {}
+
 		# 言語数が異なる場合は変更あり
-		if len(MaintenanceScheduleManager.previous_data) != len(schedule_data):
+		if len(prev_schedules) != len(schedules):
 			logger.info("変更検知: メンテナンススケジュールの言語数が変化しました")
 			return True
 
-		for lang, schedule in schedule_data.items():
-			prev_schedule = MaintenanceScheduleManager.previous_data.get(lang)
+		# 各言語のメンテナンススケジュールの比較
+		for lang, schedule in schedules.items():
+			prev_schedule = prev_schedules.get(lang)
 			if prev_schedule is None:
 				logger.info("変更検知: メンテナンススケジュールに新規言語 (%s) が追加されました", lang)
 				return True
