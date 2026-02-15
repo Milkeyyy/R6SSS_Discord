@@ -88,11 +88,23 @@ class ServerStatusEmbedManager(commands.Cog):
 
 		# 各言語のメンテナンススケジュールの比較
 		for lang, schedule in schedules.items():
-			prev_schedule = prev_schedules.get(lang)
-			if prev_schedule is None:
+			# 言語キーが存在しない場合は追加とみなす
+			if lang not in prev_schedules:
 				logger.info("変更検知: メンテナンススケジュールに新規言語 (%s) が追加されました", lang)
 				return True
 
+			prev_schedule = prev_schedules[lang]
+
+			# 両方ともNoneの場合は変更なし
+			if prev_schedule is None and schedule is None:
+				continue
+
+			# 片方だけNoneの場合は変更あり
+			if (prev_schedule is None) != (schedule is None):
+				logger.info("変更検知: メンテナンススケジュールの有無が変化しました (%s)", lang)
+				return True
+
+			# ここに来る時点で両方ともNoneではないので比較を行う
 			if (
 				prev_schedule.title != schedule.title
 				or prev_schedule.detail != schedule.detail
