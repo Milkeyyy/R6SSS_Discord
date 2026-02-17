@@ -1,6 +1,6 @@
 # R6SSS Discord Bot
 
-> [**日本語 / Japanese**](./README.md) | **英語 / English**
+> [**日本語 / Japanese**](./README-ja.md) | **英語 / English**
 
 This is a bot that sends Rainbow Six Siege server status to Discord text channels.
 
