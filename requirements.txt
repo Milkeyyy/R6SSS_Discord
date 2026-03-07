@@ -10,7 +10,7 @@ anyio==4.12.1
     # via httpx
 attrs==25.4.0
     # via aiohttp
-certifi==2026.1.4
+certifi==2026.2.25
     # via
     #   httpcore
     #   httpx
@@ -57,15 +57,15 @@ pycord-i18n==1.2.1
     # via r6sss-discord
 pymongo==4.16.0
     # via r6sss-discord
-python-box==7.3.2
+python-box==7.4.1
     # via r6sss-discord
 python-dateutil==2.9.0.post0
     # via
     #   datetimerange
     #   typepy
-python-dotenv==1.2.1
+python-dotenv==1.2.2
     # via r6sss-discord
-pytz==2025.2
+pytz==2026.1.post1
     # via typepy
 r6sss @ git+https://github.com/Milkeyyy/R6SSS_Python@796e0d9ee5e4ccbaaa49c910ff5b8bb7947be830
     # via r6sss-discord
@@ -80,7 +80,7 @@ typing-extensions==4.15.0
     #   aiosignal
     #   anyio
     #   py-cord
-uuid-utils==0.14.0
+uuid-utils==0.14.1
     # via r6sss-discord
-yarl==1.22.0
+yarl==1.23.0
     # via aiohttp

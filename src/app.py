@@ -17,6 +17,8 @@ class App:
 	DEVELOPER_WEBSITE_URL: str = "https://milkeyyy.com"
 	DEVELOPER_TWITTER_URL: str = "https://twitter.com/Milkeyyy_53"
 
+	bot_banner_url: str | None = None
+
 	@classmethod
 	def get_git_commit_hash(cls) -> str:
 		# Coolify

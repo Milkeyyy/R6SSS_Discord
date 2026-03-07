@@ -1,4 +1,10 @@
-# R6SSS Discord Bot
+<div align="center">
+<img src="resources/images/banner/R6SSS_Banner_Y11S1_1920x678.jpg" alt="Banner Image" title="R6SSS">
+<h1>R6SSS Discord Bot</h1>
+<p>Rainbow Six Siege Server Status Bot</p>
+</div>
+
+---
 
 > **日本語 / Japanese** | [英語 / English](./README.md)
 

@@ -66,7 +66,7 @@
 		"CmdMsg_Warning": "警告",
 		"CmdMsg_ExcutionError": "コマンドの実行時にエラーが発生しました",
 		"CmdMsg_InternalError": "内部エラー",
-		"CmdMsg_InternalError_Description": "内部エラーが発生しました。もう一度お試しください。\n(この問題が解決しない場合は、開発者へ報告してください。)",
+		"CmdMsg_InternalError_Description": "内部エラーが発生しました。もう一度お試しください。\n(この問題が解決しない場合は、エラーコードを添付して開発者へ報告してください。)",
 		"CmdMsg_CooldownWarning": "コマンドを実行する間隔が短すぎます。\n`{0}` 秒後にもう一度お試しください。",
 		"CmdMsg_NotOwner": "あなたにはこのコマンドを実行する権限がありません。",
 		"CmdMsg_FailedToGetConfig": "コンフィグを取得できませんでした。\nしばらく待ってからもう一度お試しください。\n(この問題が解決しない場合は、開発者へ報告してください。)",
@@ -113,7 +113,7 @@
 			"options": {
 				"locale": {
 					"name": "言語",
-					"description" :"設定する言語"
+					"description": "設定する言語"
 				}
 			}
 		},
