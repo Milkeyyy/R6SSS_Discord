@@ -7,7 +7,7 @@ from pathlib import Path
 
 import discord
 from discord.commands import Option
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 try:
 	from dotenv import load_dotenv
@@ -81,6 +81,9 @@ async def on_ready() -> None:
 
 	# ギルドデータのチェックを実行
 	await GuildConfigManager.load()
+
+	# ボット情報定期更新開始
+	update_info.start()
 
 	await KumaSan.ping(state="up", message="ログイン完了")
 
@@ -172,6 +175,16 @@ async def on_application_command_error(
 				),
 			)
 		)
+
+
+@tasks.loop(hours=1)
+async def update_info() -> None:
+	try:
+		App.bot_banner_url = await client.fetch_user(client.user.id).banner_url
+	except Exception:
+		App.bot_banner_url = None
+		logger.error("BotのバナーURLの取得に失敗")
+		logger.error(traceback.format_exc())
 
 
 # コマンド
@@ -419,7 +432,7 @@ async def ping(ctx: discord.ApplicationContext) -> None:
 async def about(ctx: discord.ApplicationContext) -> None:
 	try:
 		embed = discord.Embed(color=discord.Colour.blue())
-		embed.set_image(url=client.user.banner.url)
+		embed.set_image(url=App.bot_banner_url)
 		embed.set_author(name=App.NAME, icon_url=client.user.display_avatar.url)
 		embed.set_footer(text=App.COPYRIGHT)
 		embed.add_field(
