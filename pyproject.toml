@@ -9,11 +9,11 @@ dependencies = [
     "py-cord>=2.7.1",
     "pycord-i18n>=1.2.1",
     "pymongo>=4.16.0",
-    "python-box>=7.3.2",
-    "python-dotenv>=1.2.1",
+    "python-box>=7.4.1",
+    "python-dotenv>=1.2.2",
     "r6sss>=0.1.0",
     "six>=1.17.0",
-    "uuid-utils>=0.14.0",
+    "uuid-utils>=0.14.1",
 ]
 
 [tool.uv.sources]
