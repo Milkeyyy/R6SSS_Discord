@@ -80,7 +80,7 @@ class SettingsCommands(commands.Cog):
 				gc.server_status_message.language = "en_GB"
 				await GuildConfigManager.update(ctx.guild.id, gc)
 			logger.error(traceback.format_exc())
-			await ctx.send_followup(
+			await ctx.send_response(
 				embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
 			)
 
@@ -132,7 +132,7 @@ class SettingsCommands(commands.Cog):
 				gc.server_status_message.status_indicator = False
 				await GuildConfigManager.update(ctx.guild.id, gc)
 			logger.error(traceback.format_exc())
-			await ctx.send_followup(
+			await ctx.send_response(
 				embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
 			)
 
@@ -245,7 +245,7 @@ class SettingsCommands(commands.Cog):
 				gc.server_status_notification.auto_delete = 0
 				await GuildConfigManager.update(ctx.guild.id, gc)
 			logger.error(traceback.format_exc())
-			await ctx.send_followup(
+			await ctx.send_response(
 				embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
 			)
 
@@ -295,7 +295,7 @@ class SettingsCommands(commands.Cog):
 				gc.server_status_message.maintenance_schedule = True
 				await GuildConfigManager.update(ctx.guild.id, gc)
 			logger.error(traceback.format_exc())
-			await ctx.send_followup(
+			await ctx.send_response(
 				embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
 			)
 
@@ -391,7 +391,7 @@ class SettingsCommands(commands.Cog):
 			await ctx.send_followup(embed=embed)
 		except Exception:
 			logger.error(traceback.format_exc())
-			await ctx.send_followup(
+			await ctx.send_response(
 				embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
 			)
 

@@ -168,7 +168,7 @@ async def on_application_command_error(
 			embed=embeds.Notification.internal_error(
 				error_code=await DebugLogger.report_internal_error(
 					"<Exception>\n" + str(ex) + "\n\n<TB>\n" + traceback.format_exc(),
-					description=f"<Application Command Error>\n- {'DM' if gn is None else f'Guild: {gn} (`{ctx.guild.id}`)'}\n- User: {ctx.user} (`{ctx.user.id}`)\n- Command: `{full_command_name}`\n  - Options: ```py\n{json.dumps(ctx.selected_options, indent=2)}\n```",
+					description=f"<Application Command Error>\n- {'DM' if gn is None else f'Guild: {gn} (`{ctx.guild.id}`)'}\n- User: {ctx.user} (`{ctx.user.id}`)\n- Command: `{full_command_name}`\n  - Options: ```\n{json.dumps(ctx.selected_options, indent=2)}```",
 				),
 			)
 		)
@@ -215,8 +215,8 @@ async def status(ctx: discord.ApplicationContext) -> None:
 		)
 	except Exception:
 		logger.error(traceback.format_exc())
-		await ctx.send_followup(
-			embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
+		await ctx.send_response(
+			embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc())),
 		)
 
 
@@ -255,8 +255,8 @@ async def schedule(ctx: discord.ApplicationContext) -> None:
 		await ctx.send_followup(embeds=await embeds.MaintenanceSchedule.generate_embed(gc.server_status_message.language, schedule_data))
 	except Exception:
 		logger.error(traceback.format_exc())
-		await ctx.send_followup(
-			embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
+		await ctx.send_response(
+			embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc())),
 		)
 
 
@@ -365,8 +365,8 @@ async def create(
 
 		except Exception:
 			logger.error(traceback.format_exc())
-			await ctx.send_followup(
-				embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
+			await ctx.send_response(
+				embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc())),
 			)
 			return
 		else:
@@ -388,8 +388,8 @@ async def create(
 			gc.server_status_message.message_id = "0"
 			await GuildConfigManager.update(ctx.guild.id, gc)
 		logger.error(traceback.format_exc())
-		await ctx.send_followup(
-			embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
+		await ctx.send_response(
+			embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc())),
 		)
 
 
@@ -408,8 +408,8 @@ async def ping(ctx: discord.ApplicationContext) -> None:
 		await ctx.respond(embed=ping_embed)
 	except Exception:
 		logger.error(traceback.format_exc())
-		await ctx.send_followup(
-			embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
+		await ctx.send_response(
+			embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc())),
 		)
 
 
@@ -447,8 +447,8 @@ async def about(ctx: discord.ApplicationContext) -> None:
 		await ctx.respond(embeds=[embed, await embeds.Donation.donation()])
 	except Exception:
 		logger.error(traceback.format_exc())
-		await ctx.send_followup(
-			embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
+		await ctx.send_response(
+			embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc())),
 		)
 
 
@@ -479,7 +479,7 @@ async def testnotification(
 			if schedule_data is None:
 				logger.warning("メンテナンススケジュールの取得失敗: 指定された言語に該当するスケジュールが存在しません")
 				logger.warning(str(schedule_data))
-				await ctx.send_followup(embeds=embeds.Notification.error(description=_("CmdMsg_FailedToGetMaintenanceSchedule")))
+				await ctx.send_response(embeds=embeds.Notification.error(description=_("CmdMsg_FailedToGetMaintenanceSchedule")))
 				return
 
 			# サーバーステータスが None の場合はエラーメッセージを返す
@@ -514,8 +514,8 @@ async def testnotification(
 			)
 	except Exception:
 		logger.error(traceback.format_exc())
-		await ctx.send_followup(
-			embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
+		await ctx.send_response(
+			embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc())),
 		)
 
 
