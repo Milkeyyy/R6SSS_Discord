@@ -167,11 +167,20 @@ async def on_application_command_error(
 	# その他
 	else:
 		# 内部エラーを報告してメッセージを送信する
+		# 1. Pycord特有のラップされたエラーから、大元のエラーを取り出す
+		# original が存在しないエラー(HTTPExceptionなど)に備えて getattr を使う
+		original_ex = getattr(ex, "original", ex)
+
+		# 2. 例外オブジェクトから直接トレースバック文字列を生成する
+		tb_strings = traceback.format_exception(type(original_ex), original_ex, original_ex.__traceback__)
+		tb_text = "".join(tb_strings)
+
+		# 内部エラーを報告してメッセージを送信する
 		await ctx.respond(
 			embed=embeds.Notification.internal_error(
 				error_code=await DebugLogger.report_internal_error(
-					"<Exception>\n" + str(ex) + "\n\n<TB>\n" + traceback.format_exc(),
-					description=f"<Application Command Error>\n- {'DM' if gn is None else f'Guild: {gn} (`{ctx.guild.id}`)'}\n- User: {ctx.user} (`{ctx.user.id}`)\n- Command: `{full_command_name}`\n  - Options: ```\n{json.dumps(ctx.selected_options, indent=2)}```",
+					"<Exception>\n" + str(original_ex) + "\n\n<Traceback>\n" + tb_text,
+					description=f"<Application Command Error>\n- {'DM' if gn is None else f'Guild: {gn} (`{ctx.guild.id}`)'}\n- User: {ctx.user} (`{ctx.user.id}`)\n- Command: `{full_command_name}`\n  - Options: ```{json.dumps(ctx.selected_options, indent=2)}```",
 				),
 			)
 		)

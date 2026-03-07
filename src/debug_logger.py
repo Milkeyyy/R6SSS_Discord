@@ -34,7 +34,7 @@ class DebugLogger:
 			error_code = str(uuid.uuid7())
 			await cls.debug_channel.send(
 				embed=embeds.Notification.internal_error(
-					description=f"{'\n' + description if description is not None else ''}\nエラーコード\n```{error_code}```\nトレースバック\n```{traceback_text}```"
+					description=f"{'\n' + description if description is not None else ''}\nエラーコード\n```{error_code}```\n例外情報\n```{traceback_text}```"
 				)
 			)
 		except Exception:
