@@ -417,6 +417,7 @@ async def ping(ctx: discord.ApplicationContext) -> None:
 async def about(ctx: discord.ApplicationContext) -> None:
 	try:
 		embed = discord.Embed(color=discord.Colour.blue())
+		embed.set_image(url=client.user.banner.url)
 		embed.set_author(name=App.NAME, icon_url=client.user.display_avatar.url)
 		embed.set_footer(text=App.COPYRIGHT)
 		embed.add_field(
