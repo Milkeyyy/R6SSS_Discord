@@ -166,8 +166,10 @@ async def on_application_command_error(
 		# 内部エラーを報告してメッセージを送信する
 		await ctx.respond(
 			embed=embeds.Notification.internal_error(
-				description=f"Command: `{full_command_name}`\n{'DM' if gn is None else f'Guild: {gn} (`{ctx.guild.id}`)'}\nUser: {ctx.user} ({ctx.user.id})",
-				error_code=await DebugLogger.report_internal_error("Exception: " + str(ex) + "\n\n" + traceback.format_exc()),
+				error_code=await DebugLogger.report_internal_error(
+					"<Exception>\n" + str(ex) + "\n\n<TB>\n" + traceback.format_exc(),
+					description=f"<Application Command Error>\n- {'DM' if gn is None else f'Guild: {gn} (`{ctx.guild.id}`)'}\n- User: {ctx.user} (`{ctx.user.id}`)\n- Command: `{full_command_name}`\n  - Context: ```py{ctx.options}```",
+				),
 			)
 		)
 
