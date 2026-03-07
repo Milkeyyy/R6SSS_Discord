@@ -1,5 +1,5 @@
 <div align="center">
-<img src="resources/images/banner/R6SSS_Banner_Y11S1_1280x640.jpg" alt="Banner Image" title="R6SSS">
+<img src="resources/images/banner/Y11S1//R6SSS_Banner_Y11S1_1920x678.jpg" alt="Banner Image" title="R6SSS">
 <h1>R6SSS Discord Bot</h1>
 <p>Rainbow Six Siege Server Status Bot</p>
 </div>
