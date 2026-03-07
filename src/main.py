@@ -177,7 +177,14 @@ async def on_application_command_error(
 			embed=embeds.Notification.internal_error(
 				error_code=await DebugLogger.report_internal_error(
 					"<Exception>\n" + str(original_ex) + "\n\n<Traceback>\n" + tb_text,
-					description=f"<Application Command Error>\n- {'DM' if gn is None else f'Guild: {gn} (`{ctx.guild.id}`)'}\n- User: {ctx.user} (`{ctx.user.id}`)\n- Command: `{full_command_name}`\n  - Options: ```{json.dumps(ctx.selected_options, indent=2)}```",
+					description="".join(
+						"<Application Command Error>\n"
+						f"- {'DM' if gn is None else f'Guild: {gn} (`{ctx.guild.id}`)'}\n"
+						f"- User: {ctx.user} (`{ctx.user.id}`)\n"
+						f"- Command: `{full_command_name}`\n"
+						"  - Options\n"
+						f"{('\n'.join(['    - `' + json.dumps(o) + '`' for o in ctx.selected_options]) if ctx.selected_options else '    - None')}",
+					),
 				),
 			)
 		)

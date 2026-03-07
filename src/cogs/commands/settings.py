@@ -39,50 +39,41 @@ class SettingsCommands(commands.Cog):
 			raise Exception("ctx.guild is None")
 
 		gc = None
-		try:
-			# ギルドコンフィグを取得する
-			gc = await GuildConfigManager.get(ctx.guild.id)
-			if gc is None:
-				await ctx.send_followup(
-					embed=embeds.Notification.internal_error(
-						description=_("CmdMsg_FailedToGetConfig"),
-						error_code=await DebugLogger.report_internal_error("FailedToGetGuildConfig"),
-					)
-				)
-				return
 
-			if locale in Localization.LOCALE_DATA:
-				gc.server_status_message.language = locale
-			else:
-				gc.server_status_message.language = "en_GB"
-
-			# サーバーステータス埋め込みメッセージを更新する
-			await client.get_cog("ServerStatusEmbedManager").update(ctx.guild, None, gc, None)
-
-			# ギルドコンフィグを更新
-			if not (await GuildConfigManager.update(ctx.guild.id, gc)):
-				# コンフィグの更新に失敗した場合はエラーメッセージを返す
-				await ctx.send_followup(embed=embeds.Notification.error(description=_("CmdMsg_FailedToUpdateConfig")))
-				return
-
+		# ギルドコンフィグを取得する
+		gc = await GuildConfigManager.get(ctx.guild.id)
+		if gc is None:
 			await ctx.send_followup(
-				embed=embeds.Notification.success(
-					description=_(
-						"Cmd_setlanguage_Success",
-						Localization.EXISTS_LOCALE_LIST.get(gc.server_status_message.language),
-						gc.server_status_message.language,
-					)
+				embed=embeds.Notification.internal_error(
+					description=_("CmdMsg_FailedToGetConfig"),
+					error_code=await DebugLogger.report_internal_error("FailedToGetGuildConfig"),
 				)
 			)
-		except Exception:
-			# 設定をリセット
-			if gc is not None:
-				gc.server_status_message.language = "en_GB"
-				await GuildConfigManager.update(ctx.guild.id, gc)
-			logger.error(traceback.format_exc())
-			await ctx.send_response(
-				embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
+			return
+
+		if locale in Localization.LOCALE_DATA:
+			gc.server_status_message.language = locale
+		else:
+			gc.server_status_message.language = "en_GB"
+
+		# サーバーステータス埋め込みメッセージを更新する
+		await client.get_cog("ServerStatusEmbedManager").update(ctx.guild, None, gc, None)
+
+		# ギルドコンフィグを更新
+		if not (await GuildConfigManager.update(ctx.guild.id, gc)):
+			# コンフィグの更新に失敗した場合はエラーメッセージを返す
+			await ctx.send_followup(embed=embeds.Notification.error(description=_("CmdMsg_FailedToUpdateConfig")))
+			return
+
+		await ctx.send_followup(
+			embed=embeds.Notification.success(
+				description=_(
+					"Cmd_setlanguage_Success",
+					Localization.EXISTS_LOCALE_LIST.get(gc.server_status_message.language),
+					gc.server_status_message.language,
+				)
 			)
+		)
 
 	@commands.slash_command()
 	@discord.guild_only()
@@ -100,41 +91,30 @@ class SettingsCommands(commands.Cog):
 			raise Exception("ctx.guild is None")
 
 		gc = None
-		try:
-			# ギルドコンフィグを取得する
-			gc = await GuildConfigManager.get(ctx.guild.id)
-			if gc is None:
-				await ctx.send_followup(
-					embed=embeds.Notification.internal_error(
-						description=_("CmdMsg_FailedToGetConfig"),
-						error_code=await DebugLogger.report_internal_error("FailedToGetGuildConfig"),
-					)
-				)
-				return
 
-			gc.server_status_message.status_indicator = enable
-
-			# サーバーステータス埋め込みメッセージを更新する
-			await client.get_cog("ServerStatusEmbedManager").update(ctx.guild, None, gc, None)
-
-			# ギルドコンフィグを更新
-			if not (await GuildConfigManager.update(ctx.guild.id, gc)):
-				# コンフィグの更新に失敗した場合はエラーメッセージを返す
-				await ctx.send_followup(embed=embeds.Notification.error(description=_("CmdMsg_FailedToUpdateConfig")))
-				return
-
+		# ギルドコンフィグを取得する
+		gc = await GuildConfigManager.get(ctx.guild.id)
+		if gc is None:
 			await ctx.send_followup(
-				embed=embeds.Notification.success(description=_("Cmd_setindicator_Success_" + str(enable), _(str(enable))))
+				embed=embeds.Notification.internal_error(
+					description=_("CmdMsg_FailedToGetConfig"),
+					error_code=await DebugLogger.report_internal_error("FailedToGetGuildConfig"),
+				)
 			)
-		except Exception:
-			# 設定をリセット
-			if gc is not None:
-				gc.server_status_message.status_indicator = False
-				await GuildConfigManager.update(ctx.guild.id, gc)
-			logger.error(traceback.format_exc())
-			await ctx.send_response(
-				embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
-			)
+			return
+
+		gc.server_status_message.status_indicator = enable
+
+		# サーバーステータス埋め込みメッセージを更新する
+		await client.get_cog("ServerStatusEmbedManager").update(ctx.guild, None, gc, None)
+
+		# ギルドコンフィグを更新
+		if not (await GuildConfigManager.update(ctx.guild.id, gc)):
+			# コンフィグの更新に失敗した場合はエラーメッセージを返す
+			await ctx.send_followup(embed=embeds.Notification.error(description=_("CmdMsg_FailedToUpdateConfig")))
+			return
+
+		await ctx.send_followup(embed=embeds.Notification.success(description=_("Cmd_setindicator_Success_" + str(enable), _(str(enable)))))
 
 	@commands.slash_command()
 	@discord.guild_only()
@@ -310,90 +290,85 @@ class SettingsCommands(commands.Cog):
 			raise Exception("ctx.guild is None")
 
 		gc = None
-		try:
-			# ギルドコンフィグを取得する
-			gc = await GuildConfigManager.get(ctx.guild.id)
-			if gc is None:
-				await ctx.send_followup(
-					embed=embeds.Notification.internal_error(
-						description=_("CmdMsg_FailedToGetConfig"),
-						error_code=await DebugLogger.report_internal_error("FailedToGetGuildConfig"),
-					)
+
+		# ギルドコンフィグを取得する
+		gc = await GuildConfigManager.get(ctx.guild.id)
+		if gc is None:
+			await ctx.send_followup(
+				embed=embeds.Notification.internal_error(
+					description=_("CmdMsg_FailedToGetConfig"),
+					error_code=await DebugLogger.report_internal_error("FailedToGetGuildConfig"),
 				)
-				return
+			)
+			return
 
-			# 埋め込みメッセージを生成
-			embed = discord.Embed(title=":gear: " + _("Cmd_viewsettings_CurrentSettings"))
+		# 埋め込みメッセージを生成
+		embed = discord.Embed(title=":gear: " + _("Cmd_viewsettings_CurrentSettings"))
 
-			# 作成されたサーバーステータスメッセージ(とそのテキストチャンネル)を取得する
-			status_msg_ch = await client.get_or_fetch(discord.TextChannel, int(gc.server_status_message.channel_id))
-			if status_msg_ch:
-				try:
-					status_msg = await status_msg_ch.fetch_message(int(gc.server_status_message.message_id))
-				except discord.errors.NotFound:
-					status_msg = None
-			else:
+		# 作成されたサーバーステータスメッセージ(とそのテキストチャンネル)を取得する
+		status_msg_ch = await client.get_or_fetch(discord.TextChannel, int(gc.server_status_message.channel_id))
+		if status_msg_ch:
+			try:
+				status_msg = await status_msg_ch.fetch_message(int(gc.server_status_message.message_id))
+			except discord.errors.NotFound:
 				status_msg = None
+		else:
+			status_msg = None
 
-			embed.add_field(
-				name=f":envelope: {_('Cmd_viewsettings_ServerStatusMessage')}",
-				value=f"[**{_('Cmd_viewsettings_ServerStatusMessage_Created')}**]({status_msg.jump_url})"
-				if status_msg
-				else f"**{_('Cmd_viewsettings_ServerStatusMessage_None')}**",
-				inline=False,
-			)
+		embed.add_field(
+			name=f":envelope: {_('Cmd_viewsettings_ServerStatusMessage')}",
+			value=f"[**{_('Cmd_viewsettings_ServerStatusMessage_Created')}**]({status_msg.jump_url})"
+			if status_msg
+			else f"**{_('Cmd_viewsettings_ServerStatusMessage_None')}**",
+			inline=False,
+		)
 
-			# メンテナンススケジュールの表示
-			embed.add_field(
-				name=f":calendar: {_('Cmd_viewsettings_MaintenanceSchedule')}",
-				value=f"`{_(str(gc.server_status_message.maintenance_schedule))}`",
-				inline=False,
-			)
-			# インジケーター
-			embed.add_field(
-				name=f":radio_button: {_('Cmd_viewsettings_Indicator')}",
-				value=f"`{_(str(gc.server_status_message.status_indicator))}`",
-				inline=False,
-			)
-			# 言語
-			embed.add_field(
-				name=f":globe_with_meridians: {_('Cmd_viewsettings_Language')}",
-				value=f"`{Localization.EXISTS_LOCALE_LIST.get(gc.server_status_message.language)}` (`{gc.server_status_message.language}`)",
-				inline=False,
-			)
-			# 通知
-			notif_ch = await client.get_or_fetch(discord.TextChannel, int(gc.server_status_notification.channel_id))
-			if notif_ch is not None:
-				# 有効
-				notif_settings_text = f"`{_('True')}`"
-				# チャンネル
-				notif_settings_text += f"\n> `{_('Cmd_setnotification_Channel')}`: {notif_ch.mention}"
-				# ロール
-				if gc.server_status_notification.role_id != "0":
-					notif_role_text = f"<@&{gc.server_status_notification.role_id}>"
-				else:
-					notif_role_text = f"`{_('False')}`"
-				notif_settings_text += f"\n> `{_('Cmd_setnotification_Mention')}`: {notif_role_text}"
-				# 自動削除
-				if int(gc.server_status_notification.auto_delete) == 0:
-					notif_ad_text = f"`{_('False')}`"
-				else:
-					notif_ad_text = _(
-						"Cmd_setnotification_AutoDelete_Seconds",
-						gc.server_status_notification.auto_delete,
-					)
-				notif_settings_text += f"\n> `{_('Cmd_setnotification_AutoDelete')}`: {notif_ad_text}"
+		# メンテナンススケジュールの表示
+		embed.add_field(
+			name=f":calendar: {_('Cmd_viewsettings_MaintenanceSchedule')}",
+			value=f"`{_(str(gc.server_status_message.maintenance_schedule))}`",
+			inline=False,
+		)
+		# インジケーター
+		embed.add_field(
+			name=f":radio_button: {_('Cmd_viewsettings_Indicator')}",
+			value=f"`{_(str(gc.server_status_message.status_indicator))}`",
+			inline=False,
+		)
+		# 言語
+		embed.add_field(
+			name=f":globe_with_meridians: {_('Cmd_viewsettings_Language')}",
+			value=f"`{Localization.EXISTS_LOCALE_LIST.get(gc.server_status_message.language)}` (`{gc.server_status_message.language}`)",
+			inline=False,
+		)
+		# 通知
+		notif_ch = await client.get_or_fetch(discord.TextChannel, int(gc.server_status_notification.channel_id))
+		if notif_ch is not None:
+			# 有効
+			notif_settings_text = f"`{_('True')}`"
+			# チャンネル
+			notif_settings_text += f"\n> `{_('Cmd_setnotification_Channel')}`: {notif_ch.mention}"
+			# ロール
+			if gc.server_status_notification.role_id != "0":
+				notif_role_text = f"<@&{gc.server_status_notification.role_id}>"
 			else:
-				# 無効
-				notif_settings_text = f"`{_('False')}`"
-			embed.add_field(name=f":bell: {_('Cmd_viewsettings_Notification')}", value=notif_settings_text, inline=False)
-			# 生成した埋め込みメッセージを送信
-			await ctx.send_followup(embed=embed)
-		except Exception:
-			logger.error(traceback.format_exc())
-			await ctx.send_response(
-				embed=embeds.Notification.internal_error(error_code=await DebugLogger.report_internal_error(traceback.format_exc()))
-			)
+				notif_role_text = f"`{_('False')}`"
+			notif_settings_text += f"\n> `{_('Cmd_setnotification_Mention')}`: {notif_role_text}"
+			# 自動削除
+			if int(gc.server_status_notification.auto_delete) == 0:
+				notif_ad_text = f"`{_('False')}`"
+			else:
+				notif_ad_text = _(
+					"Cmd_setnotification_AutoDelete_Seconds",
+					gc.server_status_notification.auto_delete,
+				)
+			notif_settings_text += f"\n> `{_('Cmd_setnotification_AutoDelete')}`: {notif_ad_text}"
+		else:
+			# 無効
+			notif_settings_text = f"`{_('False')}`"
+		embed.add_field(name=f":bell: {_('Cmd_viewsettings_Notification')}", value=notif_settings_text, inline=False)
+		# 生成した埋め込みメッセージを送信
+		await ctx.send_followup(embed=embed)
 
 
 def setup(bot: discord.Bot) -> None:
