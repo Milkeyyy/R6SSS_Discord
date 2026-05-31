@@ -32,7 +32,8 @@ class MaintenanceScheduleManager:
 				logger.warning("メンテナンススケジュールの取得に失敗 (%s/%s): %s", attempt, cls.RETRY_COUNT, str(e))
 				if attempt < cls.RETRY_COUNT:
 					await asyncio.sleep(cls.RETRY_DELAY_SECONDS)
-				continue
+					continue
+				return None
 
 			cls.previous_data = cls.data
 			cls.data = data

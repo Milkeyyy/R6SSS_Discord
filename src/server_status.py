@@ -42,9 +42,6 @@ class ServerStatusManager:
 				logger.warning("サーバーステータスの取得結果が空です (%s/%s)", attempt, cls.RETRY_COUNT)
 				return None
 			break
-		if result is None:
-			return None
-
 		# 以前のサーバーステータスを更新する
 		cls.previous_data = cls.data
 
