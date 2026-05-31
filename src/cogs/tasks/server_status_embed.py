@@ -353,7 +353,7 @@ class ServerStatusEmbedManager(commands.Cog):
 			# メンテナンススケジュール情報を取得できなかった場合は処理を行わずにエラーを出力する
 			if schedule_data is None:
 				logger.error("- 更新中止: schedule_data is None")
-				await KumaSan.ping("pending", "サーバーステータスの更新中止: schedule_data is None")
+				await KumaSan.ping("pending", "メンテナンススケジュールの更新中止: schedule_data is None")
 				return
 
 			# データに変更がない場合は処理をスキップする

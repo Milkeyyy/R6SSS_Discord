@@ -36,10 +36,11 @@ class ServerStatusManager:
 				continue
 			if result is not None:
 				break
-			logger.warning("サーバーステータスの取得結果が空です (%s/%s)", attempt, cls.RETRY_COUNT)
 			if attempt < cls.RETRY_COUNT:
-				logger.warning("サーバーステータスの再取得を実行")
+				logger.warning("サーバーステータスの取得結果が空です。再取得します (%s/%s)", attempt, cls.RETRY_COUNT)
 				await asyncio.sleep(cls.RETRY_DELAY_SECONDS)
+				continue
+			logger.warning("サーバーステータスの取得結果が空です (%s/%s)", attempt, cls.RETRY_COUNT)
 		if result is None:
 			return None
 
