@@ -38,3 +38,5 @@ class MaintenanceScheduleManager:
 			cls.previous_data = cls.data
 			cls.data = data
 			return cls.data
+
+		return None
