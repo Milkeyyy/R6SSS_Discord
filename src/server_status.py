@@ -1,14 +1,18 @@
+import asyncio
 import datetime
 
 import discord
 import r6sss
 
 import icons
+from logger import logger
 
 
 class ServerStatusManager:
 	"""サーバーステータスを管理するクラス"""
 
+	RETRY_COUNT = 3
+	RETRY_DELAY_SECONDS = 1
 	data: list[r6sss.types.Status] | None = None
 	previous_data: list[r6sss.types.Status] | None = None
 	updated_at: int = 0
@@ -20,8 +24,20 @@ class ServerStatusManager:
 	@classmethod
 	async def get(cls) -> list[r6sss.types.Status] | None:
 		"""サーバーステータスを取得して整えて返す"""
-		# サーバーステータスを取得
-		result = r6sss.get_server_status()
+		result = None
+		for attempt in range(1, cls.RETRY_COUNT + 1):
+			try:
+				result = await asyncio.to_thread(r6sss.get_server_status)
+			except Exception as e:
+				logger.warning("サーバーステータスの取得に失敗 (%s/%s): %s", attempt, cls.RETRY_COUNT, str(e))
+				if attempt < cls.RETRY_COUNT:
+					await asyncio.sleep(cls.RETRY_DELAY_SECONDS)
+				continue
+			if result is not None:
+				break
+			logger.warning("サーバーステータスの再取得を実行 (%s/%s)", attempt, cls.RETRY_COUNT)
+			if attempt < cls.RETRY_COUNT:
+				await asyncio.sleep(cls.RETRY_DELAY_SECONDS)
 		if result is None:
 			return None
 
