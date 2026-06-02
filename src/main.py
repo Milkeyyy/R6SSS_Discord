@@ -44,7 +44,7 @@ async def on_ready() -> None:
 
 	# ステータス表示を更新
 	await client.change_presence(
-		activity=discord.Game(name=f"Type /create | v{App.VERSION_STRING}"),
+		activity=discord.Game(name=f"Type /help | v{App.VERSION_STRING}"),
 	)
 	logger.info(
 		"%s へログインしました！ (ID: %s)",
