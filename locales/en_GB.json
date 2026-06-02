@@ -66,7 +66,7 @@
 		"CmdMsg_Warning": "Warning",
 		"CmdMsg_ExcutionError": "An error occurred while executing the command",
 		"CmdMsg_InternalError": "Internal Error",
-		"CmdMsg_InternalError_Description": "An internal error occurred. Please try again.\n(If this problem persists, please report it to the developer with the error code attached.)",
+		"CmdMsg_InternalError_Description": "An internal error occurred. Please try again.\\n(If this problem persists, please report it to the developer with the error code attached.)",
 		"CmdMsg_CooldownWarning": "The command interval is too short.\nPlease try again in `{0}` seconds.",
 		"CmdMsg_NotOwner": "You do not have permission to execute this command.",
 		"CmdMsg_FailedToGetConfig": "Failed to retrieve config.\nPlease wait a while and try again.\n(If this problem persists, please report it to the developer.)",
