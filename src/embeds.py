@@ -269,7 +269,7 @@ class ServerStatus:
 
 		# 各プラットフォームごとの埋め込みメッセージを作成
 		embed = discord.Embed()
-		embed.title = icons.R6SSS.ICON.value + " Rainbow Six Siege X Server Status"
+		embed.title = icons.R6SSS.ICON.value + " Rainbow Six Siege Server Status"
 		embed.description = (
 			"🕒 "
 			+ localizations.translate("Last Update", lang=locale)
