@@ -65,6 +65,12 @@ max-complexity = 30
 max-args = 6
 max-branches = 30
 
+[tool.pyrefly]
+project-includes = [
+    "**/*.py*",
+    "**/*.ipynb",
+]
+
 [dependency-groups]
 dev = [
     "pip-licenses>=5.5.5",
