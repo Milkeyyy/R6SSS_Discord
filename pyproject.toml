@@ -8,13 +8,13 @@ dependencies = [
     "httpx>=0.28.1",
     "py-cord>=2.8.1",
     "pycord-i18n>=1.2.1",
-    "pymongo>=4.17.0",
+    "pymongo>=4.18.1",
     "python-box>=7.4.1",
-    "python-dotenv>=1.2.2",
+    "python-dotenv>=1.2.3",
     "r6sss>=0.1.0",
     "six>=1.17.0",
     "tzdata>=2026.4",
-    "uuid-utils>=0.17.0",
+    "uuid-utils>=1.0.0",
 ]
 
 [tool.uv]
