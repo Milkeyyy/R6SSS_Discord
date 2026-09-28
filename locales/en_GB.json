@@ -46,6 +46,7 @@
 		"Detail_ImpactedFeatures_After": "☑️ Resolved Impacted Features",
 		"Embed_Unknown_Title": "Failed to retrieve server status",
 		"Embed_Unknown_Desc": "Failed to retrieve server status.\nFor more information about bot outages, please refer to [Here](https://status.milkeyyy.com/).",
+		"Embed_Description": "Current <@$356876590342340608> server status",
 		"Platform_All": "All Platform",
 		"MaintenanceSchedule": "Maintenance Schedule",
 		"MaintenanceSchedule_Notes": "This information may contain information extracted by AI.\nThe accuracy of the information is not guaranteed.",

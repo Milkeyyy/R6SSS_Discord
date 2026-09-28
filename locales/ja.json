@@ -46,6 +46,7 @@
 		"Detail_ImpactedFeatures_After": "☑️ 問題が解消された機能",
 		"Embed_Unknown_Title": "サーバーステータスの取得に失敗しました",
 		"Embed_Unknown_Desc": "サーバーステータスを取得できませんでした。\nボットの稼働状況については[こちら](https://status.milkeyyy.com/)を参照してください。",
+		"Embed_Description": "現在の <@$356876590342340608> のサーバー稼働状況",
 		"Platform_All": "全てのプラットフォーム",
 		"MaintenanceSchedule": "メンテナンススケジュール",
 		"MaintenanceSchedule_Notes": "この情報には AI によって抽出された情報が含まれる場合があります。\n情報の正確性は保証されません。",

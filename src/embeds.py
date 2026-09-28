@@ -271,7 +271,9 @@ class ServerStatus:
 		embed = discord.Embed()
 		embed.title = icons.R6SSS.ICON.value + " Rainbow Six Siege Server Status"
 		embed.description = (
-			"🕒 "
+			localizations.translate("Embed_Description", lang=locale)
+			+ "\n"
+			+ "> "
 			+ localizations.translate("Last Update", lang=locale)
 			+ ": "
 			+ f"<t:{ServerStatusManager.updated_at}:f> (<t:{ServerStatusManager.updated_at}:R>)"
