@@ -79,11 +79,11 @@ async def on_ready() -> None:
 async def on_guild_join(guild: discord.Guild) -> None:
 	logger.info("ギルド参加: %s (%d)", guild.name, guild.id)
 	await DebugLogger.log(f"ギルド参加\n- ギルド: `{guild.name}`\n- ID: `{guild.id}`")
-	# 参加したギルドのコンフィグを作成する
-	await GuildConfigManager.create(guild.id)
-	# 統計にギルドの参加を記録する
+	# 統計にギルドの参加を記録する (統計の記録失敗が既存処理へ影響しないよう先に実行する)
 	await StatsManager.record_guild_event("join", guild)
 	await StatsManager.upsert_guild(guild)
+	# 参加したギルドのコンフィグを作成する
+	await GuildConfigManager.create(guild.id)
 
 
 # サーバー脱退時のイベント
@@ -91,11 +91,11 @@ async def on_guild_join(guild: discord.Guild) -> None:
 async def on_guild_remove(guild: discord.Guild) -> None:
 	logger.info("ギルド脱退: %s (%d)", guild.name, guild.id)
 	await DebugLogger.log(f"ギルド脱退\n- ギルド: `{guild.name}`\n- ID: `{guild.id}`")
-	# 脱退したギルドのコンフィグを削除する
-	await GuildConfigManager.delete(guild.id)
-	# 統計にギルドの脱退を記録する
+	# 統計にギルドの脱退を記録する (統計の記録失敗が既存処理へ影響しないよう先に実行する)
 	await StatsManager.record_guild_event("leave", guild)
 	await StatsManager.mark_guild_left(guild)
+	# 脱退したギルドのコンフィグを削除する
+	await GuildConfigManager.delete(guild.id)
 
 
 # アプリケーションコマンド実行時のイベント

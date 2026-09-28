@@ -246,18 +246,18 @@ class ServerStatusEmbedManager(commands.Cog):
 					# 既存のサーバーステータス埋め込みメッセージを新しいものに編集する
 					if target_embeds is not None:
 						try:
+							# 送信する埋め込みメッセージの一覧を取得する
 							# メンテナンススケジュールの埋め込みが生成されているかつ
 							# 表示設定が有効な場合はメンテナンススケジュールの埋め込みを追加する
+							sent_embeds = target_embeds[0]
 							if schedule_display and len(target_embeds) >= 2:  # noqa: PLR2004
-								await msg.edit(embeds=target_embeds[0] + target_embeds[1])
-							# メンテナンススケジュール埋め込みなし (ステータス埋め込みのみ)
-							else:
-								await msg.edit(embeds=target_embeds[0])
+								sent_embeds = target_embeds[0] + target_embeds[1]
+							await msg.edit(embeds=sent_embeds)
 
 							# 作成されたサーバーステータス埋め込みメッセージの総数をカウントする
 							self.server_status_embeds_count += 1
-							# 統計にサーバーステータス埋め込みメッセージの実送信を記録する
-							StatsManager.add_embed_sent("status_update", guild.id)
+							# 統計に実送信した埋め込みメッセージの数を記録する
+							StatsManager.add_embed_sent("status_update", guild.id, count=len(sent_embeds))
 
 						# メッセージが存在しない (削除されている) 場合
 						except discord.errors.NotFound as err:
