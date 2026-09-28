@@ -9,6 +9,7 @@ import localizations
 from client import bot
 from logger import logger
 from server_status import ServerStatusManager
+from stats import StatsManager
 
 
 class Notification:
@@ -18,11 +19,13 @@ class Notification:
 		if title == "":
 			title = _("CmdMsg_Success") if lang.strip() == "" else localizations.translate("CmdMsg_Success", lang=lang)
 
-		return discord.Embed(
+		embed = discord.Embed(
 			title=":white_check_mark: " + title,
 			description=description,
 			colour=discord.Colour.from_rgb(140, 176, 91),
 		)
+		StatsManager.add_embed_created("cmd_response")
+		return embed
 
 	@classmethod
 	def warning(cls, title: str = "", description: str = "", lang: str = "") -> discord.Embed:
@@ -30,11 +33,13 @@ class Notification:
 		if title == "":
 			title = _("CmdMsg_Warning") if lang.strip() == "" else localizations.translate("CmdMsg_Warning", lang=lang)
 
-		return discord.Embed(
+		embed = discord.Embed(
 			title=":warning: " + title,
 			description=description,
 			colour=discord.Colour.from_rgb(228, 146, 16),
 		)
+		StatsManager.add_embed_created("cmd_response")
+		return embed
 
 	@classmethod
 	def error(cls, title: str = "", description: str = "", lang: str = "") -> discord.Embed:
@@ -42,11 +47,13 @@ class Notification:
 		if title == "":
 			title = _("CmdMsg_ExcutionError") if lang.strip() == "" else localizations.translate("CmdMsg_ExcutionError", lang=lang)
 
-		return discord.Embed(
+		embed = discord.Embed(
 			title=":no_entry_sign: " + title,
 			description=description,
 			colour=discord.Colour.from_rgb(247, 206, 80),
 		)
+		StatsManager.add_embed_created("cmd_response")
+		return embed
 
 	@classmethod
 	def internal_error(cls, description: str | None = None, error_code: str | None = None) -> discord.Embed:
@@ -59,6 +66,7 @@ class Notification:
 		# エラーコードが渡された場合は先頭に挿入する
 		if error_code:
 			embed.description = f"{embed.description}\n\n> :pencil: Error Code\n> ```{error_code}```"
+		StatsManager.add_embed_created("cmd_response")
 		return embed
 
 	@classmethod
@@ -230,6 +238,7 @@ class Notification:
 					value=target_platforms_text,
 				),
 			)
+			StatsManager.add_embed_created("notification")
 
 		return embed
 
@@ -259,6 +268,7 @@ class ServerStatus:
 		# サーバーステータスが取得できてない場合はエラーメッセージを返す
 		if status_data is None:
 			logger.error("サーバーステータス埋め込みメッセージ生成中止 (サーバーステータス情報なし)")
+			StatsManager.add_embed_created("server_status")
 			return [
 				discord.Embed(
 					color=discord.Colour.light_grey(),
@@ -373,6 +383,7 @@ class ServerStatus:
 		# メンテナンススケジュールの埋め込みメッセージを一覧へ追加して埋め込みメッセージ一覧を返す
 		logger.info("サーバーステータス埋め込みメッセージ生成終了")
 		embeds.append(embed)
+		StatsManager.add_embed_created("server_status")
 		return embeds
 
 
@@ -481,6 +492,7 @@ class MaintenanceSchedule:
 				embeds.append(embed)
 
 				logger.info("メンテナンススケジュール埋め込みメッセージ生成終了")
+				StatsManager.add_embed_created("maintenance_schedule")
 				return embeds
 
 		# 予定されているメンテナンスがない場合の埋め込みメッセージ
@@ -500,6 +512,7 @@ class MaintenanceSchedule:
 
 		# メンテナンススケジュールの埋め込みメッセージを一覧へ追加して埋め込みメッセージ一覧を返す
 		logger.info("メンテナンススケジュール埋め込みメッセージ生成終了")
+		StatsManager.add_embed_created("maintenance_schedule")
 		return embeds
 
 
@@ -511,4 +524,5 @@ class Donation:
 			title=":pink_heart: " + _("DonationEmbed_Title"),
 			description=_("DonationEmbed_Description"),
 		)
+		StatsManager.add_embed_created("donation")
 		return embed

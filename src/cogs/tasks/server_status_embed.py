@@ -19,6 +19,7 @@ from logger import logger
 from maintenance_schedule import MaintenanceScheduleManager
 from owner_message import GuildOwnerAnnounceUtil
 from server_status import ServerStatusManager
+from stats import StatsManager
 
 
 class ServerStatusEmbedManager(commands.Cog):
@@ -255,6 +256,8 @@ class ServerStatusEmbedManager(commands.Cog):
 
 							# 作成されたサーバーステータス埋め込みメッセージの総数をカウントする
 							self.server_status_embeds_count += 1
+							# 統計にサーバーステータス埋め込みメッセージの実送信を記録する
+							StatsManager.add_embed_sent("status_update", guild.id)
 
 						# メッセージが存在しない (削除されている) 場合
 						except discord.errors.NotFound as err:
@@ -454,6 +457,8 @@ class ServerStatusEmbedManager(commands.Cog):
 										embeds=notif_embeds[lang],
 										delete_after=notif_delete_after_seconds,
 									)
+									# 統計に通知埋め込みメッセージの実送信を記録する
+									StatsManager.add_embed_sent("notification", guild.id, count=len(notif_embeds[lang]))
 								# 自動削除が無効の場合は削除までの時間を指定しない
 								else:
 									# 通知メッセージを送信する
@@ -467,6 +472,8 @@ class ServerStatusEmbedManager(commands.Cog):
 										+ notif_role_mention,
 										embeds=notif_embeds[lang],
 									)
+									# 統計に通知埋め込みメッセージの実送信を記録する
+									StatsManager.add_embed_sent("notification", guild.id, count=len(notif_embeds[lang]))
 							# 通知メッセージの送信先が存在しない場合は通知設定をリセットする
 							else:
 								logger.info("サーバーステータス通知メッセージ送信スキップ: チャンネルが存在しません")
