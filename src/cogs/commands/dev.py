@@ -1,3 +1,5 @@
+from collections import Counter
+
 import discord
 from discord.ext import commands
 
@@ -30,9 +32,10 @@ class DevCommands(commands.Cog):
 			inline=False,
 		)
 
+		locale_counts = Counter(guild.preferred_locale or "Not Defined" for guild in self.bot.guilds)
 		embed.add_field(
 			name="Server Preferred Locale List",
-			value="- " + str("\n- ".join({"`" + (guild.preferred_locale or "Not Defined") + "`" for guild in self.bot.guilds})),
+			value="- " + str("\n- ".join(f"`{locale}` ({count})" for locale, count in locale_counts.most_common())),
 			inline=False,
 		)
 
