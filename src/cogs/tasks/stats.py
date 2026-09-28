@@ -1,4 +1,3 @@
-import asyncio
 import traceback
 
 import discord
@@ -14,6 +13,22 @@ class StatsTaskManager(commands.Cog):
 		self.bot = bot
 		self.flush_stats.start()
 		self.collect_stats.start()
+
+	def cog_unload(self) -> None:
+		"""Cog のアンロード時に定期実行ループを停止する"""
+		self.flush_stats.cancel()
+		self.collect_stats.cancel()
+
+	async def _wait_until_ready(self, label: str) -> None:
+		"""クライアントとデータベースの準備が完了するまで待機する"""
+		logger.info("統計の%s待機中", label)
+		logger.info("- クライアントの準備完了まで待機中")
+		await self.bot.wait_until_ready()
+		logger.info("- クライアントの準備完了")
+		logger.info("- データベースの接続待機中")
+		await DBManager.connected_event.wait()
+		logger.info("- データベースの接続完了")
+		logger.info("統計の%s開始", label)
 
 	# 60秒毎に統計バッファをデータベースへ書き込む
 	@tasks.loop(seconds=60)
@@ -36,27 +51,11 @@ class StatsTaskManager(commands.Cog):
 
 	@flush_stats.before_loop
 	async def before_flush_stats(self) -> None:
-		logger.info("統計の定期書き込み待機中")
-		logger.info("- クライアントの準備完了まで待機中")
-		await self.bot.wait_until_ready()
-		logger.info("- クライアントの準備完了")
-		logger.info("- データベースの接続待機中")
-		while not DBManager.connected:
-			await asyncio.sleep(1)
-		logger.info("- データベースの接続完了")
-		logger.info("統計の定期書き込み開始")
+		await self._wait_until_ready("定期書き込み")
 
 	@collect_stats.before_loop
 	async def before_collect_stats(self) -> None:
-		logger.info("統計の定期収集待機中")
-		logger.info("- クライアントの準備完了まで待機中")
-		await self.bot.wait_until_ready()
-		logger.info("- クライアントの準備完了")
-		logger.info("- データベースの接続待機中")
-		while not DBManager.connected:
-			await asyncio.sleep(1)
-		logger.info("- データベースの接続完了")
-		logger.info("統計の定期収集開始")
+		await self._wait_until_ready("定期収集")
 
 
 def setup(bot: discord.Bot) -> None:

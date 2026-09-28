@@ -1,3 +1,4 @@
+import asyncio
 import sys
 import traceback
 from os import getenv
@@ -22,6 +23,8 @@ class DBManager:
 	snapshots_col: pymongo.asynchronous.collection.AsyncCollection
 	"""統計のヘルス・推移スナップショット (stats_snapshots)"""
 	connected: bool = False
+	connected_event: asyncio.Event = asyncio.Event()
+	"""データベースの接続完了を通知するイベント"""
 
 	@classmethod
 	async def connect(cls) -> None:
@@ -56,6 +59,7 @@ class DBManager:
 
 			# 接続完了通知
 			cls.connected = True
+			cls.connected_event.set()
 
 			# 統計用コレクションのインデックスを作成する
 			await cls.ensure_indexes()
