@@ -3,6 +3,8 @@ from collections import Counter
 import discord
 from discord.ext import commands
 
+from stats import StatsManager
+
 
 class DevCommands(commands.Cog):
 	def __init__(self, bot: discord.Bot) -> None:
@@ -36,6 +38,14 @@ class DevCommands(commands.Cog):
 		embed.add_field(
 			name="Server Preferred Locale List",
 			value="- " + str("\n- ".join(f"`{locale}` ({count})" for locale, count in locale_counts.most_common())),
+			inline=False,
+		)
+
+		# 本日のコマンド実行数をデータベースから集計する
+		today_stats = await StatsManager.get_today_command_stats()
+		embed.add_field(
+			name="Today's Commands",
+			value=f"{today_stats[0]} (Errors: {today_stats[1]})" if today_stats is not None else "N/A",
 			inline=False,
 		)
 

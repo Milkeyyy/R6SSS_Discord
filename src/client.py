@@ -17,6 +17,7 @@ bot = Bot()
 import embeds
 from config import GuildConfigManager
 from debug_logger import DebugLogger
+from stats import StatsManager
 
 
 # Bot起動時のイベント
@@ -69,12 +70,18 @@ async def on_ready() -> None:
 
 	await KumaSan.ping(state="up", message="ログイン完了")
 
+	# 統計の記録を開始する
+	StatsManager.record_start()
+
 
 # サーバー参加時のイベント
 @bot.client.event
 async def on_guild_join(guild: discord.Guild) -> None:
 	logger.info("ギルド参加: %s (%d)", guild.name, guild.id)
 	await DebugLogger.log(f"ギルド参加\n- ギルド: `{guild.name}`\n- ID: `{guild.id}`")
+	# 統計にギルドの参加を記録する (統計の記録失敗が既存処理へ影響しないよう先に実行する)
+	await StatsManager.record_guild_event("join", guild)
+	await StatsManager.upsert_guild(guild)
 	# 参加したギルドのコンフィグを作成する
 	await GuildConfigManager.create(guild.id)
 
@@ -84,6 +91,9 @@ async def on_guild_join(guild: discord.Guild) -> None:
 async def on_guild_remove(guild: discord.Guild) -> None:
 	logger.info("ギルド脱退: %s (%d)", guild.name, guild.id)
 	await DebugLogger.log(f"ギルド脱退\n- ギルド: `{guild.name}`\n- ID: `{guild.id}`")
+	# 統計にギルドの脱退を記録する (統計の記録失敗が既存処理へ影響しないよう先に実行する)
+	await StatsManager.record_guild_event("leave", guild)
+	await StatsManager.mark_guild_left(guild)
 	# 脱退したギルドのコンフィグを削除する
 	await GuildConfigManager.delete(guild.id)
 
@@ -108,6 +118,9 @@ async def on_application_command_completion(ctx: discord.ApplicationContext) -> 
 			ctx.user,
 			ctx.user.id,
 		)
+
+	# コマンドの実行数を記録する
+	StatsManager.add_command(full_command_name, ctx.guild.id if ctx.guild is not None else None, ok=True)
 
 
 # アプリケーションコマンドエラー時のイベント
@@ -177,3 +190,6 @@ async def on_application_command_error(
 				),
 			)
 		)
+
+	# コマンドのエラー数を記録する
+	StatsManager.add_command(full_command_name, ctx.guild.id if ctx.guild is not None else None, ok=False)

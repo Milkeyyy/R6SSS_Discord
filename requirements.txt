@@ -6,7 +6,7 @@ aiohttp==3.14.3
     # via py-cord
 aiosignal==1.4.0
     # via aiohttp
-anyio==4.14.2
+anyio==4.15.1
     # via httpx
 attrs==26.1.0
     # via aiohttp
@@ -32,20 +32,20 @@ httpx==0.28.1
     # via
     #   r6sss
     #   r6sss-discord
-idna==3.18
+idna==3.20
     # via
     #   anyio
     #   httpx
     #   yarl
 mbstrdecoder==1.1.5
     # via typepy
-multidict==6.7.1
+multidict==6.9.0
     # via
     #   aiohttp
     #   yarl
-packaging==26.2
+packaging==26.3
     # via typepy
-propcache==0.5.2
+propcache==0.5.4
     # via
     #   aiohttp
     #   yarl
@@ -55,7 +55,7 @@ py-cord==2.8.1
     #   r6sss-discord
 pycord-i18n==1.2.1
     # via r6sss-discord
-pymongo==4.17.0
+pymongo==4.18.1
     # via r6sss-discord
 python-box==7.4.1
     # via r6sss-discord
@@ -63,7 +63,7 @@ python-dateutil==2.9.0.post0
     # via
     #   datetimerange
     #   typepy
-python-dotenv==1.2.2
+python-dotenv==1.2.3
     # via r6sss-discord
 pytz==2026.3.post1
     # via typepy
@@ -81,7 +81,9 @@ typing-extensions==4.16.0
     #   aiosignal
     #   anyio
     #   py-cord
-uuid-utils==0.17.0
+tzdata==2026.4
     # via r6sss-discord
-yarl==1.24.5
+uuid-utils==1.0.0
+    # via r6sss-discord
+yarl==1.25.1
     # via aiohttp

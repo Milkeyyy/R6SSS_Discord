@@ -1,6 +1,6 @@
 [project]
 name = "r6sss-discord"
-version = "2.6.2"
+version = "2.7.0"
 description = "R6SSS Discord Bot"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -8,12 +8,13 @@ dependencies = [
     "httpx>=0.28.1",
     "py-cord>=2.8.1",
     "pycord-i18n>=1.2.1",
-    "pymongo>=4.17.0",
+    "pymongo>=4.18.1",
     "python-box>=7.4.1",
-    "python-dotenv>=1.2.2",
+    "python-dotenv>=1.2.3",
     "r6sss>=0.1.0",
     "six>=1.17.0",
-    "uuid-utils>=0.17.0",
+    "tzdata>=2026.4",
+    "uuid-utils>=1.0.0",
 ]
 
 [tool.uv]
@@ -61,9 +62,25 @@ unfixable = [
 [tool.ruff.lint.mccabe]
 max-complexity = 30
 
+[tool.ruff.lint.per-file-ignores]
+# テストコードでは以下のルールを無視する
+"tests/*" = [
+    "ANN",     # 型注釈
+    "ARG",     # 未使用の引数 (フェイク実装)
+    "FBT",     # bool 型の位置引数 (フェイク実装)
+    "PLR2004", # マジックナンバーの比較
+    "S101",    # assert の使用
+    "SLF001",  # プライベートメンバーへのアクセス
+]
+
 [tool.ruff.lint.pylint]
 max-args = 6
 max-branches = 30
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+pythonpath = ["src"]
+testpaths = ["tests"]
 
 [tool.pyrefly]
 project-includes = [
@@ -74,4 +91,6 @@ project-includes = [
 [dependency-groups]
 dev = [
     "pip-licenses>=5.5.5",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
 ]
