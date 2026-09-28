@@ -5,7 +5,6 @@ from pycord.i18n import _
 import embeds
 from app import App
 from client import bot
-from config import GuildConfigManager
 from localizations import Localization
 
 
@@ -13,18 +12,17 @@ class GeneralCommands(commands.Cog):
 	def __init__(self, bot: discord.Bot) -> None:
 		self.bot = bot
 
-	async def _resolve_help_lang(self, ctx: discord.ApplicationContext) -> str:
+	@classmethod
+	def _resolve_help_lang(cls, ctx: discord.ApplicationContext) -> str:
 		"""/help の表示言語を解決する。"""
-		if ctx.guild is None:
-			return "en_GB"
-
-		gc = await GuildConfigManager.get(ctx.guild.id)
-		if gc is None:
-			return "en_GB"
-
-		lang = gc.server_status_message.language
-		if lang in Localization.LOCALE_DATA:
-			return lang
+		# 他コマンドと同じく、実行者 (Discord クライアント) の言語を優先する
+		for locale in (ctx.locale, ctx.guild_locale):
+			if locale is None:
+				continue
+			# - を _ へ置き換える
+			lang = locale.replace("-", "_")
+			if lang in Localization.LOCALE_DATA:
+				return lang
 
 		return "en_GB"
 
@@ -79,7 +77,7 @@ class GeneralCommands(commands.Cog):
 	@discord.default_permissions(send_messages=True)
 	@commands.cooldown(2, 5)
 	async def help(self, ctx: discord.ApplicationContext) -> None:
-		lang = await self._resolve_help_lang(ctx)
+		lang = self._resolve_help_lang(ctx)
 
 		embed = discord.Embed(
 			title=self._get_help_text(lang, "title"),
