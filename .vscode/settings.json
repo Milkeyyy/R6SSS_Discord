@@ -5,6 +5,7 @@
 			"source.organizeImports.ruff": "explicit"
 		},
 		"editor.formatOnSave": true,
-		"editor.defaultFormatter": "charliermarsh.ruff"
+		"editor.defaultFormatter": "charliermarsh.ruff",
+		"editor.inlayHints.enabled": "on"
 	}
 }
