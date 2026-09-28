@@ -81,6 +81,8 @@ typing-extensions==4.16.0
     #   aiosignal
     #   anyio
     #   py-cord
+tzdata==2026.4
+    # via r6sss-discord
 uuid-utils==0.17.0
     # via r6sss-discord
 yarl==1.24.5
