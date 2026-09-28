@@ -1,17 +1,27 @@
 import datetime
 import traceback
-from typing import ClassVar
+from collections import OrderedDict
+from typing import ClassVar, Literal
 from zoneinfo import ZoneInfo
 
 import discord
 from pymongo import UpdateOne
+from pymongo.errors import BulkWriteError
 
 from app import App
 from db import DBManager
 from logger import logger
 
-JST = ZoneInfo("Asia/Tokyo")
+JST: datetime.tzinfo
 """日本標準時 (Asia/Tokyo)"""
+
+try:
+	JST = ZoneInfo("Asia/Tokyo")
+except Exception:
+	# タイムゾーンデータが存在しない環境では UTC+9 の固定オフセットで代替する
+	JST = datetime.timezone(datetime.timedelta(hours=9))
+	logger.warning("タイムゾーンデータ (Asia/Tokyo) を読み込めなかったため UTC+9 で代替します")
+	logger.warning(traceback.format_exc())
 
 
 class StatsManager:
@@ -27,8 +37,8 @@ class StatsManager:
 	started_at: datetime.datetime | None = None
 	"""Bot の起動時刻 (UTC)"""
 
-	_buffer: ClassVar[dict[tuple[str, str, str, str], dict[str, int]]] = {}
-	"""(日付, metric, dim1, dim2) をキーとした書き込み待ちカウンタ"""
+	_buffer: ClassVar[OrderedDict[tuple[str, str, str, str], dict[str, int]]] = OrderedDict()
+	"""(日付, metric, dim1, dim2) をキーとした書き込み待ちカウンタ (最終更新順)"""
 
 	# 日付・カウンタの記録
 
@@ -57,14 +67,16 @@ class StatsManager:
 		try:
 			# 記録時点の JST 日付でキーを確定する
 			key = (cls._get_jst_date(occurred_at), metric, dim1, dim2)
-			# バッファの上限に達している場合は最古のキーを破棄する (通常運用では到達しない)
+			# バッファの上限に達している場合は最終更新が最も古いキーを破棄する (通常運用では到達しない)
 			if key not in cls._buffer and len(cls._buffer) >= cls.MAX_BUFFER_KEYS:
 				oldest_key = next(iter(cls._buffer))
 				cls._buffer.pop(oldest_key, None)
-				logger.warning("統計バッファの上限に達したため最古のデータを破棄: %s", str(oldest_key))
+				logger.warning("統計バッファの上限に達したため最も古いデータを破棄: %s", str(oldest_key))
 			counter = cls._buffer.setdefault(key, {"count": 0, "error_count": 0})
 			counter["count"] += count
 			counter["error_count"] += error_count
+			# 更新したキーを末尾へ移動する (上限到達時は先頭から破棄するため)
+			cls._buffer.move_to_end(key)
 		except Exception:
 			logger.error("統計カウンタの記録に失敗")
 			logger.error(traceback.format_exc())
@@ -114,10 +126,23 @@ class StatsManager:
 		return ops
 
 	@classmethod
+	def _subtract_written(cls, written: dict[tuple[str, str, str, str], dict[str, int]]) -> None:
+		"""書き込みが完了した分をバッファから減算する"""
+		for key, counter in written.items():
+			current = cls._buffer.get(key)
+			if current is None:
+				continue
+			current["count"] = max(0, current["count"] - counter["count"])
+			current["error_count"] = max(0, current["error_count"] - counter["error_count"])
+			if current["count"] <= 0 and current["error_count"] <= 0:
+				cls._buffer.pop(key, None)
+
+	@classmethod
 	async def flush(cls) -> None:
 		"""バッファの内容をデータベースへ一括書き込みする
 
 		書き込みに失敗した場合はバッファを保持して次回リトライする
+		(一部の操作のみ失敗した場合は、成功した操作の分だけバッファから減算する)
 		"""
 		if not DBManager.connected or not cls._buffer:
 			return
@@ -125,17 +150,21 @@ class StatsManager:
 			# 書き込み中に加算された分を取りこぼさないよう、書き込み対象をコピーしてから実行する
 			target = {key: counter.copy() for key, counter in cls._buffer.items()}
 			ops = cls._build_flush_ops(target, datetime.datetime.now(tz=datetime.UTC))
-			await DBManager.counters_col.bulk_write(ops, ordered=False)
-			# 書き込みに成功した分だけバッファから減算する
-			for key, counter in target.items():
-				current = cls._buffer.get(key)
-				if current is None:
-					continue
-				current["count"] -= counter["count"]
-				current["error_count"] -= counter["error_count"]
-				if current["count"] <= 0 and current["error_count"] <= 0:
-					cls._buffer.pop(key, None)
-			logger.debug("統計カウンタの書き込み完了 - 件数: %d", len(ops))
+			try:
+				await DBManager.counters_col.bulk_write(ops, ordered=False)
+			# 一部の操作が失敗した場合は、成功した操作の分だけバッファから減算する
+			except BulkWriteError as err:
+				failed_indexes = {error["index"] for error in err.details.get("writeErrors", []) if "index" in error}
+				# どの操作が書き込まれたか判別できない場合はバッファを保持して次回リトライする
+				if not failed_indexes or err.details.get("writeConcernErrors"):
+					raise
+				cls._subtract_written({key: counter for i, (key, counter) in enumerate(target.items()) if i not in failed_indexes})
+				logger.warning("統計カウンタの一部の書き込みに失敗 (成功分のみバッファから減算)")
+				logger.warning("失敗した操作数: %d / %d", len(failed_indexes), len(ops))
+			else:
+				# 書き込みに成功した分だけバッファから減算する
+				cls._subtract_written(target)
+				logger.debug("統計カウンタの書き込み完了 - 件数: %d", len(ops))
 		except Exception:
 			logger.error("統計カウンタの書き込みに失敗 (次回リトライ)")
 			logger.error(traceback.format_exc())
@@ -169,8 +198,11 @@ class StatsManager:
 	# ギルド関連
 
 	@classmethod
-	async def upsert_guilds(cls, guilds: list[discord.Guild]) -> None:
-		"""ギルド情報のスナップショットを一括で保存する"""
+	async def upsert_guilds(cls, guilds: list[discord.Guild], *, mark_active: bool = False) -> None:
+		"""ギルド情報のスナップショットを一括で保存する
+
+		`mark_active` を指定した場合はアクティブ状態へ戻す (再参加時にのみ指定する)
+		"""
 		if not DBManager.connected:
 			return
 		try:
@@ -178,23 +210,27 @@ class StatsManager:
 			ops = []
 			for guild in guilds:
 				joined_at = guild.me.joined_at if guild.me is not None else None
+				set_values: dict[str, object] = {
+					"name": guild.name,
+					"icon": guild.icon.key if guild.icon is not None else None,
+					"member_count": guild.member_count or 0,
+					"preferred_locale": str(guild.preferred_locale) if guild.preferred_locale is not None else None,
+					"updated_at": now,
+				}
+				# 定期スナップショットで脱退記録を上書きしないよう、アクティブ状態は再参加時のみ更新する
+				if mark_active:
+					set_values["is_active"] = True
+					set_values["left_at"] = None
 				ops.append(
 					UpdateOne(
 						{"guild_id": str(guild.id)},
 						{
-							"$set": {
-								"name": guild.name,
-								"icon": guild.icon.key if guild.icon is not None else None,
-								"member_count": guild.member_count,
-								"preferred_locale": str(guild.preferred_locale) if guild.preferred_locale is not None else None,
-								# 再参加したギルドをアクティブへ戻す
-								"is_active": True,
-								"left_at": None,
-								"updated_at": now,
-							},
+							"$set": set_values,
 							"$setOnInsert": {
 								"guild_id": str(guild.id),
 								"joined_at": joined_at if joined_at is not None else now,
+								"is_active": True,
+								"left_at": None,
 							},
 						},
 						upsert=True,
@@ -209,11 +245,11 @@ class StatsManager:
 
 	@classmethod
 	async def upsert_guild(cls, guild: discord.Guild) -> None:
-		"""ギルド情報のスナップショットを保存する"""
-		await cls.upsert_guilds([guild])
+		"""ギルド情報のスナップショットを保存する (再参加時はアクティブ状態へ戻す)"""
+		await cls.upsert_guilds([guild], mark_active=True)
 
 	@classmethod
-	async def record_guild_event(cls, event_type: str, guild: discord.Guild) -> None:
+	async def record_guild_event(cls, event_type: Literal["join", "leave"], guild: discord.Guild) -> None:
 		"""ギルドの参加 / 脱退イベントを記録する"""
 		if not DBManager.connected:
 			return
@@ -223,7 +259,7 @@ class StatsManager:
 					"type": event_type,
 					"guild_id": str(guild.id),
 					"guild_name": guild.name,
-					"member_count": guild.member_count,
+					"member_count": guild.member_count or 0,
 					"occurred_at": datetime.datetime.now(tz=datetime.UTC),
 				}
 			)
@@ -243,7 +279,9 @@ class StatsManager:
 				{
 					"$set": {
 						"name": guild.name,
-						"member_count": guild.member_count,
+						"icon": guild.icon.key if guild.icon is not None else None,
+						"member_count": guild.member_count or 0,
+						"preferred_locale": str(guild.preferred_locale) if guild.preferred_locale is not None else None,
 						"is_active": False,
 						"left_at": now,
 						"updated_at": now,
