@@ -18,7 +18,11 @@ dependencies = [
 ]
 
 [tool.uv]
-exclude-newer = "1 week"
+exclude-newer = "1 day"
+
+[[tool.uv.index]]
+url = "https://pypi.flatt.tech/simple/"
+default = true
 
 [tool.uv.sources]
 r6sss = { git = "https://github.com/Milkeyyy/R6SSS_Python" }
