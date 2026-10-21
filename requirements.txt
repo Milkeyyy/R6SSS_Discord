@@ -2,7 +2,7 @@
 #    uv export -o requirements.txt --no-hashes --no-dev
 aiohappyeyeballs==2.7.1
     # via aiohttp
-aiohttp==3.14.3
+aiohttp==3.14.5
     # via py-cord
 aiosignal==1.4.0
     # via aiohttp
@@ -18,7 +18,7 @@ chardet==6.0.0.post1
     # via mbstrdecoder
 datetimerange==2.3.2
     # via r6sss
-dnspython==2.8.0
+dnspython==2.9.0
     # via pymongo
 frozenlist==1.8.0
     # via
@@ -39,7 +39,7 @@ idna==3.20
     #   yarl
 mbstrdecoder==1.1.5
     # via typepy
-multidict==6.9.0
+multidict==7.1.0
     # via
     #   aiohttp
     #   yarl
@@ -55,7 +55,7 @@ py-cord==2.8.1
     #   r6sss-discord
 pycord-i18n==1.2.1
     # via r6sss-discord
-pymongo==4.18.1
+pymongo==4.19.0
     # via r6sss-discord
 python-box==7.4.1
     # via r6sss-discord
@@ -63,9 +63,9 @@ python-dateutil==2.9.0.post0
     # via
     #   datetimerange
     #   typepy
-python-dotenv==1.2.3
+python-dotenv==1.2.4
     # via r6sss-discord
-pytz==2026.3.post1
+pytz==2026.5
     # via typepy
 r6sss @ git+https://github.com/Milkeyyy/R6SSS_Python@796e0d9ee5e4ccbaaa49c910ff5b8bb7947be830
     # via r6sss-discord
@@ -81,7 +81,7 @@ typing-extensions==4.16.0
     #   aiosignal
     #   anyio
     #   py-cord
-tzdata==2026.4
+tzdata==2026.5
     # via r6sss-discord
 uuid-utils==1.0.0
     # via r6sss-discord
