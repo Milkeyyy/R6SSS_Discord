@@ -25,7 +25,7 @@ url = "https://pypi.flatt.tech/simple/"
 default = true
 
 [tool.uv.sources]
-r6sss = { git = "https://github.com/Milkeyyy/R6SSS_Python" }
+r6sss = { git = "https://github.com/Milkeyyy/R6SSS_Python", rev = "v0.2.0" }
 
 [tool.ruff]
 line-length = 140

@@ -67,7 +67,7 @@ python-dotenv==1.2.4
     # via r6sss-discord
 pytz==2026.5
     # via typepy
-r6sss @ git+https://github.com/Milkeyyy/R6SSS_Python@796e0d9ee5e4ccbaaa49c910ff5b8bb7947be830
+r6sss @ git+https://github.com/Milkeyyy/R6SSS_Python@e8e35148c6b54253b297b067eea00d86cd5e46c7
     # via r6sss-discord
 six==1.17.0
     # via

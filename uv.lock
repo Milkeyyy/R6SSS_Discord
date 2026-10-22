@@ -871,8 +871,8 @@ wheels = [
 
 [[package]]
 name = "r6sss"
-version = "0.1.0"
-source = { git = "https://github.com/Milkeyyy/R6SSS_Python#796e0d9ee5e4ccbaaa49c910ff5b8bb7947be830" }
+version = "0.2.0"
+source = { git = "https://github.com/Milkeyyy/R6SSS_Python?rev=v0.2.0#e8e35148c6b54253b297b067eea00d86cd5e46c7" }
 dependencies = [
     { name = "datetimerange" },
     { name = "httpx" },
@@ -910,7 +910,7 @@ requires-dist = [
     { name = "pymongo", specifier = ">=4.19.0" },
     { name = "python-box", specifier = ">=7.4.1" },
     { name = "python-dotenv", specifier = ">=1.2.4" },
-    { name = "r6sss", git = "https://github.com/Milkeyyy/R6SSS_Python" },
+    { name = "r6sss", git = "https://github.com/Milkeyyy/R6SSS_Python?rev=v0.2.0" },
     { name = "six", specifier = ">=1.17.0" },
     { name = "tzdata", specifier = ">=2026.5" },
     { name = "uuid-utils", specifier = ">=1.0.0" },
