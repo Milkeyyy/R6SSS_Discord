@@ -5,13 +5,13 @@ description = "R6SSS Discord Bot"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "httpx>=0.28.1",
+    "httpx2>=2.15.1",
     "py-cord>=2.8.1",
     "pycord-i18n>=1.2.1",
     "pymongo>=4.19.0",
     "python-box>=7.4.1",
     "python-dotenv>=1.2.4",
-    "r6sss>=0.2.0",
+    "r6sss>=0.3.0",
     "six>=1.17.0",
     "tzdata>=2026.5",
     "uuid-utils>=1.1.0",
@@ -25,7 +25,7 @@ url = "https://pypi.flatt.tech/simple/"
 default = true
 
 [tool.uv.sources]
-r6sss = { git = "https://github.com/Milkeyyy/R6SSS_Python", rev = "v0.2.0" }
+r6sss = { git = "https://github.com/Milkeyyy/R6SSS_Python", rev = "v0.3.0" }
 
 [tool.ruff]
 line-length = 140
