@@ -11,10 +11,10 @@ dependencies = [
     "pymongo>=4.19.0",
     "python-box>=7.4.1",
     "python-dotenv>=1.2.4",
-    "r6sss>=0.1.0",
+    "r6sss>=0.2.0",
     "six>=1.17.0",
     "tzdata>=2026.5",
-    "uuid-utils>=1.0.0",
+    "uuid-utils>=1.1.0",
 ]
 
 [tool.uv]
