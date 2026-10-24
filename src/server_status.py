@@ -2,7 +2,6 @@ import asyncio
 import datetime
 
 import discord
-import httpx
 import r6sss
 
 import icons
@@ -29,12 +28,12 @@ class ServerStatusManager:
 		for attempt in range(1, cls.RETRY_COUNT + 1):
 			try:
 				result = await asyncio.to_thread(r6sss.get_server_status)
-			except httpx.HTTPError as e:
+			except r6sss.R6SSSError as e:
 				logger.warning("サーバーステータスの取得に失敗 (%s/%s): %s", attempt, cls.RETRY_COUNT, str(e))
 				if attempt < cls.RETRY_COUNT:
 					await asyncio.sleep(cls.RETRY_DELAY_SECONDS)
 				continue
-			if result is None:
+			if not result:
 				if attempt < cls.RETRY_COUNT:
 					logger.warning("サーバーステータスの取得結果が空です。再取得します (%s/%s)", attempt, cls.RETRY_COUNT)
 					await asyncio.sleep(cls.RETRY_DELAY_SECONDS)
@@ -42,6 +41,9 @@ class ServerStatusManager:
 				logger.warning("サーバーステータスの取得結果が空です (%s/%s)", attempt, cls.RETRY_COUNT)
 				return None
 			break
+		# 全試行で例外が発生した場合は取得失敗として扱う
+		if not result:
+			return None
 		# 以前のサーバーステータスを更新する
 		cls.previous_data = cls.data
 

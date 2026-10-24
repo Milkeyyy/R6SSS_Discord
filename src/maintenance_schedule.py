@@ -1,7 +1,6 @@
 import asyncio
 from typing import ClassVar
 
-import httpx
 import r6sss
 from r6sss.types import MaintenanceSchedule
 
@@ -28,7 +27,7 @@ class MaintenanceScheduleManager:
 				for k, v in cls.LOCALE_MAP.items():
 					if v in data:
 						data[k] = data[v]
-			except httpx.HTTPError as e:
+			except r6sss.R6SSSError as e:
 				logger.warning("メンテナンススケジュールの取得に失敗 (%s/%s): %s", attempt, cls.RETRY_COUNT, str(e))
 				if attempt < cls.RETRY_COUNT:
 					await asyncio.sleep(cls.RETRY_DELAY_SECONDS)

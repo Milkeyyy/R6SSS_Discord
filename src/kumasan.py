@@ -1,12 +1,12 @@
 from os import getenv
 
-import httpx
+import httpx2
 
 from logger import logger
 
 
 class KumaSan:
-	cl = httpx.AsyncClient()
+	cl = httpx2.AsyncClient()
 
 	@classmethod
 	async def ping(cls, state: str = "up", message: str = "OK", ping: str = "") -> None:
