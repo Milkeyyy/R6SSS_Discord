@@ -1,9 +1,9 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.12"
 
 [options]
-exclude-newer = "2026-10-22T14:48:25.0070861Z"
+exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for backwards compatibility when using relative exclude-newer values.
 exclude-newer-span = "P1D"
 
 [[package]]
@@ -882,7 +882,7 @@ dependencies = [
 
 [[package]]
 name = "r6sss-discord"
-version = "2.7.1"
+version = "2.7.2"
 source = { virtual = "." }
 dependencies = [
     { name = "httpx2" },
