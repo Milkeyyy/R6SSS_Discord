@@ -1,11 +1,11 @@
 [project]
 name = "r6sss-discord"
-version = "2.7.2"
+version = "2.7.3"
 description = "R6SSS Discord Bot"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "httpx2>=2.15.1",
+    "httpx2>=2.16.0",
     "py-cord>=2.8.1",
     "pycord-i18n>=1.2.1",
     "pymongo>=4.19.0",
@@ -13,12 +13,12 @@ dependencies = [
     "python-dotenv>=1.2.4",
     "r6sss>=0.3.0",
     "six>=1.17.0",
-    "tzdata>=2026.5",
-    "uuid-utils>=1.1.0",
+    "tzdata>=2026.6",
+    "uuid-utils>=1.2.0",
 ]
 
 [tool.uv]
-exclude-newer = "1 day"
+exclude-newer = "3 hours"
 
 [[tool.uv.index]]
 url = "https://pypi.flatt.tech/simple/"
@@ -95,6 +95,6 @@ project-includes = [
 [dependency-groups]
 dev = [
     "pip-licenses>=5.5.5",
-    "pytest>=9.1.1",
-    "pytest-asyncio>=1.4.0",
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.4.1",
 ]
