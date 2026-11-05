@@ -128,20 +128,24 @@ class Notification:
 			)
 			if schedule_data is not None:
 				# メンテナンススケジュールの情報を追加する
-				embed.fields.append(  # ダウンタイム
+				# メンテナンス内容
+				embed.description = "**" + schedule_data.title + "**\n" + schedule_data.detail
+				# ダウンタイム
+				embed.fields.append(
 					discord.EmbedField(
 						name=":clock3: " + localizations.translate("MaintenanceSchedule_Downtime", lang=lang),
 						value=localizations.translate("MaintenanceSchedule_Downtime_Minute", [str(schedule_data.downtime)], lang=lang),
 					),
 				)
-				embed.fields.append(  # パッチノート
-					discord.EmbedField(
-						name=":notepad_spiral: " + localizations.translate("MaintenanceSchedule_PatchNotes", lang=lang),
-						value=schedule_data.patchnotes
-						if schedule_data.patchnotes.strip() != ""
-						else localizations.translate("None", lang=lang),
-					),
-				)
+				# パッチノート
+				# URLが無い場合はフィールド自体を追加しない
+				if schedule_data.patchnotes.strip() != "":
+					embed.fields.append(
+						discord.EmbedField(
+							name=":notepad_spiral: " + localizations.translate("MaintenanceSchedule_PatchNotes", lang=lang),
+							value=schedule_data.patchnotes,
+						),
+					)
 		# 計画メンテナンス終了
 		elif result.detail == r6sss.types.ComparisonDetail.SCHEDULED_MAINTENANCE_END:
 			embed = discord.Embed(
@@ -150,21 +154,24 @@ class Notification:
 				author=embed_author,
 			)
 			if schedule_data is not None:
-				# メンテナンススケジュールの情報を追加する
-				embed.fields.append(  # ダウンタイム
+				# メンテナンス内容
+				embed.description = "**" + schedule_data.title + "**\n" + schedule_data.detail
+				# ダウンタイム
+				embed.fields.append(
 					discord.EmbedField(
 						name=":clock3: " + localizations.translate("MaintenanceSchedule_Downtime", lang=lang),
 						value=localizations.translate("MaintenanceSchedule_Downtime_Minute", [str(schedule_data.downtime)], lang=lang),
 					),
 				)
-				embed.fields.append(  # パッチノート
-					discord.EmbedField(
-						name=":notepad_spiral: " + localizations.translate("MaintenanceSchedule_PatchNotes", lang=lang),
-						value=schedule_data.patchnotes
-						if schedule_data.patchnotes.strip() != ""
-						else localizations.translate("None", lang=lang),
-					),
-				)
+				# パッチノート
+				# URLが無い場合はフィールド自体を追加しない
+				if schedule_data.patchnotes.strip() != "":
+					embed.fields.append(
+						discord.EmbedField(
+							name=":notepad_spiral: " + localizations.translate("MaintenanceSchedule_PatchNotes", lang=lang),
+							value=schedule_data.patchnotes,
+						),
+					)
 
 		# すべての機能の問題が解消
 		elif result.detail == r6sss.types.ComparisonDetail.ALL_FEATURES_OUTAGE_RESOLVED:
