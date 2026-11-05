@@ -301,9 +301,6 @@ class SettingsCommands(commands.Cog):
 			)
 			return
 
-		# 埋め込みメッセージを生成
-		embed = discord.Embed(title=":gear: " + _("Cmd_viewsettings_CurrentSettings"))
-
 		# 作成されたサーバーステータスメッセージ(とそのテキストチャンネル)を取得する
 		status_msg_ch = await bot.client.get_or_fetch(discord.TextChannel, int(gc.server_status_message.channel_id))
 		if status_msg_ch:
@@ -314,45 +311,48 @@ class SettingsCommands(commands.Cog):
 		else:
 			status_msg = None
 
-		embed.add_field(
-			name=f":envelope: {_('Cmd_viewsettings_ServerStatusMessage')}",
-			value=f"[**{_('Cmd_viewsettings_ServerStatusMessage_Created')}**]({status_msg.jump_url})"
-			if status_msg
-			else f"**{_('Cmd_viewsettings_ServerStatusMessage_None')}**",
-			inline=False,
-		)
+		language = gc.server_status_message.language
+		language_text = f"`{Localization.EXISTS_LOCALE_LIST.get(language)}` (`{language}`)"
 
-		# メンテナンススケジュールの表示
-		embed.add_field(
-			name=f":calendar: {_('Cmd_viewsettings_MaintenanceSchedule')}",
-			value=f"`{_(str(gc.server_status_message.maintenance_schedule))}`",
-			inline=False,
-		)
-		# インジケーター
-		embed.add_field(
-			name=f":radio_button: {_('Cmd_viewsettings_Indicator')}",
-			value=f"`{_(str(gc.server_status_message.status_indicator))}`",
-			inline=False,
-		)
-		# 言語
-		embed.add_field(
-			name=f":globe_with_meridians: {_('Cmd_viewsettings_Language')}",
-			value=f"`{Localization.EXISTS_LOCALE_LIST.get(gc.server_status_message.language)}` (`{gc.server_status_message.language}`)",
-			inline=False,
-		)
+		sections = [
+			# サーバーステータスメッセージ
+			{
+				"icon": ":envelope:",
+				"name": _("Cmd_viewsettings_ServerStatusMessage"),
+				"value": (
+					f"[**{_('Cmd_viewsettings_ServerStatusMessage_Created')}**]({status_msg.jump_url})"
+					if status_msg
+					else f"**{_('Cmd_viewsettings_ServerStatusMessage_None')}**"
+				),
+			},
+			# メンテナンススケジュールの表示
+			{
+				"icon": ":calendar:",
+				"name": _("Cmd_viewsettings_MaintenanceSchedule"),
+				"value": f"`{_(str(gc.server_status_message.maintenance_schedule))}`",
+			},
+			# インジケーター
+			{
+				"icon": ":radio_button:",
+				"name": _("Cmd_viewsettings_Indicator"),
+				"value": f"`{_(str(gc.server_status_message.status_indicator))}`",
+			},
+			# 言語
+			{
+				"icon": ":globe_with_meridians:",
+				"name": _("Cmd_viewsettings_Language"),
+				"value": language_text,
+			},
+		]
+
 		# 通知
 		notif_ch = await bot.client.get_or_fetch(discord.TextChannel, int(gc.server_status_notification.channel_id))
 		if notif_ch is not None:
-			# 有効
-			notif_settings_text = f"`{_('True')}`"
-			# チャンネル
-			notif_settings_text += f"\n> `{_('Cmd_setnotification_Channel')}`: {notif_ch.mention}"
 			# ロール
 			if gc.server_status_notification.role_id != "0":
 				notif_role_text = f"<@&{gc.server_status_notification.role_id}>"
 			else:
 				notif_role_text = f"`{_('False')}`"
-			notif_settings_text += f"\n> `{_('Cmd_setnotification_Mention')}`: {notif_role_text}"
 			# 自動削除
 			if int(gc.server_status_notification.auto_delete) == 0:
 				notif_ad_text = f"`{_('False')}`"
@@ -361,13 +361,37 @@ class SettingsCommands(commands.Cog):
 					"Cmd_setnotification_AutoDelete_Seconds",
 					gc.server_status_notification.auto_delete,
 				)
-			notif_settings_text += f"\n> `{_('Cmd_setnotification_AutoDelete')}`: {notif_ad_text}"
+			# 有効
+			sections.append(
+				{
+					"icon": ":bell:",
+					"name": _("Cmd_viewsettings_Notification"),
+					"value": f"`{_('True')}`",
+					# チャンネル / メンション / 自動削除
+					"items": [
+						{"name": _("Cmd_setnotification_Channel"), "value": notif_ch.mention},
+						{"name": _("Cmd_setnotification_Mention"), "value": notif_role_text},
+						{"name": _("Cmd_setnotification_AutoDelete"), "value": notif_ad_text},
+					],
+				}
+			)
 		else:
 			# 無効
-			notif_settings_text = f"`{_('False')}`"
-		embed.add_field(name=f":bell: {_('Cmd_viewsettings_Notification')}", value=notif_settings_text, inline=False)
+			sections.append(
+				{
+					"icon": ":bell:",
+					"name": _("Cmd_viewsettings_Notification"),
+					"value": f"`{_('False')}`",
+				}
+			)
+
 		# 生成した埋め込みメッセージを送信
-		await ctx.send_followup(embed=embed)
+		await ctx.send_followup(
+			embed=await embeds.Settings.settings(
+				title=_("Cmd_viewsettings_CurrentSettings"),
+				sections=sections,
+			)
+		)
 
 
 def setup(bot: discord.Bot) -> None:

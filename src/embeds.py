@@ -523,6 +523,29 @@ class MaintenanceSchedule:
 		return embeds
 
 
+class Settings:
+	@classmethod
+	async def settings(cls, title: str, sections: list[dict]) -> discord.Embed:
+		"""設定表示用埋め込みメッセージを生成する
+
+		`sections` の各要素は以下のキーを持つ辞書:
+		- `icon`: 項目名の先頭に付ける絵文字 (省略可)
+		- `name`: 項目名
+		- `value`: 項目の値
+		- `inline`: インライン表示するか (省略時は `False`)
+		- `items`: `value` の下に `> ラベル: 値` 形式で表示する子項目の辞書リスト (省略可)
+		"""
+		embed = discord.Embed(title=":gear: " + title)
+		for section in sections:
+			value = section["value"]
+			for item in section.get("items", []):
+				value += f"\n> `{item['name']}`: {item['value']}"
+			name = f"{section['icon']} {section['name']}" if section.get("icon") else section["name"]
+			embed.add_field(name=name, value=value, inline=section.get("inline", False))
+		StatsManager.add_embed_created("cmd_response")
+		return embed
+
+
 class Donation:
 	@classmethod
 	async def donation(cls) -> discord.Embed:
