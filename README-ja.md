@@ -13,7 +13,7 @@ Discord のテキストチャンネルにレインボーシックス シージ�
 定期的に更新されるサーバーステータスメッセージを作成することもできます。
 
 
-<img src="https://github.com/user-attachments/assets/e8c49ff2-32ad-49e2-ba60-85ba642fed07" width="40%" />
+<img src="https://github.com/user-attachments/assets/e8c49ff2-32ad-49e2-ba60-85ba642fed07" />
 
 ---
 
@@ -86,10 +86,11 @@ Discord のテキストチャンネルにレインボーシックス シージ�
 	  - `自動削除` は `0` 秒に設定すると無効になります。 (初期値は `10` 秒です。)
   > 通知の例
   >
-  > <img src="https://github.com/user-attachments/assets/baf3e13d-647b-4feb-a77d-88f28f074d32" width="40%" />
+  > <img width="404" height="581" alt="notification_20261108_1" src="https://github.com/user-attachments/assets/30fd8e78-76da-480f-93b8-2d7863807821" />
+  > <img width="473" height="554" alt="notification_20261108_2" src="https://github.com/user-attachments/assets/4f399737-6513-4c82-9de3-0fbcee9b5d3d" />
 
 
-## [オープンソースライセンス](./OSS.md)
+## [オープンソースソフトウェア](./OSS.md)
 
 
 ## 利用規約・プライバシーポリシー
